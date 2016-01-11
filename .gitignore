@@ -45,3 +45,15 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.config
+MSBEdit/bin/Debug/MSBEdit.exe
+*.pdb
+*.exe
+*.manifest
+MSBEdit/bin/Debug/MSBEdit.xml
+*.dll
+*.Cache
+MSBEdit/obj/Debug/MSBEdit.xml
+*.txt
+MSBEdit/obj/Debug/MSBEdit.Resources.resources
+*.suo
