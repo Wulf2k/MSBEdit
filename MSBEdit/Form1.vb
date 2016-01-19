@@ -83,6 +83,10 @@ Public Class frmMSBEdit
         Dim partsPtr As UInteger
         Dim partsCnt As UInteger
 
+        Dim mapstudioPtr As UInteger
+        Dim mapstudioCnt As UInteger
+
+
         If UIntFromBytes(&H8) > &H10000 Then bigEndian = False
 
         modelPtr = UIntFromBytes(&H4)
@@ -98,7 +102,91 @@ Public Class frmMSBEdit
         partsPtr = UIntFromBytes((pointCnt * &H4) + &H8 + pointPtr)
         partsCnt = UIntFromBytes(partsPtr + &H8)
 
-        MsgBox(Hex(partsPtr))
+
+
+
+
+        dgvParts.Rows.Clear()
+        dgvParts.Columns.Clear()
+
+        dgvParts.Columns.Add("Unknown 1", "Unknown 1")
+        dgvParts.Columns.Add("Object type", "Object type")
+        dgvParts.Columns.Add("Type index", "Type index")
+        dgvParts.Columns.Add("Unknown 2", "Unknown 2")
+
+        dgvParts.Columns.Add("Unknown 3", "Unknown 3")
+        dgvParts.Columns.Add("X pos", "X pos")
+        dgvParts.Columns.Add("Y pos", "Y pos")
+        dgvParts.Columns.Add("Z pos", "Z pos")
+
+        dgvParts.Columns.Add("Unknown 4", "Unknown 4")
+        dgvParts.Columns.Add("Facing", "Facing")
+        dgvParts.Columns.Add("Unknown 5", "Unknown 5")
+        dgvParts.Columns.Add("Unknown 6", "Unknown 6")  '1.0
+
+        dgvParts.Columns.Add("Unknown 7", "Unknown 7")  '1.0
+        dgvParts.Columns.Add("Unknown 8", "Unknown 8")  '1.0
+        dgvParts.Columns.Add("Unknown 9", "Unknown 9")  '1 for h
+        dgvParts.Columns.Add("Unknown 10", "Unknown 10")    '0
+
+        dgvParts.Columns.Add("Unknown 11", "Unknown 11")    '0
+        dgvParts.Columns.Add("Unknown 12", "Unknown 12")    '0
+        dgvParts.Columns.Add("Unknown 13", "Unknown 13")    '1 for h
+        dgvParts.Columns.Add("Unknown 14", "Unknown 14")    '0s
+
+        dgvParts.Columns.Add("Unknown 15", "Unknown 15")    '0
+        dgvParts.Columns.Add("Unknown 16", "Unknown 16")    '0
+        dgvParts.Columns.Add("Unknown 17", "Unknown 17")    'something
+        dgvParts.Columns.Add("Unknown 18", "Unknown 18")    'something
+
+        dgvParts.Columns.Add("Unknown 19", "Unknown 19")
+        dgvParts.Columns.Add("Unknown 20", "Unknown 20")
+
+        dgvParts.Columns.Add("Object name", "Object name")
+        dgvParts.Columns.Add("SIB path", "SIB path")
+
+        dgvParts.Columns.Add("ID in scripts", "ID in scripts")
+        dgvParts.Columns.Add("Unknown 23", "Unknown 23")    '0
+        dgvParts.Columns.Add("Unknown 24", "Unknown 24")    '0
+
+        dgvParts.Columns.Add("Unknown 25", "Unknown 25")    '00010100
+
+        dgvParts.Columns.Add("Unknown 26", "Unknown 26")    '0
+        dgvParts.Columns.Add("Unknown 27", "Unknown 27")    '0
+
+        dgvParts.Columns.Add("Unknown 28", "Unknown 28")   '08000000 for h
+
+        dgvParts.Columns.Add("Unknown 29", "Unknown 29")    '0
+        dgvParts.Columns.Add("Unknown 30", "Unknown 30")    '00000001 for h
+
+        dgvParts.Columns.Add("NPC ID", "NPC ID")    '0
+
+        dgvParts.Columns.Add("ID in scripts#2", "ID in scripts#2")    '0
+        dgvParts.Columns.Add("Unknown 33", "Unknown 33")    '0
+        dgvParts.Columns.Add("Unknown 34", "Unknown 34")    '0008ffff for h
+        dgvParts.Columns.Add("Unknown 35", "Unknown 35")
+
+        dgvParts.Columns.Add("Unknown 36", "Unknown 36")
+        dgvParts.Columns.Add("Unknown 37", "Unknown 37")
+        dgvParts.Columns.Add("Unknown 38", "Unknown 38")
+        dgvParts.Columns.Add("Unknown 39", "Unknown 39")
+
+        dgvParts.Columns.Add("Unknown 40", "Unknown 40")
+        dgvParts.Columns.Add("Unknown 41", "Unknown 41")    '-1s for h
+        dgvParts.Columns.Add("Unknown 42", "Unknown 42")
+        dgvParts.Columns.Add("Unknown 43", "Unknown 43")
+
+        dgvParts.Columns.Add("Unknown 44", "Unknown 44")
+        dgvParts.Columns.Add("Unknown 45", "Unknown 45")
+        dgvParts.Columns.Add("Unknown 46", "Unknown 46")    '0s for h
+
+
+
+
+
+        mapstudioPtr = UIntFromBytes((partsCnt * &H4) + &H8 + partsPtr)
+        mapstudioCnt = UIntFromBytes(mapstudioPtr + &H8)
+
 
 
 
