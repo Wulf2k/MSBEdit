@@ -26,12 +26,20 @@ Partial Class frmMSBEdit
         Me.btnOpen = New System.Windows.Forms.Button()
         Me.txtMSBfile = New System.Windows.Forms.TextBox()
         Me.lblGAFile = New System.Windows.Forms.Label()
-        Me.dgvCreature = New System.Windows.Forms.DataGridView()
+        Me.dgvCreatures = New System.Windows.Forms.DataGridView()
         Me.tabParams = New System.Windows.Forms.TabControl()
         Me.tabCreatures = New System.Windows.Forms.TabPage()
-        CType(Me.dgvCreature, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabModels = New System.Windows.Forms.TabPage()
+        Me.dgvModels = New System.Windows.Forms.DataGridView()
+        Me.tabObjects = New System.Windows.Forms.TabPage()
+        Me.dgvObjects = New System.Windows.Forms.DataGridView()
+        CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabCreatures.SuspendLayout()
+        Me.tabModels.SuspendLayout()
+        CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabObjects.SuspendLayout()
+        CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -69,17 +77,19 @@ Partial Class frmMSBEdit
         Me.lblGAFile.TabIndex = 33
         Me.lblGAFile.Text = "File:"
         '
-        'dgvCreature
+        'dgvCreatures
         '
-        Me.dgvCreature.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvCreature.Location = New System.Drawing.Point(6, 6)
-        Me.dgvCreature.Name = "dgvCreature"
-        Me.dgvCreature.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvCreature.TabIndex = 37
+        Me.dgvCreatures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCreatures.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCreatures.Name = "dgvCreatures"
+        Me.dgvCreatures.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures.TabIndex = 37
         '
         'tabParams
         '
         Me.tabParams.Controls.Add(Me.tabCreatures)
+        Me.tabParams.Controls.Add(Me.tabModels)
+        Me.tabParams.Controls.Add(Me.tabObjects)
         Me.tabParams.Location = New System.Drawing.Point(12, 70)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
@@ -88,7 +98,7 @@ Partial Class frmMSBEdit
         '
         'tabCreatures
         '
-        Me.tabCreatures.Controls.Add(Me.dgvCreature)
+        Me.tabCreatures.Controls.Add(Me.dgvCreatures)
         Me.tabCreatures.Location = New System.Drawing.Point(4, 22)
         Me.tabCreatures.Name = "tabCreatures"
         Me.tabCreatures.Padding = New System.Windows.Forms.Padding(3)
@@ -96,6 +106,42 @@ Partial Class frmMSBEdit
         Me.tabCreatures.TabIndex = 0
         Me.tabCreatures.Text = "Creatures"
         Me.tabCreatures.UseVisualStyleBackColor = True
+        '
+        'tabModels
+        '
+        Me.tabModels.Controls.Add(Me.dgvModels)
+        Me.tabModels.Location = New System.Drawing.Point(4, 22)
+        Me.tabModels.Name = "tabModels"
+        Me.tabModels.Size = New System.Drawing.Size(1119, 638)
+        Me.tabModels.TabIndex = 2
+        Me.tabModels.Text = "Models"
+        Me.tabModels.UseVisualStyleBackColor = True
+        '
+        'dgvModels
+        '
+        Me.dgvModels.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvModels.Location = New System.Drawing.Point(6, 6)
+        Me.dgvModels.Name = "dgvModels"
+        Me.dgvModels.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvModels.TabIndex = 38
+        '
+        'tabObjects
+        '
+        Me.tabObjects.Controls.Add(Me.dgvObjects)
+        Me.tabObjects.Location = New System.Drawing.Point(4, 22)
+        Me.tabObjects.Name = "tabObjects"
+        Me.tabObjects.Size = New System.Drawing.Size(1119, 638)
+        Me.tabObjects.TabIndex = 1
+        Me.tabObjects.Text = "Objects"
+        Me.tabObjects.UseVisualStyleBackColor = True
+        '
+        'dgvObjects
+        '
+        Me.dgvObjects.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvObjects.Location = New System.Drawing.Point(6, 6)
+        Me.dgvObjects.Name = "dgvObjects"
+        Me.dgvObjects.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvObjects.TabIndex = 38
         '
         'frmMSBEdit
         '
@@ -108,10 +154,14 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor v0.100"
-        CType(Me.dgvCreature, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.Text = "Wulf's MSB Editor v0.150"
+        CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
         Me.tabCreatures.ResumeLayout(False)
+        Me.tabModels.ResumeLayout(False)
+        CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabObjects.ResumeLayout(False)
+        CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -120,8 +170,12 @@ Partial Class frmMSBEdit
     Friend WithEvents btnOpen As System.Windows.Forms.Button
     Friend WithEvents txtMSBfile As System.Windows.Forms.TextBox
     Friend WithEvents lblGAFile As System.Windows.Forms.Label
-    Friend WithEvents dgvCreature As System.Windows.Forms.DataGridView
+    Friend WithEvents dgvCreatures As System.Windows.Forms.DataGridView
     Friend WithEvents tabParams As System.Windows.Forms.TabControl
     Friend WithEvents tabCreatures As System.Windows.Forms.TabPage
+    Friend WithEvents tabObjects As System.Windows.Forms.TabPage
+    Friend WithEvents dgvObjects As System.Windows.Forms.DataGridView
+    Friend WithEvents tabModels As System.Windows.Forms.TabPage
+    Friend WithEvents dgvModels As System.Windows.Forms.DataGridView
 
 End Class
