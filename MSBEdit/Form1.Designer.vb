@@ -154,7 +154,7 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor v0.150"
+        Me.Text = "Wulf's MSB Editor v0.200"
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
         Me.tabCreatures.ResumeLayout(False)
