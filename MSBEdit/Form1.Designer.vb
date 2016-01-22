@@ -33,6 +33,10 @@ Partial Class frmMSBEdit
         Me.dgvModels = New System.Windows.Forms.DataGridView()
         Me.tabObjects = New System.Windows.Forms.TabPage()
         Me.dgvObjects = New System.Windows.Forms.DataGridView()
+        Me.tabUnhandled = New System.Windows.Forms.TabPage()
+        Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
+        Me.tabMapPieces = New System.Windows.Forms.TabPage()
+        Me.dgvMapPieces = New System.Windows.Forms.DataGridView()
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabCreatures.SuspendLayout()
@@ -40,6 +44,10 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabObjects.SuspendLayout()
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabUnhandled.SuspendLayout()
+        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabMapPieces.SuspendLayout()
+        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -88,8 +96,10 @@ Partial Class frmMSBEdit
         'tabParams
         '
         Me.tabParams.Controls.Add(Me.tabCreatures)
+        Me.tabParams.Controls.Add(Me.tabMapPieces)
         Me.tabParams.Controls.Add(Me.tabModels)
         Me.tabParams.Controls.Add(Me.tabObjects)
+        Me.tabParams.Controls.Add(Me.tabUnhandled)
         Me.tabParams.Location = New System.Drawing.Point(12, 70)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
@@ -143,6 +153,42 @@ Partial Class frmMSBEdit
         Me.dgvObjects.Size = New System.Drawing.Size(1107, 626)
         Me.dgvObjects.TabIndex = 38
         '
+        'tabUnhandled
+        '
+        Me.tabUnhandled.Controls.Add(Me.dgvUnhandled)
+        Me.tabUnhandled.Location = New System.Drawing.Point(4, 22)
+        Me.tabUnhandled.Name = "tabUnhandled"
+        Me.tabUnhandled.Size = New System.Drawing.Size(1119, 638)
+        Me.tabUnhandled.TabIndex = 3
+        Me.tabUnhandled.Text = "Unhandled"
+        Me.tabUnhandled.UseVisualStyleBackColor = True
+        '
+        'dgvUnhandled
+        '
+        Me.dgvUnhandled.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvUnhandled.Location = New System.Drawing.Point(6, 6)
+        Me.dgvUnhandled.Name = "dgvUnhandled"
+        Me.dgvUnhandled.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvUnhandled.TabIndex = 38
+        '
+        'tabMapPieces
+        '
+        Me.tabMapPieces.Controls.Add(Me.dgvMapPieces)
+        Me.tabMapPieces.Location = New System.Drawing.Point(4, 22)
+        Me.tabMapPieces.Name = "tabMapPieces"
+        Me.tabMapPieces.Size = New System.Drawing.Size(1119, 638)
+        Me.tabMapPieces.TabIndex = 4
+        Me.tabMapPieces.Text = "Map Pieces"
+        Me.tabMapPieces.UseVisualStyleBackColor = True
+        '
+        'dgvMapPieces
+        '
+        Me.dgvMapPieces.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvMapPieces.Location = New System.Drawing.Point(6, 6)
+        Me.dgvMapPieces.Name = "dgvMapPieces"
+        Me.dgvMapPieces.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvMapPieces.TabIndex = 38
+        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -154,7 +200,7 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor v0.200"
+        Me.Text = "Wulf's MSB Editor v0.210"
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
         Me.tabCreatures.ResumeLayout(False)
@@ -162,6 +208,10 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabObjects.ResumeLayout(False)
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabUnhandled.ResumeLayout(False)
+        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabMapPieces.ResumeLayout(False)
+        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -177,5 +227,9 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvObjects As System.Windows.Forms.DataGridView
     Friend WithEvents tabModels As System.Windows.Forms.TabPage
     Friend WithEvents dgvModels As System.Windows.Forms.DataGridView
+    Friend WithEvents tabUnhandled As System.Windows.Forms.TabPage
+    Friend WithEvents dgvUnhandled As System.Windows.Forms.DataGridView
+    Friend WithEvents tabMapPieces As System.Windows.Forms.TabPage
+    Friend WithEvents dgvMapPieces As System.Windows.Forms.DataGridView
 
 End Class
