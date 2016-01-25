@@ -148,8 +148,8 @@ Public Class frmMSBEdit
 
         Dim ptr As UInteger
 
+        Dim nameoffset As UInteger
         Dim type As UInteger
-
         Dim index As UInteger
 
         Dim xpos As Single
@@ -206,15 +206,17 @@ Public Class frmMSBEdit
         dgvModels.Columns(1).Width = 40
         dgvModels.Columns.Add("Model #", "Model #")
         dgvModels.Columns(2).Width = 60
+        dgvModels.Columns(2).DefaultCellStyle.BackColor = Color.LightGray
         dgvModels.Columns.Add("Model", "Model")
         dgvModels.Columns.Add("Sibpath", "Sibpath")
-        dgvModels.Columns.Add("Unknown &H00", "Unknown &H00")
-        dgvModels.Columns(5).Width = 60
         dgvModels.Columns.Add("Unknown &H0C", "Unknown &H0C")
-        dgvModels.Columns(6).Width = 60
+        dgvModels.Columns(5).Width = 60
         dgvModels.Columns.Add("Unknown &H10", "Unknown &H10")
-        dgvModels.Columns(7).Width = 60
+        dgvModels.Columns(6).Width = 60
         dgvModels.Columns.Add("Offset", "Offset")
+        dgvModels.Columns(7).DefaultCellStyle.BackColor = Color.LightGray
+        dgvModels.Columns.Add("Name Offset", "Name Offset")
+        dgvModels.Columns(8).Width = 60
 
 
         eventPtr = UIntFromFour((modelCnt * &H4) + &H8)
@@ -242,7 +244,7 @@ Public Class frmMSBEdit
         dgvMapPieces.Columns.Add("Script ID", "Script ID")
         dgvMapPieces.Columns(5).Width = 60
 
-        dgvMapPieces.Columns.Add("Unknown &H00", "Unknown &H00")
+        dgvMapPieces.Columns.Add("Name Offset", "Name Offset")
         dgvMapPieces.Columns.Add("Unknown &H10", "Unknown &H10")
         dgvMapPieces.Columns.Add("Unknown &H20", "Unknown &H20")
         dgvMapPieces.Columns.Add("Unknown &H24", "Unknown &H24")
@@ -270,14 +272,20 @@ Public Class frmMSBEdit
         dgvObjects.Columns.Add("Index", "Index")
         dgvObjects.Columns(1).Width = 40
         dgvObjects.Columns.Add("X pos", "X pos")
+        dgvObjects.Columns(2).Width = 60
         dgvObjects.Columns.Add("Y pos", "Y pos")
+        dgvObjects.Columns(3).Width = 60
         dgvObjects.Columns.Add("Z pos", "Z pos")
+        dgvObjects.Columns(4).Width = 60
         dgvObjects.Columns.Add("Facing", "Facing")
+        dgvObjects.Columns(5).Width = 60
         dgvObjects.Columns.Add("Model #", "Model #")
         dgvObjects.Columns(6).Width = 40
         dgvObjects.Columns.Add("Name", "Name")
         dgvObjects.Columns.Add("Sibpath", "Sibpath")
         dgvObjects.Columns.Add("Offset", "Offset")
+        dgvObjects.Columns(9).DefaultCellStyle.BackColor = Color.LightGray
+        dgvObjects.Columns.Add("Name Offset", "Name Offset")
 
 
         dgvCreatures.Rows.Clear()
@@ -287,9 +295,13 @@ Public Class frmMSBEdit
         dgvCreatures.Columns.Add("Index", "Index")
         dgvCreatures.Columns(1).Width = 40
         dgvCreatures.Columns.Add("X pos", "X pos")
+        dgvCreatures.Columns(2).Width = 60
         dgvCreatures.Columns.Add("Y pos", "Y pos")
+        dgvCreatures.Columns(3).Width = 60
         dgvCreatures.Columns.Add("Z pos", "Z pos")
+        dgvCreatures.Columns(4).Width = 60
         dgvCreatures.Columns.Add("Facing", "Facing")
+        dgvCreatures.Columns(5).Width = 60
         dgvCreatures.Columns.Add("Model #", "Model #")
         dgvCreatures.Columns(6).Width = 40
         dgvCreatures.Columns.Add("Name", "Name")
@@ -299,6 +311,8 @@ Public Class frmMSBEdit
         dgvCreatures.Columns.Add("NPC ID #1", "NPC ID #1")
         'dgvCreatures.Columns.Add("NPC ID #2", "NPC ID #2")
         dgvCreatures.Columns.Add("Offset", "Offset")
+        dgvCreatures.Columns(11).DefaultCellStyle.BackColor = Color.LightGray
+        dgvCreatures.Columns.Add("Name Offset", "Name Offset")
 
         dgvUnhandled.Rows.Clear()
         dgvUnhandled.Columns.Clear()
@@ -306,16 +320,17 @@ Public Class frmMSBEdit
         dgvUnhandled.Columns.Add("Index", "Index")
         dgvUnhandled.Columns.Add("Name", "Name")
         dgvUnhandled.Columns.Add("Offset", "Offset")
+        dgvUnhandled.Columns.Add("Name Offset", "Name Offset")
 
 
         For i = 0 To modelCnt - 2
-            padding = 0
             ptr = UIntFromFour(modelPtr + &HC + i * &H4)
 
+            nameoffset = UIntFromFour(ptr)
             type = UIntFromFour(ptr + &H4)
             index = UIntFromFour(ptr + &H8)
-            name = StrFromBytes(ptr + &H20 + padding)
-            sibpath = StrFromBytes(ptr + &H20 + name.Length + 1 + padding)
+            name = StrFromBytes(ptr + nameoffset)
+            sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
             offset = ptr
 
@@ -325,11 +340,11 @@ Public Class frmMSBEdit
             row(3) = name
             row(4) = sibpath
 
-            row(5) = UIntFromFour(ptr + &H0)
-            row(6) = UIntFromFour(ptr + &HC)
-            row(7) = UIntFromFour(ptr + &H10)
+            row(5) = UIntFromFour(ptr + &HC)
+            row(6) = UIntFromFour(ptr + &H10)
 
-            row(8) = offset
+            row(7) = offset
+            row(8) = nameoffset
 
             dgvModels.Rows.Add(row)
         Next
@@ -337,19 +352,17 @@ Public Class frmMSBEdit
         For i = 0 To partsCnt - 2
             padding = 0
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
-            If bigEndian Then padding = &H4
-            '&H0 = offset to name?
             Select Case UIntFromFour(ptr + &H4)
                 Case &H0
+                    nameoffset = UIntFromFour(ptr)
                     type = UIntFromFour(ptr + &H4)
                     index = UIntFromFour(ptr + &H8)
                     model = UIntFromFour(ptr + &HC)
 
-                    name = StrFromBytes(ptr + &H64 + padding)
-                    sibpath = StrFromBytes(ptr + &H64 + name.Length + 1 + padding)
+                    name = StrFromBytes(ptr + nameoffset)
+                    sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
                     If sibpath.Length = 0 Then padding += 4
-                    If Not bigEndian Then padding += 4
 
                     If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
                         padding += sibpath.Length + name.Length + 2
@@ -358,7 +371,7 @@ Public Class frmMSBEdit
                         padding += sibpath.Length + name.Length + 2
                     End If
 
-                    scriptid1 = SIntFromFour(ptr + &H64 + padding)
+                    scriptid1 = SIntFromFour(ptr + nameoffset + padding)
                     offset = ptr
 
                     row(0) = type
@@ -367,7 +380,7 @@ Public Class frmMSBEdit
                     row(3) = name
                     row(4) = sibpath
                     row(5) = scriptid1
-                    row(6) = UIntFromFour(ptr + &H0)
+                    row(6) = nameoffset
                     row(7) = UIntFromFour(ptr + &H10)
                     row(8) = SIntFromFour(ptr + &H20)
                     row(9) = SIntFromFour(ptr + &H24)
@@ -379,15 +392,16 @@ Public Class frmMSBEdit
                     row(15) = SIntFromFour(ptr + &H48)
                     row(16) = SIntFromFour(ptr + &H58)
                     row(17) = SIntFromFour(ptr + &H5C)
-                    row(18) = UIntFromFour(ptr + &H64 + padding + &H4)
-                    row(19) = UIntFromFour(ptr + &H64 + padding + &H8)
-                    row(20) = UIntFromFour(ptr + &H64 + padding + &HC)
+                    row(18) = UIntFromFour(ptr + nameoffset + padding + &H4)
+                    row(19) = UIntFromFour(ptr + nameoffset + padding + &H8)
+                    row(20) = UIntFromFour(ptr + nameoffset + padding + &HC)
                     row(21) = ptr
 
                     dgvMapPieces.Rows.Add(row)
 
 
                 Case &H1, &H9
+                    nameoffset = UIntFromFour(ptr)
                     type = UIntFromFour(ptr + &H4)
                     index = UIntFromFour(ptr + &H8)
                     model = UIntFromFour(ptr + &HC)
@@ -397,18 +411,9 @@ Public Class frmMSBEdit
 
                     facing = SingleFromFour(ptr + &H24)
 
-                    name = StrFromBytes(ptr + &H64 + padding)
-                    sibpath = StrFromBytes(ptr + &H64 + name.Length + 1 + padding)
+                    name = StrFromBytes(ptr + nameoffset)
+                    sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
-                    If sibpath.Length = 0 Then padding += 4
-                    If Not bigEndian Then padding += 4
-
-                    If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
-                        padding += sibpath.Length + name.Length + 2
-                        padding += (4 - (padding Mod 4))
-                    Else
-                        padding += sibpath.Length + name.Length + 2
-                    End If
 
                     offset = ptr
 
@@ -422,12 +427,12 @@ Public Class frmMSBEdit
                     row(7) = name
                     row(8) = sibpath
                     row(9) = offset
+                    row(10) = nameoffset
 
                     dgvObjects.Rows.Add(row)
 
-
-
                 Case &H2, &H4, &HA
+                    nameoffset = UIntFromFour(ptr)
                     type = UIntFromFour(ptr + &H4)
                     index = UIntFromFour(ptr + &H8)
                     model = UIntFromFour(ptr + &HC)
@@ -468,18 +473,21 @@ Public Class frmMSBEdit
                     row(10) = npcid1
 
                     row(11) = offset
+                    row(12) = nameoffset
 
                     dgvCreatures.Rows.Add(row)
 
                 Case Else
+                    nameoffset = UIntFromTwo(ptr)
                     type = UIntFromFour(ptr + &H4)
-                    name = StrFromBytes(ptr + &H64 + padding)
+                    name = StrFromBytes(ptr + nameoffset)
                     offset = ptr
 
                     row(0) = type
                     row(1) = UIntFromFour(ptr + &H8)
                     row(2) = name
                     row(3) = offset
+                    row(4) = nameoffset
 
                     dgvUnhandled.Rows.Add(row)
             End Select
@@ -531,6 +539,7 @@ Public Class frmMSBEdit
 
         Dim ptr As UInteger
 
+        Dim nameoffset As UInteger
         Dim type As UInteger
         Dim model As UInteger
 
@@ -550,43 +559,32 @@ Public Class frmMSBEdit
         Dim npcid2 As Integer
 
         Dim offset As UInteger
-
         Dim padding As UInteger
 
 
-
-
         For i = 0 To dgvModels.Rows.Count - 2
-            padding = 0
-            ptr = UIntFromFour(modelPtr + &HC + i * &H4)
-
             type = dgvModels.Rows(i).Cells(0).Value
             index = dgvModels.Rows(i).Cells(1).Value
 
             name = dgvModels.Rows(i).Cells(3).Value
             sibpath = dgvModels.Rows(i).Cells(4).Value
 
-            ptr = dgvModels.Rows(i).Cells(8).Value
+            ptr = dgvModels.Rows(i).Cells(7).Value
+            nameoffset = dgvModels.Rows(i).Cells(8).Value
 
-            InsBytes(ptr + &H0, UInt32ToFourByte(dgvModels.Rows(i).Cells(5).Value))
+            InsBytes(ptr + &H0, UInt32ToFourByte(nameoffset))
             InsBytes(ptr + &H4, UInt32ToFourByte(type))
             InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            InsBytes(ptr + &HC, UInt32ToFourByte(dgvModels.Rows(i).Cells(6).Value))
-            InsBytes(ptr + &H10, UInt32ToFourByte(dgvModels.Rows(i).Cells(7).Value))
+            InsBytes(ptr + &HC, UInt32ToFourByte(dgvModels.Rows(i).Cells(5).Value))
+            InsBytes(ptr + &H10, UInt32ToFourByte(dgvModels.Rows(i).Cells(6).Value))
 
-            InsBytes(ptr + &H20 + padding, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + &H20 + padding + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
         Next
-
-
-
 
 
         For i = 0 To dgvCreatures.Rows.Count - 2
             padding = 0
-
-            If bigEndian Then padding = &H4
-
             type = dgvCreatures.Rows(i).Cells(0).Value
             index = dgvCreatures.Rows(i).Cells(1).Value
 
@@ -603,7 +601,9 @@ Public Class frmMSBEdit
             scriptid1 = dgvCreatures.Rows(i).Cells(9).Value
             npcid1 = dgvCreatures.Rows(i).Cells(10).Value
             ptr = dgvCreatures.Rows(i).Cells(11).Value
+            nameoffset = dgvCreatures.Rows(i).Cells(12).Value
 
+            InsBytes(ptr, UInt32ToFourByte(nameoffset))
             InsBytes(ptr + &H4, UInt32ToFourByte(type))
             InsBytes(ptr + &H8, UInt32ToFourByte(index))
             InsBytes(ptr + &HC, UInt32ToFourByte(model))
@@ -612,11 +612,10 @@ Public Class frmMSBEdit
             InsBytes(ptr + &H1C, SingleToFourByte(zpos))
             InsBytes(ptr + &H24, SingleToFourByte(facing))
 
-            InsBytes(ptr + &H64 + padding, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + &H64 + padding + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
 
             If sibpath.Length = 0 Then padding += 4
-            If Not bigEndian Then padding += 4
 
             If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
                 padding += sibpath.Length + name.Length + 2
@@ -625,16 +624,13 @@ Public Class frmMSBEdit
                 padding += sibpath.Length + name.Length + 2
             End If
 
-            InsBytes(ptr + &H64 + padding, Int32ToFourByte(scriptid1))
-            InsBytes(ptr + &H64 + padding + &H24, Int32ToFourByte(npcid1))
+            InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
+            InsBytes(ptr + nameoffset + padding + &H24, Int32ToFourByte(npcid1))
         Next
 
 
         For i = 0 To dgvObjects.Rows.Count - 2
             padding = 0
-            ptr = UIntFromFour(partsPtr + &HC + i * &H4)
-
-            If bigEndian Then padding = &H4
 
             type = dgvObjects.Rows(i).Cells(0).Value
             index = dgvObjects.Rows(i).Cells(1).Value
@@ -650,7 +646,10 @@ Public Class frmMSBEdit
             sibpath = dgvObjects.Rows(i).Cells(8).Value
 
             ptr = dgvObjects.Rows(i).Cells(9).Value
+            nameoffset = dgvObjects.Rows(i).Cells(10).Value
 
+
+            InsBytes(ptr, UInt32ToFourByte(nameoffset))
             InsBytes(ptr + &H4, UInt32ToFourByte(type))
             InsBytes(ptr + &H8, UInt32ToFourByte(index))
             InsBytes(ptr + &HC, UInt32ToFourByte(model))
@@ -659,8 +658,8 @@ Public Class frmMSBEdit
             InsBytes(ptr + &H1C, SingleToFourByte(zpos))
             InsBytes(ptr + &H24, SingleToFourByte(facing))
 
-            InsBytes(ptr + &H64 + padding, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + &H64 + padding + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
         Next
 
 
