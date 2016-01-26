@@ -253,6 +253,7 @@ Public Class frmMSBEdit
         dgvMapPieces.Columns.Add("Unknown &H30", "Unknown &H30")
         dgvMapPieces.Columns.Add("Unknown &H34", "Unknown &H34")
         dgvMapPieces.Columns.Add("Unknown &H38", "Unknown &H38")
+        dgvMapPieces.Columns.Add("Unknown &H3C", "Unknown &H3C")
         dgvMapPieces.Columns.Add("Unknown &H48", "Unknown &H48")
         dgvMapPieces.Columns.Add("Unknown &H58", "Unknown &H58")
         dgvMapPieces.Columns.Add("Unknown &H5C", "Unknown &H5C")
@@ -389,13 +390,16 @@ Public Class frmMSBEdit
                     row(12) = SingleFromFour(ptr + &H30)
                     row(13) = SingleFromFour(ptr + &H34)
                     row(14) = SIntFromFour(ptr + &H38)
-                    row(15) = SIntFromFour(ptr + &H48)
-                    row(16) = SIntFromFour(ptr + &H58)
-                    row(17) = SIntFromFour(ptr + &H5C)
-                    row(18) = UIntFromFour(ptr + nameoffset + padding + &H4)
-                    row(19) = UIntFromFour(ptr + nameoffset + padding + &H8)
-                    row(20) = UIntFromFour(ptr + nameoffset + padding + &HC)
-                    row(21) = ptr
+
+                    row(15) = SIntFromFour(ptr + &H3C)
+
+                    row(16) = SIntFromFour(ptr + &H48)
+                    row(17) = SIntFromFour(ptr + &H58)
+                    row(18) = SIntFromFour(ptr + &H5C)
+                    row(19) = UIntFromFour(ptr + nameoffset + padding + &H4)
+                    row(20) = UIntFromFour(ptr + nameoffset + padding + &H8)
+                    row(21) = UIntFromFour(ptr + nameoffset + padding + &HC)
+                    row(22) = ptr
 
                     dgvMapPieces.Rows.Add(row)
 
@@ -580,6 +584,61 @@ Public Class frmMSBEdit
 
             InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
             InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+        Next
+
+
+        For i = 0 To dgvMapPieces.Rows.Count - 2
+            padding = 0
+            type = dgvMapPieces.Rows(i).Cells(0).Value
+            index = dgvMapPieces.Rows(i).Cells(1).Value
+
+            model = dgvMapPieces.Rows(i).Cells(2).Value
+            name = dgvMapPieces.Rows(i).Cells(3).Value
+            sibpath = dgvMapPieces.Rows(i).Cells(4).Value
+
+            scriptid1 = dgvMapPieces.Rows(i).Cells(5).Value
+            nameoffset = dgvMapPieces.Rows(i).Cells(6).Value
+
+            ptr = dgvMapPieces.Rows(i).Cells(22).Value
+
+            InsBytes(ptr + &H0, UInt32ToFourByte(nameoffset))
+            InsBytes(ptr + &H4, UInt32ToFourByte(type))
+            InsBytes(ptr + &H8, UInt32ToFourByte(index))
+            InsBytes(ptr + &HC, UInt32ToFourByte(model))
+
+            InsBytes(ptr + &H10, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(7).Value))
+            InsBytes(ptr + &H20, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(8).Value))
+            InsBytes(ptr + &H24, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(9).Value))
+            InsBytes(ptr + &H28, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(10).Value))
+
+            InsBytes(ptr + &H2C, SingleToFourByte(dgvMapPieces.Rows(i).Cells(11).Value))
+            InsBytes(ptr + &H30, SingleToFourByte(dgvMapPieces.Rows(i).Cells(12).Value))
+            InsBytes(ptr + &H34, SingleToFourByte(dgvMapPieces.Rows(i).Cells(13).Value))
+
+            InsBytes(ptr + &H38, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(14).Value))
+            InsBytes(ptr + &H3C, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(15).Value))
+            InsBytes(ptr + &H48, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(16).Value))
+            InsBytes(ptr + &H58, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
+            InsBytes(ptr + &H5C, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(18).Value))
+
+            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+
+            If sibpath.Length = 0 Then padding += 4
+
+            If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
+                padding += sibpath.Length + name.Length + 2
+                padding += (4 - (padding Mod 4))
+            Else
+                padding += sibpath.Length + name.Length + 2
+            End If
+
+            InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
+
+            InsBytes(ptr + nameoffset + padding + &H4, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
+            InsBytes(ptr + nameoffset + padding + &H8, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(20).Value))
+            InsBytes(ptr + nameoffset + padding + &HC, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(21).Value))
+
         Next
 
 
