@@ -5,12 +5,24 @@ Public Class frmMSBEdit
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
 
+    Public Shared eventParams() As Byte = {}
+    Public Shared eventParamsOrigOffset As UInteger
+
+    Public Shared pointParams() As Byte = {}
+    Public Shared pointParamsOrigOffset As UInteger
+
     Private Sub txt_Drop(sender As Object, e As System.Windows.Forms.DragEventArgs) Handles txtMSBfile.DragDrop
         Dim file() As String = e.Data.GetData(DataFormats.FileDrop)
         sender.Text = file(0)
     End Sub
     Private Sub txt_DragEnter(sender As Object, e As System.Windows.Forms.DragEventArgs) Handles txtMSBfile.DragEnter
         e.Effect = DragDropEffects.Copy
+    End Sub
+
+    Private Sub WriteBytes(ByRef fs As FileStream, ByVal byt() As Byte)
+        For i = 0 To byt.Length - 1
+            fs.WriteByte(byt(i))
+        Next
     End Sub
 
     Private Function StrFromBytes(ByVal loc As UInteger) As String
@@ -28,6 +40,14 @@ Public Class frmMSBEdit
 
         Return Str
     End Function
+
+    Private Function Str2Bytes(ByVal str As String) As Byte()
+        Dim BArr() As Byte
+        BArr = System.Text.Encoding.ASCII.GetBytes(str)
+        Return BArr
+    End Function
+
+
 
     Private Function Int16ToTwoByte(ByVal val As Integer) As Byte()
         If bigEndian Then
@@ -228,6 +248,14 @@ Public Class frmMSBEdit
         partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
         partsCnt = UIntFromFour(partsPtr + &H8)
 
+        eventParamsOrigOffset = eventPtr
+        ReDim eventParams(pointPtr - eventPtr - 1)
+        Array.Copy(bytes, eventPtr, eventParams, 0, eventParams.Length)
+
+        pointParamsOrigOffset = pointPtr
+        ReDim pointParams(partsPtr - pointPtr - 1)
+        Array.Copy(bytes, pointPtr, pointParams, 0, pointParams.Length)
+
 
 
         dgvMapPieces.Rows.Clear()
@@ -287,6 +315,16 @@ Public Class frmMSBEdit
         dgvObjects.Columns.Add("Offset", "Offset")
         dgvObjects.Columns(9).DefaultCellStyle.BackColor = Color.LightGray
         dgvObjects.Columns.Add("Name Offset", "Name Offset")
+        dgvObjects.Columns.Add("Script ID", "Script ID")
+        dgvObjects.Columns.Add("Unknown &H10", "Unknown &H10")
+        dgvObjects.Columns.Add("Unknown &H2C", "Unknown &H2C")
+        dgvObjects.Columns.Add("Unknown &H30", "Unknown &H30")
+        dgvObjects.Columns.Add("Unknown &H34", "Unknown &H34")
+        dgvObjects.Columns.Add("Unknown &H38", "Unknown &H38")
+        dgvObjects.Columns.Add("Unknown &H3C", "Unknown &H3C")
+        dgvObjects.Columns.Add("Unknown &H58", "Unknown &H58")
+        dgvObjects.Columns.Add("Unknown p+&H20", "Unknown p+&H20")
+        dgvObjects.Columns.Add("Unknown p+&H24", "Unknown p+&H24")
 
 
         dgvCreatures.Rows.Clear()
@@ -418,6 +456,9 @@ Public Class frmMSBEdit
                     name = StrFromBytes(ptr + nameoffset)
                     sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
+                    padding = ((sibpath.Length + name.Length + 5) And -&H4)
+
+                    scriptid1 = SIntFromFour(ptr + nameoffset + padding)
 
                     offset = ptr
 
@@ -432,6 +473,18 @@ Public Class frmMSBEdit
                     row(8) = sibpath
                     row(9) = offset
                     row(10) = nameoffset
+                    row(11) = scriptid1
+
+                    row(12) = SIntFromFour(ptr + &H10)
+                    row(13) = SingleFromFour(ptr + &H2C)
+                    row(14) = SingleFromFour(ptr + &H30)
+                    row(15) = SingleFromFour(ptr + &H34)
+                    row(16) = SIntFromFour(ptr + &H38)
+                    row(17) = SIntFromFour(ptr + &H3C)
+                    row(18) = SIntFromFour(ptr + &H58)
+
+                    row(19) = SIntFromFour(ptr + nameoffset + padding + &H20)
+                    row(20) = SIntFromFour(ptr + nameoffset + padding + &H24)
 
                     dgvObjects.Rows.Add(row)
 
@@ -505,6 +558,11 @@ Public Class frmMSBEdit
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
 
+        Dim tmpbytes() As Byte
+
+        Dim msbIndex As Byte() = {}
+        Dim msbData As Byte() = {}
+
         Dim modelPtr As UInteger
         Dim modelCnt As UInteger
 
@@ -542,6 +600,7 @@ Public Class frmMSBEdit
 
 
         Dim ptr As UInteger
+        Dim curroffset As UInteger
 
         Dim nameoffset As UInteger
         Dim type As UInteger
@@ -565,83 +624,213 @@ Public Class frmMSBEdit
         Dim offset As UInteger
         Dim padding As UInteger
 
+        If File.Exists(txtMSBfile.Text & ".tmp") Then File.Delete(txtMSBfile.Text & ".tmp")
+        Dim MSBStream As New IO.FileStream(txtMSBfile.Text & ".tmp", IO.FileMode.CreateNew)
 
-        For i = 0 To dgvModels.Rows.Count - 2
+        WriteBytes(MSBStream, UInt32ToFourByte(0))
+
+
+        modelPtr = 0
+        modelCnt = dgvModels.Rows.Count - 2
+        curroffset = modelPtr + &H10 + (modelCnt + 1) * &H4
+
+        MSBStream.Position = &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt + 2))
+
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("MODEL_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+        For i As UInteger = 0 To modelCnt
             type = dgvModels.Rows(i).Cells(0).Value
             index = dgvModels.Rows(i).Cells(1).Value
-
             name = dgvModels.Rows(i).Cells(3).Value
             sibpath = dgvModels.Rows(i).Cells(4).Value
-
-            ptr = dgvModels.Rows(i).Cells(7).Value
             nameoffset = dgvModels.Rows(i).Cells(8).Value
+            padding = ((sibpath.Length + name.Length + 5) And -&H4)
 
-            InsBytes(ptr + &H0, UInt32ToFourByte(nameoffset))
-            InsBytes(ptr + &H4, UInt32ToFourByte(type))
-            InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            InsBytes(ptr + &HC, UInt32ToFourByte(dgvModels.Rows(i).Cells(5).Value))
-            InsBytes(ptr + &H10, UInt32ToFourByte(dgvModels.Rows(i).Cells(6).Value))
+            'Update Index
+            curroffset = MSBStream.Position
+            MSBStream.Position = modelPtr + &HC + i * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            MSBStream.Position = curroffset
 
-            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            WriteBytes(MSBStream, UInt32ToFourByte(nameoffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(type))
+            WriteBytes(MSBStream, UInt32ToFourByte(index))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(5).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(6).Value))
+
+            MSBStream.Position = curroffset + nameoffset
+            WriteBytes(MSBStream, Str2Bytes(name))
+            MSBStream.Position += 1
+            WriteBytes(MSBStream, Str2Bytes(sibpath))
+            MSBStream.Position = curroffset + nameoffset + padding
+        Next
+        eventPtr = (MSBStream.Length And -&H4) + &H4
+        MSBStream.Position = modelPtr + &H10 + (modelCnt) * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
+        MSBStream.Position = eventPtr
+
+
+
+
+        bytes = eventParams
+        WriteBytes(MSBStream, UInt32ToFourByte(0))
+        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - eventParamsOrigOffset + eventPtr))
+        eventCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(eventCnt))
+
+        For i As UInteger = 0 To eventCnt - 1
+            curroffset = &HC + i * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - eventParamsOrigOffset + eventPtr))
         Next
 
+        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
+        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
+        WriteBytes(MSBStream, tmpbytes)
+
+
+        pointPtr = MSBStream.Length
+        bytes = pointParams
+        WriteBytes(MSBStream, UInt32ToFourByte(0))
+        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - pointParamsOrigOffset + pointPtr))
+        pointCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(pointCnt))
+
+        For i As UInteger = 0 To pointCnt - 1
+            curroffset = &HC + i * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - pointParamsOrigOffset + pointPtr))
+        Next
+
+        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
+        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
+        WriteBytes(MSBStream, tmpbytes)
+        partsPtr = MSBStream.Length
+
+
+
+
+        partsCnt = dgvMapPieces.Rows.Count + dgvCreatures.Rows.Count + dgvObjects.Rows.Count + dgvUnhandled.Rows.Count - 5
+        curroffset = partsPtr + &H10 + (partsCnt + 1) * &H4
+        MSBStream.Position = partsPtr + &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt + 2))
+
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
         For i = 0 To dgvMapPieces.Rows.Count - 2
-            padding = 0
             type = dgvMapPieces.Rows(i).Cells(0).Value
             index = dgvMapPieces.Rows(i).Cells(1).Value
-
             model = dgvMapPieces.Rows(i).Cells(2).Value
             name = dgvMapPieces.Rows(i).Cells(3).Value
             sibpath = dgvMapPieces.Rows(i).Cells(4).Value
-
             scriptid1 = dgvMapPieces.Rows(i).Cells(5).Value
             nameoffset = dgvMapPieces.Rows(i).Cells(6).Value
+            padding = ((sibpath.Length + name.Length + 5) And -&H4)
 
-            ptr = dgvMapPieces.Rows(i).Cells(22).Value
+            'Update Index
+            curroffset = MSBStream.Position
+            MSBStream.Position = partsPtr + &HC + i * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            MSBStream.Position = curroffset
 
-            InsBytes(ptr + &H0, UInt32ToFourByte(nameoffset))
-            InsBytes(ptr + &H4, UInt32ToFourByte(type))
-            InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            InsBytes(ptr + &HC, UInt32ToFourByte(model))
+            WriteBytes(MSBStream, UInt32ToFourByte(nameoffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(type))
+            WriteBytes(MSBStream, UInt32ToFourByte(index))
+            WriteBytes(MSBStream, UInt32ToFourByte(model))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(7).Value))
 
-            InsBytes(ptr + &H10, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(7).Value))
-            InsBytes(ptr + &H20, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(8).Value))
-            InsBytes(ptr + &H24, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(9).Value))
-            InsBytes(ptr + &H28, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(10).Value))
+            MSBStream.Position = curroffset + &H20
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(8).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(9).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(10).Value))
+            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(11).Value))
+            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(12).Value))
+            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(13).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(14).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(15).Value))
 
-            InsBytes(ptr + &H2C, SingleToFourByte(dgvMapPieces.Rows(i).Cells(11).Value))
-            InsBytes(ptr + &H30, SingleToFourByte(dgvMapPieces.Rows(i).Cells(12).Value))
-            InsBytes(ptr + &H34, SingleToFourByte(dgvMapPieces.Rows(i).Cells(13).Value))
+            MSBStream.Position = curroffset + &H48
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(16).Value))
 
-            InsBytes(ptr + &H38, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(14).Value))
-            InsBytes(ptr + &H3C, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(15).Value))
-            InsBytes(ptr + &H48, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(16).Value))
-            InsBytes(ptr + &H58, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
-            InsBytes(ptr + &H5C, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(18).Value))
+            MSBStream.Position = curroffset + &H58
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(18).Value))
 
-            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            MSBStream.Position = curroffset + nameoffset
+            WriteBytes(MSBStream, Str2Bytes(name))
 
-            If sibpath.Length = 0 Then padding += 4
+            MSBStream.Position += 1
+            WriteBytes(MSBStream, Str2Bytes(sibpath))
 
-            If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
-                padding += sibpath.Length + name.Length + 2
-                padding += (4 - (padding Mod 4))
-            Else
-                padding += sibpath.Length + name.Length + 2
-            End If
+            MSBStream.Position = curroffset + nameoffset + padding
+            WriteBytes(MSBStream, Int32ToFourByte(scriptid1))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(20).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(21).Value))
 
-            InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
-
-            InsBytes(ptr + nameoffset + padding + &H4, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
-            InsBytes(ptr + nameoffset + padding + &H8, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(20).Value))
-            InsBytes(ptr + nameoffset + padding + &HC, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(21).Value))
-
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
         Next
 
 
+
+
+        For i = 0 To dgvObjects.Rows.Count - 2
+            type = dgvObjects.Rows(i).Cells(0).Value
+            index = dgvObjects.Rows(i).Cells(1).Value
+            xpos = dgvObjects.Rows(i).Cells(2).Value
+            ypos = dgvObjects.Rows(i).Cells(3).Value
+            zpos = dgvObjects.Rows(i).Cells(4).Value
+            facing = dgvObjects.Rows(i).Cells(5).Value
+            model = dgvObjects.Rows(i).Cells(6).Value
+            name = dgvObjects.Rows(i).Cells(7).Value
+            sibpath = dgvObjects.Rows(i).Cells(8).Value
+            nameoffset = dgvObjects.Rows(i).Cells(10).Value
+            padding = ((sibpath.Length + name.Length + 5) And -&H4)
+
+            'Update Index
+            curroffset = MSBStream.Position
+            MSBStream.Position = partsPtr + &HC + (i + dgvMapPieces.Rows.Count - 1) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            MSBStream.Position = curroffset
+
+            WriteBytes(MSBStream, UInt32ToFourByte(nameoffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(type))
+            WriteBytes(MSBStream, UInt32ToFourByte(index))
+            WriteBytes(MSBStream, UInt32ToFourByte(model))
+
+            MSBStream.Position = curroffset + &H14
+            WriteBytes(MSBStream, SingleToFourByte(xpos))
+            WriteBytes(MSBStream, SingleToFourByte(ypos))
+            WriteBytes(MSBStream, SingleToFourByte(zpos))
+
+            MSBStream.Position = curroffset + &H24
+            WriteBytes(MSBStream, SingleToFourByte(facing))
+
+            MSBStream.Position = curroffset + nameoffset
+            WriteBytes(MSBStream, Str2Bytes(name))
+            MSBStream.Position += 1
+            WriteBytes(MSBStream, Str2Bytes(sibpath))
+
+            'InsBytes(ptr, UInt32ToFourByte(nameoffset))
+            'nsBytes(ptr + &H4, UInt32ToFourByte(type))
+            'InsBytes(ptr + &H8, UInt32ToFourByte(index))
+            'InsBytes(ptr + &HC, UInt32ToFourByte(model))
+            'InsBytes(ptr + &H14, SingleToFourByte(xpos))
+            'InsBytes(ptr + &H18, SingleToFourByte(ypos))
+            'InsBytes(ptr + &H1C, SingleToFourByte(zpos))
+            'InsBytes(ptr + &H24, SingleToFourByte(facing))
+
+            'InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            'InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+        Next
         For i = 0 To dgvCreatures.Rows.Count - 2
             padding = 0
             type = dgvCreatures.Rows(i).Cells(0).Value
@@ -662,17 +851,17 @@ Public Class frmMSBEdit
             ptr = dgvCreatures.Rows(i).Cells(11).Value
             nameoffset = dgvCreatures.Rows(i).Cells(12).Value
 
-            InsBytes(ptr, UInt32ToFourByte(nameoffset))
-            InsBytes(ptr + &H4, UInt32ToFourByte(type))
-            InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            InsBytes(ptr + &HC, UInt32ToFourByte(model))
-            InsBytes(ptr + &H14, SingleToFourByte(xpos))
-            InsBytes(ptr + &H18, SingleToFourByte(ypos))
-            InsBytes(ptr + &H1C, SingleToFourByte(zpos))
-            InsBytes(ptr + &H24, SingleToFourByte(facing))
+            'InsBytes(ptr, UInt32ToFourByte(nameoffset))
+            'InsBytes(ptr + &H4, UInt32ToFourByte(type))
+            'InsBytes(ptr + &H8, UInt32ToFourByte(index))
+            'InsBytes(ptr + &HC, UInt32ToFourByte(model))
+            'InsBytes(ptr + &H14, SingleToFourByte(xpos))
+            'InsBytes(ptr + &H18, SingleToFourByte(ypos))
+            'InsBytes(ptr + &H1C, SingleToFourByte(zpos))
+            'InsBytes(ptr + &H24, SingleToFourByte(facing))
 
-            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            'InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
+            'InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
 
             If sibpath.Length = 0 Then padding += 4
 
@@ -683,48 +872,13 @@ Public Class frmMSBEdit
                 padding += sibpath.Length + name.Length + 2
             End If
 
-            InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
-            InsBytes(ptr + nameoffset + padding + &H24, Int32ToFourByte(npcid1))
+            'InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
+            'InsBytes(ptr + nameoffset + padding + &H24, Int32ToFourByte(npcid1))
         Next
 
 
-        For i = 0 To dgvObjects.Rows.Count - 2
-            padding = 0
-
-            type = dgvObjects.Rows(i).Cells(0).Value
-            index = dgvObjects.Rows(i).Cells(1).Value
-
-            xpos = dgvObjects.Rows(i).Cells(2).Value
-            ypos = dgvObjects.Rows(i).Cells(3).Value
-            zpos = dgvObjects.Rows(i).Cells(4).Value
-
-            facing = dgvObjects.Rows(i).Cells(5).Value
-
-            model = dgvObjects.Rows(i).Cells(6).Value
-            name = dgvObjects.Rows(i).Cells(7).Value
-            sibpath = dgvObjects.Rows(i).Cells(8).Value
-
-            ptr = dgvObjects.Rows(i).Cells(9).Value
-            nameoffset = dgvObjects.Rows(i).Cells(10).Value
-
-
-            InsBytes(ptr, UInt32ToFourByte(nameoffset))
-            InsBytes(ptr + &H4, UInt32ToFourByte(type))
-            InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            InsBytes(ptr + &HC, UInt32ToFourByte(model))
-            InsBytes(ptr + &H14, SingleToFourByte(xpos))
-            InsBytes(ptr + &H18, SingleToFourByte(ypos))
-            InsBytes(ptr + &H1C, SingleToFourByte(zpos))
-            InsBytes(ptr + &H24, SingleToFourByte(facing))
-
-            InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
-            InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
-        Next
-
-
-
-        File.WriteAllBytes(txtMSBfile.Text, bytes)
-
+        'File.WriteAllBytes(txtMSBfile.Text, bytes)
+        MSBStream.Close()
         MsgBox("Save Complete.")
     End Sub
 End Class
