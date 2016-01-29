@@ -188,7 +188,7 @@ Public Class frmMSBEdit
 
         Dim offset As UInteger
         Dim padding As UInteger
-        Dim row(30) As String
+        Dim row(40) As String
 
 
 
@@ -282,12 +282,14 @@ Public Class frmMSBEdit
         dgvMapPieces.Columns.Add("Unknown &H34", "Unknown &H34")
         dgvMapPieces.Columns.Add("Unknown &H38", "Unknown &H38")
         dgvMapPieces.Columns.Add("Unknown &H3C", "Unknown &H3C")
+        dgvMapPieces.Columns.Add("Unknown &H40", "Unknown &H40")
         dgvMapPieces.Columns.Add("Unknown &H48", "Unknown &H48")
         dgvMapPieces.Columns.Add("Unknown &H58", "Unknown &H58")
         dgvMapPieces.Columns.Add("Unknown &H5C", "Unknown &H5C")
-        dgvMapPieces.Columns.Add("Unknown p+&H4", "Unknown p+&H4")
-        dgvMapPieces.Columns.Add("Unknown p+&H8", "Unknown p+&H8")
-        dgvMapPieces.Columns.Add("Unknown p+&HC", "Unknown p+&HC")
+        dgvMapPieces.Columns.Add("Unknown p+&H04", "Unknown p+&H04")
+        dgvMapPieces.Columns.Add("Unknown p+&H08", "Unknown p+&H08")
+        dgvMapPieces.Columns.Add("Unknown p+&H0C", "Unknown p+&H0C")
+        dgvMapPieces.Columns.Add("Unknown p+&H10", "Unknown p+&H10")
         dgvMapPieces.Columns.Add("Offset", "Offset")
 
 
@@ -322,9 +324,21 @@ Public Class frmMSBEdit
         dgvObjects.Columns.Add("Unknown &H34", "Unknown &H34")
         dgvObjects.Columns.Add("Unknown &H38", "Unknown &H38")
         dgvObjects.Columns.Add("Unknown &H3C", "Unknown &H3C")
+        dgvObjects.Columns.Add("Unknown &H40", "Unknown &H40")
+        dgvObjects.Columns.Add("Unknown &H44", "Unknown &H44")
         dgvObjects.Columns.Add("Unknown &H58", "Unknown &H58")
+        dgvObjects.Columns.Add("Unknown &H5C", "Unknown &H5C")
+        dgvObjects.Columns.Add("Unknown p+&H04", "Unknown p+&H04")
+        dgvObjects.Columns.Add("Unknown p+&H08", "Unknown p+&H08")
+        dgvObjects.Columns.Add("Unknown p+&H0C", "Unknown p+&H0C")
+        dgvObjects.Columns.Add("Unknown p+&H10", "Unknown p+&H10")
+        dgvObjects.Columns.Add("Unknown p+&H14", "Unknown p+&H14")
+        dgvObjects.Columns.Add("Unknown p+&H18", "Unknown p+&H18")
+        dgvObjects.Columns.Add("Unknown p+&H1C", "Unknown p+&H1C")
         dgvObjects.Columns.Add("Unknown p+&H20", "Unknown p+&H20")
         dgvObjects.Columns.Add("Unknown p+&H24", "Unknown p+&H24")
+        dgvObjects.Columns.Add("Unknown p+&H28", "Unknown p+&H28")
+        dgvObjects.Columns.Add("Unknown p+&H2C", "Unknown p+&H2C")
 
 
         dgvCreatures.Rows.Clear()
@@ -401,14 +415,8 @@ Public Class frmMSBEdit
                     name = StrFromBytes(ptr + nameoffset)
                     sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
-                    If sibpath.Length = 0 Then padding += 4
-
-                    If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
-                        padding += sibpath.Length + name.Length + 2
-                        padding += (4 - (padding Mod 4))
-                    Else
-                        padding += sibpath.Length + name.Length + 2
-                    End If
+                    padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                    If sibpath.Length = 0 Then padding += &H4
 
                     scriptid1 = SIntFromFour(ptr + nameoffset + padding)
                     offset = ptr
@@ -428,16 +436,17 @@ Public Class frmMSBEdit
                     row(12) = SingleFromFour(ptr + &H30)
                     row(13) = SingleFromFour(ptr + &H34)
                     row(14) = SIntFromFour(ptr + &H38)
-
                     row(15) = SIntFromFour(ptr + &H3C)
+                    row(16) = SIntFromFour(ptr + &H40)
 
-                    row(16) = SIntFromFour(ptr + &H48)
-                    row(17) = SIntFromFour(ptr + &H58)
-                    row(18) = SIntFromFour(ptr + &H5C)
-                    row(19) = UIntFromFour(ptr + nameoffset + padding + &H4)
-                    row(20) = UIntFromFour(ptr + nameoffset + padding + &H8)
-                    row(21) = UIntFromFour(ptr + nameoffset + padding + &HC)
-                    row(22) = ptr
+                    row(17) = SIntFromFour(ptr + &H48)
+                    row(18) = SIntFromFour(ptr + &H58)
+                    row(19) = SIntFromFour(ptr + &H5C)
+                    row(20) = UIntFromFour(ptr + nameoffset + padding + &H4)
+                    row(21) = UIntFromFour(ptr + nameoffset + padding + &H8)
+                    row(22) = UIntFromFour(ptr + nameoffset + padding + &HC)
+                    row(23) = UIntFromFour(ptr + nameoffset + padding + &H10)
+                    row(24) = ptr
 
                     dgvMapPieces.Rows.Add(row)
 
@@ -457,6 +466,11 @@ Public Class frmMSBEdit
                     sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
                     padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                    If padding < &H10 Then
+                        padding = &H10
+                        If Not bigEndian Then padding += &H4
+                    End If
+
 
                     scriptid1 = SIntFromFour(ptr + nameoffset + padding)
 
@@ -474,17 +488,27 @@ Public Class frmMSBEdit
                     row(9) = offset
                     row(10) = nameoffset
                     row(11) = scriptid1
-
                     row(12) = SIntFromFour(ptr + &H10)
                     row(13) = SingleFromFour(ptr + &H2C)
                     row(14) = SingleFromFour(ptr + &H30)
                     row(15) = SingleFromFour(ptr + &H34)
                     row(16) = SIntFromFour(ptr + &H38)
                     row(17) = SIntFromFour(ptr + &H3C)
-                    row(18) = SIntFromFour(ptr + &H58)
-
-                    row(19) = SIntFromFour(ptr + nameoffset + padding + &H20)
-                    row(20) = SIntFromFour(ptr + nameoffset + padding + &H24)
+                    row(18) = SIntFromFour(ptr + &H40)
+                    row(19) = SIntFromFour(ptr + &H44)
+                    row(20) = SIntFromFour(ptr + &H58)
+                    row(21) = SIntFromFour(ptr + &H5C)
+                    row(22) = SIntFromFour(ptr + nameoffset + padding + &H4)
+                    row(23) = SIntFromFour(ptr + nameoffset + padding + &H8)
+                    row(24) = SIntFromFour(ptr + nameoffset + padding + &HC)
+                    row(25) = SIntFromFour(ptr + nameoffset + padding + &H10)
+                    row(26) = SIntFromFour(ptr + nameoffset + padding + &H14)
+                    row(27) = SIntFromFour(ptr + nameoffset + padding + &H18)
+                    row(28) = SIntFromFour(ptr + nameoffset + padding + &H1C)
+                    row(29) = SIntFromFour(ptr + nameoffset + padding + &H20)
+                    row(30) = SIntFromFour(ptr + nameoffset + padding + &H24)
+                    row(31) = SIntFromFour(ptr + nameoffset + padding + &H28)
+                    row(32) = SIntFromFour(ptr + nameoffset + padding + &H2C)
 
                     dgvObjects.Rows.Add(row)
 
@@ -499,21 +523,18 @@ Public Class frmMSBEdit
 
                     facing = SingleFromFour(ptr + &H24)
 
-                    name = StrFromBytes(ptr + &H64 + padding)
-                    sibpath = StrFromBytes(ptr + &H64 + name.Length + 1 + padding)
+                    name = StrFromBytes(ptr + nameoffset)
+                    sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
-                    If sibpath.Length = 0 Then padding += 4
-                    If Not bigEndian Then padding += 4
-
-                    If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
-                        padding += sibpath.Length + name.Length + 2
-                        padding += (4 - (padding Mod 4))
-                    Else
-                        padding += sibpath.Length + name.Length + 2
+                    padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                    If padding < &H10 Then
+                        padding = &H10
+                        If Not bigEndian Then padding += &H4
                     End If
 
-                    scriptid1 = SIntFromFour(ptr + &H64 + padding)
-                    npcid1 = SIntFromFour(ptr + &H64 + padding + &H24)
+
+                    scriptid1 = SIntFromFour(ptr + nameoffset + padding)
+                    npcid1 = SIntFromFour(ptr + nameoffset + padding + &H24)
 
                     offset = ptr
 
@@ -730,7 +751,12 @@ Public Class frmMSBEdit
             sibpath = dgvMapPieces.Rows(i).Cells(4).Value
             scriptid1 = dgvMapPieces.Rows(i).Cells(5).Value
             nameoffset = dgvMapPieces.Rows(i).Cells(6).Value
+
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
+            If padding < &H10 Then
+                padding = &H10
+                If Not bigEndian Then padding += &H4
+            End If
 
             'Update Index
             curroffset = MSBStream.Position
@@ -753,13 +779,14 @@ Public Class frmMSBEdit
             WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(13).Value))
             WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(14).Value))
             WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(15).Value))
-
-            MSBStream.Position = curroffset + &H48
             WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(16).Value))
 
+            MSBStream.Position = curroffset + &H48
+            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
+
             MSBStream.Position = curroffset + &H58
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
             WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(18).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
 
             MSBStream.Position = curroffset + nameoffset
             WriteBytes(MSBStream, Str2Bytes(name))
@@ -769,11 +796,11 @@ Public Class frmMSBEdit
 
             MSBStream.Position = curroffset + nameoffset + padding
             WriteBytes(MSBStream, Int32ToFourByte(scriptid1))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
             WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(20).Value))
             WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(21).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(22).Value))
+            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(23).Value))
 
-            WriteBytes(MSBStream, UInt32ToFourByte(0))
             WriteBytes(MSBStream, UInt32ToFourByte(0))
             WriteBytes(MSBStream, UInt32ToFourByte(0))
             WriteBytes(MSBStream, UInt32ToFourByte(0))
@@ -793,7 +820,14 @@ Public Class frmMSBEdit
             name = dgvObjects.Rows(i).Cells(7).Value
             sibpath = dgvObjects.Rows(i).Cells(8).Value
             nameoffset = dgvObjects.Rows(i).Cells(10).Value
+
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
+            If padding < &H10 Then
+                padding = &H10
+                If Not bigEndian Then padding += &H4
+            End If
+
+            scriptid1 = dgvObjects.Rows(i).Cells(11).Value
 
             'Update Index
             curroffset = MSBStream.Position
@@ -801,38 +835,59 @@ Public Class frmMSBEdit
             WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
             MSBStream.Position = curroffset
 
-            WriteBytes(MSBStream, UInt32ToFourByte(nameoffset))
-            WriteBytes(MSBStream, UInt32ToFourByte(type))
-            WriteBytes(MSBStream, UInt32ToFourByte(index))
-            WriteBytes(MSBStream, UInt32ToFourByte(model))
-
-            MSBStream.Position = curroffset + &H14
+            '&H0
+            WriteBytes(MSBStream, Int32ToFourByte(nameoffset))
+            WriteBytes(MSBStream, Int32ToFourByte(type))
+            WriteBytes(MSBStream, Int32ToFourByte(index))
+            WriteBytes(MSBStream, Int32ToFourByte(model))
+            '&H10
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(12).Value))
             WriteBytes(MSBStream, SingleToFourByte(xpos))
             WriteBytes(MSBStream, SingleToFourByte(ypos))
             WriteBytes(MSBStream, SingleToFourByte(zpos))
+            '&H20
 
             MSBStream.Position = curroffset + &H24
             WriteBytes(MSBStream, SingleToFourByte(facing))
+            MSBStream.Position = curroffset + &H2C
+            WriteBytes(MSBStream, SingleToFourByte(dgvObjects.Rows(i).Cells(13).Value))
+            '&H30
+            WriteBytes(MSBStream, SingleToFourByte(dgvObjects.Rows(i).Cells(14).Value))
+            WriteBytes(MSBStream, SingleToFourByte(dgvObjects.Rows(i).Cells(15).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(16).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(17).Value))
+            '&H40
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(18).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(19).Value))
+
+            MSBStream.Position = curroffset + &H58
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(20).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(21).Value))
+
 
             MSBStream.Position = curroffset + nameoffset
             WriteBytes(MSBStream, Str2Bytes(name))
             MSBStream.Position += 1
             WriteBytes(MSBStream, Str2Bytes(sibpath))
 
-            'InsBytes(ptr, UInt32ToFourByte(nameoffset))
-            'nsBytes(ptr + &H4, UInt32ToFourByte(type))
-            'InsBytes(ptr + &H8, UInt32ToFourByte(index))
-            'InsBytes(ptr + &HC, UInt32ToFourByte(model))
-            'InsBytes(ptr + &H14, SingleToFourByte(xpos))
-            'InsBytes(ptr + &H18, SingleToFourByte(ypos))
-            'InsBytes(ptr + &H1C, SingleToFourByte(zpos))
-            'InsBytes(ptr + &H24, SingleToFourByte(facing))
-
-            'InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
-            'InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
+            'p+&H0
+            MSBStream.Position = curroffset + nameoffset + padding
+            WriteBytes(MSBStream, Int32ToFourByte(scriptid1))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(22).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(23).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(24).Value))
+            'p+&H10
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(25).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(26).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(27).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(28).Value))
+            'p+&H20
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(29).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(30).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(31).Value))
+            WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(32).Value))
         Next
         For i = 0 To dgvCreatures.Rows.Count - 2
-            padding = 0
             type = dgvCreatures.Rows(i).Cells(0).Value
             index = dgvCreatures.Rows(i).Cells(1).Value
 
@@ -863,14 +918,6 @@ Public Class frmMSBEdit
             'InsBytes(ptr + nameoffset, System.Text.Encoding.ASCII.GetBytes(name))
             'InsBytes(ptr + nameoffset + name.Length + 1, System.Text.Encoding.ASCII.GetBytes(sibpath))
 
-            If sibpath.Length = 0 Then padding += 4
-
-            If Not ((sibpath.Length + name.Length + 2) Mod 4) = 0 Then
-                padding += sibpath.Length + name.Length + 2
-                padding += (4 - (padding Mod 4))
-            Else
-                padding += sibpath.Length + name.Length + 2
-            End If
 
             'InsBytes(ptr + nameoffset + padding, Int32ToFourByte(scriptid1))
             'InsBytes(ptr + nameoffset + padding + &H24, Int32ToFourByte(npcid1))
