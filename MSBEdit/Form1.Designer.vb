@@ -29,25 +29,25 @@ Partial Class frmMSBEdit
         Me.dgvCreatures = New System.Windows.Forms.DataGridView()
         Me.tabParams = New System.Windows.Forms.TabControl()
         Me.tabCreatures = New System.Windows.Forms.TabPage()
+        Me.tabMapPieces = New System.Windows.Forms.TabPage()
+        Me.dgvMapPieces = New System.Windows.Forms.DataGridView()
         Me.tabModels = New System.Windows.Forms.TabPage()
         Me.dgvModels = New System.Windows.Forms.DataGridView()
         Me.tabObjects = New System.Windows.Forms.TabPage()
         Me.dgvObjects = New System.Windows.Forms.DataGridView()
         Me.tabUnhandled = New System.Windows.Forms.TabPage()
         Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
-        Me.tabMapPieces = New System.Windows.Forms.TabPage()
-        Me.dgvMapPieces = New System.Windows.Forms.DataGridView()
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabCreatures.SuspendLayout()
+        Me.tabMapPieces.SuspendLayout()
+        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabModels.SuspendLayout()
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabObjects.SuspendLayout()
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabUnhandled.SuspendLayout()
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabMapPieces.SuspendLayout()
-        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -117,6 +117,24 @@ Partial Class frmMSBEdit
         Me.tabCreatures.Text = "Creatures"
         Me.tabCreatures.UseVisualStyleBackColor = True
         '
+        'tabMapPieces
+        '
+        Me.tabMapPieces.Controls.Add(Me.dgvMapPieces)
+        Me.tabMapPieces.Location = New System.Drawing.Point(4, 22)
+        Me.tabMapPieces.Name = "tabMapPieces"
+        Me.tabMapPieces.Size = New System.Drawing.Size(1119, 638)
+        Me.tabMapPieces.TabIndex = 4
+        Me.tabMapPieces.Text = "Map Pieces"
+        Me.tabMapPieces.UseVisualStyleBackColor = True
+        '
+        'dgvMapPieces
+        '
+        Me.dgvMapPieces.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvMapPieces.Location = New System.Drawing.Point(6, 6)
+        Me.dgvMapPieces.Name = "dgvMapPieces"
+        Me.dgvMapPieces.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvMapPieces.TabIndex = 38
+        '
         'tabModels
         '
         Me.tabModels.Controls.Add(Me.dgvModels)
@@ -171,24 +189,6 @@ Partial Class frmMSBEdit
         Me.dgvUnhandled.Size = New System.Drawing.Size(1107, 626)
         Me.dgvUnhandled.TabIndex = 38
         '
-        'tabMapPieces
-        '
-        Me.tabMapPieces.Controls.Add(Me.dgvMapPieces)
-        Me.tabMapPieces.Location = New System.Drawing.Point(4, 22)
-        Me.tabMapPieces.Name = "tabMapPieces"
-        Me.tabMapPieces.Size = New System.Drawing.Size(1119, 638)
-        Me.tabMapPieces.TabIndex = 4
-        Me.tabMapPieces.Text = "Map Pieces"
-        Me.tabMapPieces.UseVisualStyleBackColor = True
-        '
-        'dgvMapPieces
-        '
-        Me.dgvMapPieces.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvMapPieces.Location = New System.Drawing.Point(6, 6)
-        Me.dgvMapPieces.Name = "dgvMapPieces"
-        Me.dgvMapPieces.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvMapPieces.TabIndex = 38
-        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -204,14 +204,14 @@ Partial Class frmMSBEdit
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
         Me.tabCreatures.ResumeLayout(False)
+        Me.tabMapPieces.ResumeLayout(False)
+        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabModels.ResumeLayout(False)
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabObjects.ResumeLayout(False)
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabUnhandled.ResumeLayout(False)
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabMapPieces.ResumeLayout(False)
-        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
