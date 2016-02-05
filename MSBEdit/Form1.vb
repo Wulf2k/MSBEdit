@@ -4,6 +4,8 @@ Public Class frmMSBEdit
 
     Public models As msbdata = New msbdata
     Public creatures As msbdata = New msbdata
+    Public mapPieces As msbdata = New msbdata
+
 
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
@@ -165,6 +167,7 @@ Public Class frmMSBEdit
         Return tmpUint
     End Function
 
+
     Private Sub btnOpen_Click(sender As Object, e As EventArgs) Handles btnOpen.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
 
@@ -185,9 +188,6 @@ Public Class frmMSBEdit
         Dim sibpath As String
 
         Dim scriptid1 As Integer
-        Dim scriptid2 As Integer
-        Dim npcid1 As Integer
-        Dim npcid2 As Integer
 
         Dim offset As UInteger
         Dim padding As UInteger
@@ -253,36 +253,12 @@ Public Class frmMSBEdit
         dgvMapPieces.Rows.Clear()
         dgvMapPieces.Columns.Clear()
 
-        dgvMapPieces.Columns.Add("Type", "Type")
-        dgvMapPieces.Columns(0).Width = 40
-        dgvMapPieces.Columns.Add("Index", "Index")
-        dgvMapPieces.Columns(1).Width = 40
-        dgvMapPieces.Columns.Add("Model #", "Model #")
-        dgvMapPieces.Columns(2).Width = 60
-        dgvMapPieces.Columns.Add("Name", "Name")
-        dgvMapPieces.Columns.Add("Sibpath", "Sibpath")
-        dgvMapPieces.Columns.Add("Script ID", "Script ID")
-        dgvMapPieces.Columns(5).Width = 60
+        For i = 0 To mapPieces.fieldCount - 1
+            dgvMapPieces.Columns.Add(mapPieces.retrieveName(i), mapPieces.retrieveName(i))
+            dgvMapPieces.Columns(i).Width = mapPieces.retrieveWidth(i)
+            dgvMapPieces.Columns(i).DefaultCellStyle.BackColor = mapPieces.retrieveBackColor(i)
+        Next
 
-        dgvMapPieces.Columns.Add("Name Offset", "Name Offset")
-        dgvMapPieces.Columns.Add("Unknown &H10", "Unknown &H10")
-        dgvMapPieces.Columns.Add("Unknown &H20", "Unknown &H20")
-        dgvMapPieces.Columns.Add("Unknown &H24", "Unknown &H24")
-        dgvMapPieces.Columns.Add("Unknown &H28", "Unknown &H28")
-        dgvMapPieces.Columns.Add("Unknown &H2C", "Unknown &H2C")
-        dgvMapPieces.Columns.Add("Unknown &H30", "Unknown &H30")
-        dgvMapPieces.Columns.Add("Unknown &H34", "Unknown &H34")
-        dgvMapPieces.Columns.Add("Unknown &H38", "Unknown &H38")
-        dgvMapPieces.Columns.Add("Unknown &H3C", "Unknown &H3C")
-        dgvMapPieces.Columns.Add("Unknown &H40", "Unknown &H40")
-        dgvMapPieces.Columns.Add("Unknown &H48", "Unknown &H48")
-        dgvMapPieces.Columns.Add("Unknown &H58", "Unknown &H58")
-        dgvMapPieces.Columns.Add("Unknown &H5C", "Unknown &H5C")
-        dgvMapPieces.Columns.Add("Unknown p+&H04", "Unknown p+&H04")
-        dgvMapPieces.Columns.Add("Unknown p+&H08", "Unknown p+&H08")
-        dgvMapPieces.Columns.Add("Unknown p+&H0C", "Unknown p+&H0C")
-        dgvMapPieces.Columns.Add("Unknown p+&H10", "Unknown p+&H10")
-        dgvMapPieces.Columns.Add("Offset", "Offset")
 
 
 
@@ -396,49 +372,48 @@ Public Class frmMSBEdit
             padding = 0
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
             Select Case UIntFromFour(ptr + &H4)
-                Case &H0
-                    nameoffset = UIntFromFour(ptr)
-                    type = UIntFromFour(ptr + &H4)
-                    index = UIntFromFour(ptr + &H8)
-                    model = UIntFromFour(ptr + &HC)
+                Case &H0, &H5, &H8
+                    Dim currOffset As Integer = 0
+                    Dim mapRow(mapPieces.fieldCount) As String
+                    Dim mapName As String = ""
+                    Dim mapSibpath As String = ""
+                    Dim textboost As Integer
 
+                    nameoffset = SIntFromFour(ptr)
                     name = StrFromBytes(ptr + nameoffset)
                     sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
+
+                    mapRow(mapPieces.getNameIndex) = name
+                    mapRow(mapPieces.getNameIndex + 1) = sibpath
+
                     padding = ((sibpath.Length + name.Length + 5) And -&H4)
-                    If sibpath.Length = 0 Then padding += &H4
+                    If padding < &H10 Then
+                        padding = &H10
+                        If Not bigEndian Then padding += &H4
+                    End If
 
-                    scriptid1 = SIntFromFour(ptr + nameoffset + padding)
-                    offset = ptr
+                    For j = 0 To mapPieces.fieldCount - 1
+                        If j < mapPieces.getNameIndex Then
+                            textboost = 0
+                        Else
+                            textboost = nameoffset + padding
+                        End If
 
-                    row(0) = type
-                    row(1) = index
-                    row(2) = model
-                    row(3) = name
-                    row(4) = sibpath
-                    row(5) = scriptid1
-                    row(6) = nameoffset
-                    row(7) = UIntFromFour(ptr + &H10)
-                    row(8) = SIntFromFour(ptr + &H20)
-                    row(9) = SIntFromFour(ptr + &H24)
-                    row(10) = SIntFromFour(ptr + &H28)
-                    row(11) = SingleFromFour(ptr + &H2C)
-                    row(12) = SingleFromFour(ptr + &H30)
-                    row(13) = SingleFromFour(ptr + &H34)
-                    row(14) = SIntFromFour(ptr + &H38)
-                    row(15) = SIntFromFour(ptr + &H3C)
-                    row(16) = SIntFromFour(ptr + &H40)
+                        If j = mapPieces.getNameIndex Then currOffset = 0
 
-                    row(17) = SIntFromFour(ptr + &H48)
-                    row(18) = SIntFromFour(ptr + &H58)
-                    row(19) = SIntFromFour(ptr + &H5C)
-                    row(20) = UIntFromFour(ptr + nameoffset + padding + &H4)
-                    row(21) = UIntFromFour(ptr + nameoffset + padding + &H8)
-                    row(22) = UIntFromFour(ptr + nameoffset + padding + &HC)
-                    row(23) = UIntFromFour(ptr + nameoffset + padding + &H10)
-                    row(24) = ptr
+                        Select Case mapPieces.retrieveType(j)
+                            Case "i32"
+                                mapRow(j) = SIntFromFour(ptr + textboost + currOffset)
+                                currOffset += 4
+                            Case "f32"
+                                mapRow(j) = Math.Round(SingleFromFour(ptr + textboost + currOffset), 2)
+                                currOffset += 4
+                        End Select
+                    Next
 
-                    dgvMapPieces.Rows.Add(row)
+                    dgvMapPieces.Rows.Add(mapRow)
+
 
 
                 Case &H1, &H9
@@ -504,7 +479,6 @@ Public Class frmMSBEdit
                     row(34) = SIntFromFour(ptr + nameoffset + padding + &H2C)
 
                     dgvObjects.Rows.Add(row)
-
                 Case &H2, &H4, &HA
                     Dim currOffset As Integer = 0
                     Dim crtRow(creatures.fieldCount) As String
@@ -661,8 +635,8 @@ Public Class frmMSBEdit
             MSBStream.Position = curroffset
 
             nameoffset = dgvModels.Rows(i).Cells(0).Value
-            name = dgvModels.Rows(i).Cells(creatures.getNameIndex).Value
-            sibpath = dgvModels.Rows(i).Cells(creatures.getNameIndex + 1).Value
+            name = dgvModels.Rows(i).Cells(models.getNameIndex).Value
+            sibpath = dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
             If padding < &H10 Then
@@ -741,14 +715,17 @@ Public Class frmMSBEdit
         WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
+
+        'Map Pieces
         For i = 0 To dgvMapPieces.Rows.Count - 2
-            type = dgvMapPieces.Rows(i).Cells(0).Value
-            index = dgvMapPieces.Rows(i).Cells(1).Value
-            model = dgvMapPieces.Rows(i).Cells(2).Value
-            name = dgvMapPieces.Rows(i).Cells(3).Value
-            sibpath = dgvMapPieces.Rows(i).Cells(4).Value
-            scriptid1 = dgvMapPieces.Rows(i).Cells(5).Value
-            nameoffset = dgvMapPieces.Rows(i).Cells(6).Value
+            curroffset = MSBStream.Position
+            MSBStream.Position = partsPtr + &HC + (i) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            MSBStream.Position = curroffset
+
+            nameoffset = dgvMapPieces.Rows(i).Cells(0).Value
+            name = dgvMapPieces.Rows(i).Cells(mapPieces.getNameIndex).Value
+            sibpath = dgvMapPieces.Rows(i).Cells(mapPieces.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
             If padding < &H10 Then
@@ -756,57 +733,21 @@ Public Class frmMSBEdit
                 If Not bigEndian Then padding += &H4
             End If
 
-            'Update Index
-            curroffset = MSBStream.Position
-            MSBStream.Position = partsPtr + &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-            MSBStream.Position = curroffset
-
-            WriteBytes(MSBStream, UInt32ToFourByte(nameoffset))
-            WriteBytes(MSBStream, UInt32ToFourByte(type))
-            WriteBytes(MSBStream, UInt32ToFourByte(index))
-            WriteBytes(MSBStream, UInt32ToFourByte(model))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(7).Value))
-
-            MSBStream.Position = curroffset + &H20
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(8).Value))
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(9).Value))
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(10).Value))
-            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(11).Value))
-            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(12).Value))
-            WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(13).Value))
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(14).Value))
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(15).Value))
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(16).Value))
-
-            MSBStream.Position = curroffset + &H48
-            WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(17).Value))
-
-            MSBStream.Position = curroffset + &H58
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(18).Value))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(19).Value))
-
-            MSBStream.Position = curroffset + nameoffset
-            WriteBytes(MSBStream, Str2Bytes(name))
-
-            MSBStream.Position += 1
-            WriteBytes(MSBStream, Str2Bytes(sibpath))
-
-            MSBStream.Position = curroffset + nameoffset + padding
-            WriteBytes(MSBStream, Int32ToFourByte(scriptid1))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(20).Value))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(21).Value))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(22).Value))
-            WriteBytes(MSBStream, UInt32ToFourByte(dgvMapPieces.Rows(i).Cells(23).Value))
-
-            WriteBytes(MSBStream, UInt32ToFourByte(0))
-            WriteBytes(MSBStream, UInt32ToFourByte(0))
-            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            For j = 0 To mapPieces.fieldCount - 1
+                If j = mapPieces.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+                If j = mapPieces.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + padding
+                Select Case mapPieces.retrieveType(j)
+                    Case "i32"
+                        WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(j).Value))
+                    Case "f32"
+                        WriteBytes(MSBStream, SingleToFourByte(dgvMapPieces.Rows(i).Cells(j).Value))
+                    Case "string"
+                        WriteBytes(MSBStream, Str2Bytes(dgvMapPieces.Rows(i).Cells(j).Value & Chr(0)))
+                End Select
+            Next
         Next
 
-
-
-
+        'Objects
         For i = 0 To dgvObjects.Rows.Count - 2
             type = dgvObjects.Rows(i).Cells(0).Value
             index = dgvObjects.Rows(i).Cells(1).Value
@@ -884,6 +825,8 @@ Public Class frmMSBEdit
             WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(33).Value))
             WriteBytes(MSBStream, Int32ToFourByte(dgvObjects.Rows(i).Cells(34).Value))
         Next
+
+        'Creatures
         For i = 0 To dgvCreatures.Rows.Count - 2
             curroffset = MSBStream.Position
             MSBStream.Position = partsPtr + &HC + (i + dgvObjects.Rows.Count + dgvMapPieces.Rows.Count - 2) * &H4
@@ -920,6 +863,45 @@ Public Class frmMSBEdit
         MsgBox("Save Complete.")
     End Sub
 
+    Private Sub mapPrep()
+        mapPieces.add("Name Offset", "i32", 40, Color.White)
+        mapPieces.add("Type", "i32", 40, Color.White)
+        mapPieces.add("Index", "i32", 40, Color.White)
+        mapPieces.add("Model", "i32", 40, Color.White)
+        mapPieces.add("x10", "i32", 40, Color.LightGray)
+        mapPieces.add("X pos", "f32", 75, Color.White)
+        mapPieces.add("Y pos", "f32", 75, Color.White)
+        mapPieces.add("Z pos", "f32", 75, Color.White)
+        mapPieces.add("Rotation 1", "f32", 60, Color.White)
+        mapPieces.add("Rotation 2", "f32", 60, Color.White)
+        mapPieces.add("Rotation 3", "f32", 60, Color.White)
+        mapPieces.add("x2C", "f32", 40, Color.LightGray)
+        mapPieces.add("x30", "f32", 40, Color.LightGray)
+        mapPieces.add("x34", "f32", 40, Color.LightGray)
+        mapPieces.add("x38", "i32", 75, Color.LightGray)
+        mapPieces.add("x3C", "i32", 75, Color.LightGray)
+        mapPieces.add("x40", "i32", 40, Color.LightGray)
+        mapPieces.add("x44", "i32", 40, Color.LightGray)
+        mapPieces.add("x48", "i32", 40, Color.LightGray)
+        mapPieces.add("x4c", "i32", 40, Color.LightGray)
+        mapPieces.add("x50", "i32", 40, Color.LightGray)
+        mapPieces.add("x54", "i32", 40, Color.LightGray)
+        mapPieces.add("x58", "i32", 40, Color.LightGray)
+        mapPieces.add("x5C", "i32", 40, Color.LightGray)
+        mapPieces.add("x60", "i32", 40, Color.LightGray)
+        mapPieces.add("x64", "i32", 75, Color.LightGray)
+        mapPieces.setNameIndex(mapPieces.fieldCount)
+        mapPieces.add("Name", "string", 100, Color.White)
+        mapPieces.add("Sibpath", "string", 100, Color.White)
+        mapPieces.add("Script ID", "i32", 60, Color.White)
+        mapPieces.add("p+x04", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x08", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x0C", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x10", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x14", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x18", "i32", 75, Color.LightGray)
+        mapPieces.add("p+x1C", "i32", 75, Color.LightGray)
+    End Sub
     Private Sub crtPrep()
         creatures.add("Name Offset", "i32", 40, Color.White)
         creatures.add("Type", "i32", 40, Color.White)
@@ -946,7 +928,7 @@ Public Class frmMSBEdit
         creatures.add("x58", "i32", 40, Color.LightGray)
         creatures.add("x5C", "i32", 40, Color.LightGray)
         creatures.add("x60", "i32", 40, Color.LightGray)
-        creatures.add("x64", "i32", 40, Color.LightGray)
+        creatures.add("x64", "i32", 75, Color.LightGray)
         creatures.setNameIndex(creatures.fieldCount)
         creatures.add("Name", "string", 100, Color.White)
         creatures.add("Sibpath", "string", 100, Color.White)
@@ -989,10 +971,11 @@ Public Class frmMSBEdit
 
 
     Private Sub frmMSBEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        mapPrep()
+
         crtPrep()
+
         mdlPrep()
-
-
 
     End Sub
 
@@ -1022,8 +1005,7 @@ Public Class msbdata
     Private fieldWidth As List(Of Integer) = New List(Of Integer)
     Private fieldBackColor As List(Of Color) = New List(Of Color)
 
-
-    Public Shared nameIdx As Integer
+    Private nameIdx As Integer
 
     Public Sub add(ByVal name As String, ByVal type As String, width As Integer, backColor As Color)
         fieldNames.Add(name)

@@ -100,7 +100,7 @@ Partial Class frmMSBEdit
         Me.tabParams.Controls.Add(Me.tabModels)
         Me.tabParams.Controls.Add(Me.tabObjects)
         Me.tabParams.Controls.Add(Me.tabUnhandled)
-        Me.tabParams.Location = New System.Drawing.Point(12, 70)
+        Me.tabParams.Location = New System.Drawing.Point(12, 69)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
         Me.tabParams.Size = New System.Drawing.Size(1127, 664)
