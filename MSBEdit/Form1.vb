@@ -1,13 +1,17 @@
 ﻿Imports System.IO
 
+
+'Creature type 0x4 is sized wrong
+
 Public Class frmMSBEdit
 
     Public models As msbdata = New msbdata
     Public creatures As msbdata = New msbdata
     Public mapPieces As msbdata = New msbdata
     Public objects As msbdata = New msbdata
-    Public collision As msbdata = New msbdata
-
+    Public collision0x5 As msbdata = New msbdata
+    Public collision0xB As msbdata = New msbdata
+    Public unhandled As msbdata = New msbdata
 
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
@@ -184,14 +188,11 @@ Public Class frmMSBEdit
         Dim ptr As UInteger
 
         Dim nameoffset As UInteger
-        Dim type As UInteger
 
         Dim name As String
         Dim sibpath As String
 
 
-
-        Dim offset As UInteger
         Dim padding As UInteger
         Dim row(40) As String
 
@@ -290,18 +291,37 @@ Public Class frmMSBEdit
 
 
 
+        dgvCollision0x5.Rows.Clear()
+        dgvCollision0x5.Columns.Clear()
 
-        dgvCollision.Rows.Clear()
-        dgvCollision.Columns.Clear()
-
-        For i = 0 To collision.fieldCount - 1
-            dgvCollision.Columns.Add(collision.retrieveName(i), collision.retrieveName(i))
-            dgvCollision.Columns(i).Width = collision.retrieveWidth(i)
-            dgvCollision.Columns(i).DefaultCellStyle.BackColor = collision.retrieveBackColor(i)
+        For i = 0 To collision0x5.fieldCount - 1
+            dgvCollision0x5.Columns.Add(collision0x5.retrieveName(i), collision0x5.retrieveName(i))
+            dgvCollision0x5.Columns(i).Width = collision0x5.retrieveWidth(i)
+            dgvCollision0x5.Columns(i).DefaultCellStyle.BackColor = collision0x5.retrieveBackColor(i)
         Next
 
 
 
+        dgvCollision0xB.Rows.Clear()
+        dgvCollision0xB.Columns.Clear()
+
+        For i = 0 To collision0xB.fieldCount - 1
+            dgvCollision0xB.Columns.Add(collision0xB.retrieveName(i), collision0xB.retrieveName(i))
+            dgvCollision0xB.Columns(i).Width = collision0xB.retrieveWidth(i)
+            dgvCollision0xB.Columns(i).DefaultCellStyle.BackColor = collision0xB.retrieveBackColor(i)
+        Next
+
+
+
+
+        dgvUnhandled.Rows.Clear()
+        dgvUnhandled.Columns.Clear()
+
+        For i = 0 To unhandled.fieldCount - 1
+            dgvUnhandled.Columns.Add(unhandled.retrieveName(i), unhandled.retrieveName(i))
+            dgvUnhandled.Columns(i).Width = unhandled.retrieveWidth(i)
+            dgvUnhandled.Columns(i).DefaultCellStyle.BackColor = unhandled.retrieveBackColor(i)
+        Next
 
 
         For i = 0 To modelCnt - 2
@@ -337,7 +357,7 @@ Public Class frmMSBEdit
             padding = 0
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
             Select Case UIntFromFour(ptr + &H4)
-                Case &H0, &H5, &H8
+                Case &H0, &H8
                     Dim currOffset As Integer = 0
                     Dim mapRow(mapPieces.fieldCount) As String
                     Dim mapName As String = ""
@@ -466,9 +486,9 @@ Public Class frmMSBEdit
                     Next
 
                     dgvCreatures.Rows.Add(crtRow)
-                Case &HB
+                Case &H5
                     Dim currOffset As Integer = 0
-                    Dim colRow(collision.fieldCount) As String
+                    Dim colRow(collision0x5.fieldCount) As String
                     Dim colName As String = ""
                     Dim colSibpath As String = ""
                     Dim textboost As Integer
@@ -477,8 +497,8 @@ Public Class frmMSBEdit
                     name = StrFromBytes(ptr + nameoffset)
                     sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
 
-                    colRow(collision.getNameIndex) = name
-                    colRow(collision.getNameIndex + 1) = sibpath
+                    colRow(collision0x5.getNameIndex) = name
+                    colRow(collision0x5.getNameIndex + 1) = sibpath
 
                     padding = ((sibpath.Length + name.Length + 5) And -&H4)
                     If padding <= &H10 Then
@@ -486,16 +506,16 @@ Public Class frmMSBEdit
                         If Not bigEndian Then padding += &H4
                     End If
 
-                    For j = 0 To collision.fieldCount - 1
-                        If j < collision.getNameIndex Then
+                    For j = 0 To collision0x5.fieldCount - 1
+                        If j < collision0x5.getNameIndex Then
                             textboost = 0
                         Else
                             textboost = nameoffset + padding
                         End If
 
-                        If j = collision.getNameIndex Then currOffset = 0
+                        If j = collision0x5.getNameIndex Then currOffset = 0
 
-                        Select Case collision.retrieveType(j)
+                        Select Case collision0x5.retrieveType(j)
                             Case "i8"
                                 colRow(j) = SIntFromOne(ptr + textboost + currOffset)
                                 currOffset += 1
@@ -511,7 +531,100 @@ Public Class frmMSBEdit
                         End Select
                     Next
 
-                    dgvCollision.Rows.Add(colRow)
+                    dgvCollision0x5.Rows.Add(colRow)
+
+                Case &HB
+                    Dim currOffset As Integer = 0
+                    Dim colRow(collision0xB.fieldCount) As String
+                    Dim colName As String = ""
+                    Dim colSibpath As String = ""
+                    Dim textboost As Integer
+
+                    nameoffset = SIntFromFour(ptr)
+                    name = StrFromBytes(ptr + nameoffset)
+                    sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
+
+                    colRow(collision0xB.getNameIndex) = name
+                    colRow(collision0xB.getNameIndex + 1) = sibpath
+
+                    padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                    If padding <= &H10 Then
+                        padding = &H10
+                        If Not bigEndian Then padding += &H4
+                    End If
+
+                    For j = 0 To collision0xB.fieldCount - 1
+                        If j < collision0xB.getNameIndex Then
+                            textboost = 0
+                        Else
+                            textboost = nameoffset + padding
+                        End If
+
+                        If j = collision0xB.getNameIndex Then currOffset = 0
+
+                        Select Case collision0xB.retrieveType(j)
+                            Case "i8"
+                                colRow(j) = SIntFromOne(ptr + textboost + currOffset)
+                                currOffset += 1
+                            Case "i16"
+                                colRow(j) = SIntFromTwo(ptr + textboost + currOffset)
+                                currOffset += 2
+                            Case "i32"
+                                colRow(j) = SIntFromFour(ptr + textboost + currOffset)
+                                currOffset += 4
+                            Case "f32"
+                                colRow(j) = Math.Round(SingleFromFour(ptr + textboost + currOffset), 2)
+                                currOffset += 4
+                        End Select
+                    Next
+
+                    dgvCollision0xB.Rows.Add(colRow)
+                Case Else
+                    Dim currOffset As Integer = 0
+                    Dim unhRow(unhandled.fieldCount) As String
+                    Dim unhName As String = ""
+                    Dim unhSibpath As String = ""
+                    Dim textboost As Integer
+
+                    nameoffset = SIntFromFour(ptr)
+                    name = StrFromBytes(ptr + nameoffset)
+                    sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
+
+                    unhRow(unhandled.getNameIndex) = name
+                    unhRow(unhandled.getNameIndex + 1) = sibpath
+
+                    padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                    If padding <= &H10 Then
+                        padding = &H10
+                        If Not bigEndian Then padding += &H4
+                    End If
+
+                    For j = 0 To unhandled.fieldCount - 1
+                        If j < unhandled.getNameIndex Then
+                            textboost = 0
+                        Else
+                            textboost = nameoffset + padding
+                        End If
+
+                        If j = unhandled.getNameIndex Then currOffset = 0
+
+                        Select Case unhandled.retrieveType(j)
+                            Case "i8"
+                                unhRow(j) = SIntFromOne(ptr + textboost + currOffset)
+                                currOffset += 1
+                            Case "i16"
+                                unhRow(j) = SIntFromTwo(ptr + textboost + currOffset)
+                                currOffset += 2
+                            Case "i32"
+                                unhRow(j) = SIntFromFour(ptr + textboost + currOffset)
+                                currOffset += 4
+                            Case "f32"
+                                unhRow(j) = Math.Round(SingleFromFour(ptr + textboost + currOffset), 2)
+                                currOffset += 4
+                        End Select
+                    Next
+
+                    dgvUnhandled.Rows.Add(unhRow)
             End Select
         Next
 
@@ -519,7 +632,6 @@ Public Class frmMSBEdit
         mapstudioCnt = UIntFromFour(mapstudioPtr + &H8)
 
     End Sub
-
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
 
@@ -564,29 +676,13 @@ Public Class frmMSBEdit
 
 
 
-        Dim ptr As UInteger
         Dim curroffset As UInteger
 
         Dim nameoffset As UInteger
-        Dim type As UInteger
-        Dim model As UInteger
-
-        Dim index As UInteger
-
-        Dim xpos As Single
-        Dim ypos As Single
-        Dim zpos As Single
-        Dim facing As Single
 
         Dim name As String
         Dim sibpath As String
 
-        Dim scriptid1 As Integer
-        Dim scriptid2 As Integer
-        Dim npcid1 As Integer
-        Dim npcid2 As Integer
-
-        Dim offset As UInteger
         Dim padding As UInteger
 
         If File.Exists(txtMSBfile.Text & ".tmp") Then File.Delete(txtMSBfile.Text & ".tmp")
@@ -619,7 +715,7 @@ Public Class frmMSBEdit
             sibpath = dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
-            If padding < &H10 Then
+            If padding <= &H10 Then
                 padding = &H10
                 If Not bigEndian Then padding += &H4
             End If
@@ -685,7 +781,7 @@ Public Class frmMSBEdit
 
 
 
-        partsCnt = dgvMapPieces.Rows.Count + dgvCreatures.Rows.Count + dgvObjects.Rows.Count + dgvCollision.Rows.Count - 5
+        partsCnt = dgvMapPieces.Rows.Count + dgvCreatures.Rows.Count + dgvObjects.Rows.Count + dgvCollision0xB.Rows.Count - 5
         curroffset = partsPtr + &H10 + (partsCnt + 1) * &H4
         MSBStream.Position = partsPtr + &H4
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
@@ -708,7 +804,7 @@ Public Class frmMSBEdit
             sibpath = dgvMapPieces.Rows(i).Cells(mapPieces.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
-            If padding < &H10 Then
+            If padding <= &H10 Then
                 padding = &H10
                 If Not bigEndian Then padding += &H4
             End If
@@ -772,7 +868,7 @@ Public Class frmMSBEdit
             sibpath = dgvCreatures.Rows(i).Cells(creatures.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
-            If padding < &H10 Then
+            If padding <= &H10 Then
                 padding = &H10
                 If Not bigEndian Then padding += &H4
             End If
@@ -791,37 +887,73 @@ Public Class frmMSBEdit
             Next
         Next
 
-        'Type x0B, Collision?
-        For i = 0 To dgvCollision.Rows.Count - 2
+        'Collision x05
+        For i = 0 To dgvCollision0x5.Rows.Count - 2
             curroffset = MSBStream.Position
             MSBStream.Position = partsPtr + &HC + (i + dgvObjects.Rows.Count + dgvMapPieces.Rows.Count + dgvCreatures.Rows.Count - 3) * &H4
             WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
             MSBStream.Position = curroffset
 
-            nameoffset = dgvCollision.Rows(i).Cells(0).Value
-            name = dgvCollision.Rows(i).Cells(collision.getNameIndex).Value
-            sibpath = dgvCollision.Rows(i).Cells(collision.getNameIndex + 1).Value
+            nameoffset = dgvCollision0x5.Rows(i).Cells(0).Value
+            name = dgvCollision0x5.Rows(i).Cells(collision0x5.getNameIndex).Value
+            sibpath = dgvCollision0x5.Rows(i).Cells(collision0x5.getNameIndex + 1).Value
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
-            If padding < &H10 Then
+            If padding <= &H10 Then
                 padding = &H10
                 If Not bigEndian Then padding += &H4
             End If
 
-            For j = 0 To collision.fieldCount - 1
-                If j = collision.getNameIndex Then MSBStream.Position = curroffset + nameoffset
-                If j = collision.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + padding
-                Select Case collision.retrieveType(j)
+            For j = 0 To collision0x5.fieldCount - 1
+                If j = collision0x5.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+                If j = collision0x5.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + padding
+                Select Case collision0x5.retrieveType(j)
                     Case "i8"
-                        WriteBytes(MSBStream, Int8ToOneByte(dgvCollision.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, Int8ToOneByte(dgvCollision0x5.Rows(i).Cells(j).Value))
                     Case "i16"
-                        WriteBytes(MSBStream, Int16ToTwoByte(dgvCollision.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, Int16ToTwoByte(dgvCollision0x5.Rows(i).Cells(j).Value))
                     Case "i32"
-                        WriteBytes(MSBStream, Int32ToFourByte(dgvCollision.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, Int32ToFourByte(dgvCollision0x5.Rows(i).Cells(j).Value))
                     Case "f32"
-                        WriteBytes(MSBStream, SingleToFourByte(dgvCollision.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, SingleToFourByte(dgvCollision0x5.Rows(i).Cells(j).Value))
                     Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgvCollision.Rows(i).Cells(j).Value & Chr(0)))
+                        WriteBytes(MSBStream, Str2Bytes(dgvCollision0x5.Rows(i).Cells(j).Value & Chr(0)))
+                End Select
+            Next
+        Next
+
+
+        'Collision x0B
+        For i = 0 To dgvCollision0xB.Rows.Count - 2
+            curroffset = MSBStream.Position
+            MSBStream.Position = partsPtr + &HC + (i + dgvObjects.Rows.Count + dgvMapPieces.Rows.Count + dgvCreatures.Rows.Count + dgvCollision0x5.ColumnCount - 4) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            MSBStream.Position = curroffset
+
+            nameoffset = dgvCollision0xB.Rows(i).Cells(0).Value
+            name = dgvCollision0xB.Rows(i).Cells(collision0xB.getNameIndex).Value
+            sibpath = dgvCollision0xB.Rows(i).Cells(collision0xB.getNameIndex + 1).Value
+
+            padding = ((sibpath.Length + name.Length + 5) And -&H4)
+            If padding <= &H10 Then
+                padding = &H10
+                If Not bigEndian Then padding += &H4
+            End If
+
+            For j = 0 To collision0xB.fieldCount - 1
+                If j = collision0xB.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+                If j = collision0xB.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + padding
+                Select Case collision0xB.retrieveType(j)
+                    Case "i8"
+                        WriteBytes(MSBStream, Int8ToOneByte(dgvCollision0xB.Rows(i).Cells(j).Value))
+                    Case "i16"
+                        WriteBytes(MSBStream, Int16ToTwoByte(dgvCollision0xB.Rows(i).Cells(j).Value))
+                    Case "i32"
+                        WriteBytes(MSBStream, Int32ToFourByte(dgvCollision0xB.Rows(i).Cells(j).Value))
+                    Case "f32"
+                        WriteBytes(MSBStream, SingleToFourByte(dgvCollision0xB.Rows(i).Cells(j).Value))
+                    Case "string"
+                        WriteBytes(MSBStream, Str2Bytes(dgvCollision0xB.Rows(i).Cells(j).Value & Chr(0)))
                 End Select
             Next
         Next
@@ -969,12 +1101,10 @@ Public Class frmMSBEdit
         objects.add("p+x06", "i8", 40, Color.LightGray)
         objects.add("p+x07", "i8", 40, Color.LightGray)
         objects.add("p+x08", "i32", 60, Color.LightGray)
-
         objects.add("p+x0C", "i8", 40, Color.LightGray)
         objects.add("p+x0D", "i8", 40, Color.LightGray)
         objects.add("p+x0E", "i8", 40, Color.LightGray)
         objects.add("p+x0F", "i8", 40, Color.LightGray)
-
         objects.add("p+x10", "i8", 40, Color.LightGray)
         objects.add("p+x11", "i8", 40, Color.LightGray)
         objects.add("p+x12", "i8", 40, Color.LightGray)
@@ -987,64 +1117,155 @@ Public Class frmMSBEdit
         objects.add("p+x28", "i32", 60, Color.White)
         objects.add("p+x2C", "i32", 60, Color.LightGray)
     End Sub
-    Private Sub colPrep()
-        collision.add("Name Offset", "i32", 40, Color.White)
-        collision.add("Type", "i32", 40, Color.White)
-        collision.add("Index", "i32", 40, Color.White)
-        collision.add("Model", "i32", 40, Color.White)
-        collision.add("x10", "i32", 40, Color.LightGray)
-        collision.add("X pos", "f32", 75, Color.White)
-        collision.add("Y pos", "f32", 75, Color.White)
-        collision.add("Z pos", "f32", 75, Color.White)
-        collision.add("Rotation 1", "f32", 60, Color.White)
-        collision.add("Rotation 2", "f32", 60, Color.White)
-        collision.add("Rotation 3", "f32", 60, Color.White)
-        collision.add("x2C", "f32", 40, Color.LightGray)
-        collision.add("x30", "f32", 40, Color.LightGray)
-        collision.add("x34", "f32", 40, Color.LightGray)
-        collision.add("x38", "i32", 40, Color.LightGray)
-        collision.add("x3C", "i32", 40, Color.LightGray)
-        collision.add("x40", "i32", 40, Color.LightGray)
-        collision.add("x44", "i32", 40, Color.LightGray)
-        collision.add("x48", "i32", 40, Color.LightGray)
-        collision.add("x4C", "i32", 40, Color.LightGray)
-        collision.add("x50", "i32", 40, Color.LightGray)
-        collision.add("x54", "i32", 40, Color.LightGray)
-        collision.add("x58", "i32", 40, Color.LightGray)
-        collision.add("x5C", "i32", 40, Color.LightGray)
-        collision.add("x60", "i32", 40, Color.LightGray)
-        collision.setNameIndex(collision.fieldCount)
-        collision.add("Name", "string", 100, Color.White)
-        collision.add("Sibpath", "string", 100, Color.White)
-        collision.add("Script ID", "i32", 60, Color.White)
-        collision.add("p+x04", "i8", 40, Color.LightGray)
-        collision.add("p+x05", "i8", 40, Color.LightGray)
-        collision.add("p+x06", "i8", 40, Color.LightGray)
-        collision.add("p+x07", "i8", 40, Color.LightGray)
-        collision.add("p+x08", "i8", 40, Color.LightGray)
-        collision.add("p+x09", "i8", 40, Color.LightGray)
-        collision.add("p+x0A", "i8", 40, Color.LightGray)
-        collision.add("p+x0B", "i8", 40, Color.LightGray)
-        collision.add("p+x0C", "i8", 40, Color.LightGray)
-        collision.add("p+x0D", "i8", 40, Color.LightGray)
-        collision.add("p+x0E", "i8", 40, Color.LightGray)
-        collision.add("p+x0F", "i8", 40, Color.LightGray)
-        collision.add("p+x10", "i8", 40, Color.LightGray)
-        collision.add("p+x11", "i8", 40, Color.LightGray)
-        collision.add("p+x12", "i8", 40, Color.LightGray)
-        collision.add("p+x13", "i8", 40, Color.LightGray)
-        collision.add("p+x14", "i8", 40, Color.LightGray)
-        collision.add("p+x15", "i8", 40, Color.LightGray)
-        collision.add("p+x16", "i8", 40, Color.LightGray)
-        collision.add("p+x17", "i8", 40, Color.LightGray)
-        collision.add("p+x18", "i8", 40, Color.LightGray)
-        collision.add("p+x19", "i8", 40, Color.LightGray)
-        collision.add("p+x1A", "i8", 40, Color.LightGray)
-        collision.add("p+x1B", "i8", 40, Color.LightGray)
-        collision.add("p+x1C", "i16", 40, Color.LightGray)
-        collision.add("p+x1E", "i16", 40, Color.LightGray)
-        collision.add("p+x20", "i32", 40, Color.LightGray)
-        collision.add("p+x24", "i32", 40, Color.LightGray)
+    Private Sub col0x5Prep()
+        collision0x5.add("Name Offset", "i32", 40, Color.White)
+        collision0x5.add("Type", "i32", 40, Color.White)
+        collision0x5.add("Index", "i32", 40, Color.White)
+        collision0x5.add("Model", "i32", 40, Color.White)
+        collision0x5.add("x10", "i32", 40, Color.LightGray)
+        collision0x5.add("X pos", "f32", 75, Color.White)
+        collision0x5.add("Y pos", "f32", 75, Color.White)
+        collision0x5.add("Z pos", "f32", 75, Color.White)
+        collision0x5.add("Rotation 1", "f32", 60, Color.White)
+        collision0x5.add("Rotation 2", "f32", 60, Color.White)
+        collision0x5.add("Rotation 3", "f32", 60, Color.White)
+        collision0x5.add("x2C", "f32", 40, Color.LightGray)
+        collision0x5.add("x30", "f32", 40, Color.LightGray)
+        collision0x5.add("x34", "f32", 40, Color.LightGray)
+        collision0x5.add("x38", "i32", 40, Color.LightGray)
+        collision0x5.add("x3C", "i32", 40, Color.LightGray)
+        collision0x5.add("x40", "i32", 40, Color.LightGray)
+        collision0x5.add("x44", "i32", 40, Color.LightGray)
+        collision0x5.add("x48", "i32", 40, Color.LightGray)
+        collision0x5.add("x4C", "i32", 40, Color.LightGray)
+        collision0x5.add("x50", "i32", 40, Color.LightGray)
+        collision0x5.add("x54", "i32", 40, Color.LightGray)
+        collision0x5.add("x58", "i32", 40, Color.LightGray)
+        collision0x5.add("x5C", "i32", 40, Color.LightGray)
+        collision0x5.add("x60", "i32", 40, Color.LightGray)
+        collision0x5.setNameIndex(collision0x5.fieldCount)
+        collision0x5.add("Name", "string", 100, Color.White)
+        collision0x5.add("Sibpath", "string", 100, Color.White)
+        collision0x5.add("Script ID", "i32", 60, Color.White)
+        collision0x5.add("p+x04", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x05", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x06", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x07", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x08", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x09", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0A", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0B", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0C", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0D", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0E", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x0F", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x10", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x11", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x12", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x13", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x14", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x15", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x16", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x17", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x18", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x19", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1A", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1B", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1C", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1D", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1E", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x1F", "i8", 40, Color.LightGray)
+        collision0x5.add("p+x20", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x24", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x28", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x2C", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x30", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x34", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x38", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x3C", "i16", 40, Color.LightGray)
+        collision0x5.add("p+x3E", "i16", 40, Color.LightGray)
+        collision0x5.add("p+x40", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x44", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x48", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x4C", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x50", "i32", 60, Color.LightGray)
+        collision0x5.add("p+x54", "i16", 40, Color.LightGray)
+        collision0x5.add("p+x56", "i16", 40, Color.LightGray)
+        collision0x5.add("p+x58", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x5C", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x60", "i32", 40, Color.LightGray)
+        collision0x5.add("p+x64", "i32", 40, Color.LightGray)
+    End Sub
+    Private Sub col0xBPrep()
+        collision0xB.add("Name Offset", "i32", 40, Color.White)
+        collision0xB.add("Type", "i32", 40, Color.White)
+        collision0xB.add("Index", "i32", 40, Color.White)
+        collision0xB.add("Model", "i32", 40, Color.White)
+        collision0xB.add("x10", "i32", 40, Color.LightGray)
+        collision0xB.add("X pos", "f32", 75, Color.White)
+        collision0xB.add("Y pos", "f32", 75, Color.White)
+        collision0xB.add("Z pos", "f32", 75, Color.White)
+        collision0xB.add("Rotation 1", "f32", 60, Color.White)
+        collision0xB.add("Rotation 2", "f32", 60, Color.White)
+        collision0xB.add("Rotation 3", "f32", 60, Color.White)
+        collision0xB.add("x2C", "f32", 40, Color.LightGray)
+        collision0xB.add("x30", "f32", 40, Color.LightGray)
+        collision0xB.add("x34", "f32", 40, Color.LightGray)
+        collision0xB.add("x38", "i32", 40, Color.LightGray)
+        collision0xB.add("x3C", "i32", 40, Color.LightGray)
+        collision0xB.add("x40", "i32", 40, Color.LightGray)
+        collision0xB.add("x44", "i32", 40, Color.LightGray)
+        collision0xB.add("x48", "i32", 40, Color.LightGray)
+        collision0xB.add("x4C", "i32", 40, Color.LightGray)
+        collision0xB.add("x50", "i32", 40, Color.LightGray)
+        collision0xB.add("x54", "i32", 40, Color.LightGray)
+        collision0xB.add("x58", "i32", 40, Color.LightGray)
+        collision0xB.add("x5C", "i32", 40, Color.LightGray)
+        collision0xB.add("x60", "i32", 40, Color.LightGray)
+        collision0xB.setNameIndex(collision0xB.fieldCount)
+        collision0xB.add("Name", "string", 100, Color.White)
+        collision0xB.add("Sibpath", "string", 100, Color.White)
+        collision0xB.add("Script ID", "i32", 60, Color.White)
+        collision0xB.add("p+x04", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x05", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x06", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x07", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x08", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x09", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0A", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0B", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0C", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0D", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0E", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x0F", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x10", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x11", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x12", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x13", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x14", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x15", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x16", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x17", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x18", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x19", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x1A", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x1B", "i8", 40, Color.LightGray)
+        collision0xB.add("p+x1C", "i16", 40, Color.LightGray)
+        collision0xB.add("p+x1E", "i16", 40, Color.LightGray)
+        collision0xB.add("p+x20", "i32", 40, Color.LightGray)
+        collision0xB.add("p+x24", "i32", 40, Color.LightGray)
+
+    End Sub
+
+
+    Private Sub unhPrep()
+        unhandled.add("Name Offset", "i32", 40, Color.White)
+        unhandled.add("Type", "i32", 40, Color.White)
+        unhandled.add("Index", "i32", 40, Color.White)
+        unhandled.add("Model", "i32", 40, Color.White)
+        unhandled.setNameIndex(unhandled.fieldCount)
+        unhandled.add("Name", "string", 100, Color.White)
+        unhandled.add("Sibpath", "string", 100, Color.White)
     End Sub
 
     Private Sub frmMSBEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -1056,8 +1277,11 @@ Public Class frmMSBEdit
 
         objPrep()
 
-        colPrep()
+        col0x5Prep()
 
+        col0xBPrep()
+
+        unhPrep()
     End Sub
 
     Public Sub sizeChange() Handles MyBase.Resize
@@ -1075,6 +1299,15 @@ Public Class frmMSBEdit
 
         dgvObjects.Width = MyBase.Width - 55
         dgvObjects.Height = MyBase.Height - 150
+
+        dgvCollision0x5.Width = MyBase.Width - 55
+        dgvCollision0x5.Height = MyBase.Height - 150
+
+        dgvCollision0xB.Width = MyBase.Width - 55
+        dgvCollision0xB.Height = MyBase.Height - 150
+
+        dgvUnhandled.Width = MyBase.Width - 55
+        dgvUnhandled.Height = MyBase.Height - 150
     End Sub
 
 
