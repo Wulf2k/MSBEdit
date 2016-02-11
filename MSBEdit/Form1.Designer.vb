@@ -35,8 +35,8 @@ Partial Class frmMSBEdit
         Me.dgvModels = New System.Windows.Forms.DataGridView()
         Me.tabObjects = New System.Windows.Forms.TabPage()
         Me.dgvObjects = New System.Windows.Forms.DataGridView()
-        Me.tabUnhandled = New System.Windows.Forms.TabPage()
-        Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
+        Me.tabCollision = New System.Windows.Forms.TabPage()
+        Me.dgvCollision = New System.Windows.Forms.DataGridView()
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabCreatures.SuspendLayout()
@@ -46,8 +46,8 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabObjects.SuspendLayout()
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabUnhandled.SuspendLayout()
-        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision.SuspendLayout()
+        CType(Me.dgvCollision, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -99,7 +99,7 @@ Partial Class frmMSBEdit
         Me.tabParams.Controls.Add(Me.tabMapPieces)
         Me.tabParams.Controls.Add(Me.tabModels)
         Me.tabParams.Controls.Add(Me.tabObjects)
-        Me.tabParams.Controls.Add(Me.tabUnhandled)
+        Me.tabParams.Controls.Add(Me.tabCollision)
         Me.tabParams.Location = New System.Drawing.Point(12, 69)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
@@ -171,23 +171,23 @@ Partial Class frmMSBEdit
         Me.dgvObjects.Size = New System.Drawing.Size(1107, 626)
         Me.dgvObjects.TabIndex = 38
         '
-        'tabUnhandled
+        'tabCollision
         '
-        Me.tabUnhandled.Controls.Add(Me.dgvUnhandled)
-        Me.tabUnhandled.Location = New System.Drawing.Point(4, 22)
-        Me.tabUnhandled.Name = "tabUnhandled"
-        Me.tabUnhandled.Size = New System.Drawing.Size(1119, 638)
-        Me.tabUnhandled.TabIndex = 3
-        Me.tabUnhandled.Text = "Unhandled"
-        Me.tabUnhandled.UseVisualStyleBackColor = True
+        Me.tabCollision.Controls.Add(Me.dgvCollision)
+        Me.tabCollision.Location = New System.Drawing.Point(4, 22)
+        Me.tabCollision.Name = "tabCollision"
+        Me.tabCollision.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision.TabIndex = 3
+        Me.tabCollision.Text = "Collision"
+        Me.tabCollision.UseVisualStyleBackColor = True
         '
-        'dgvUnhandled
+        'dgvCollision
         '
-        Me.dgvUnhandled.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvUnhandled.Location = New System.Drawing.Point(6, 6)
-        Me.dgvUnhandled.Name = "dgvUnhandled"
-        Me.dgvUnhandled.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvUnhandled.TabIndex = 38
+        Me.dgvCollision.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCollision.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCollision.Name = "dgvCollision"
+        Me.dgvCollision.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision.TabIndex = 38
         '
         'frmMSBEdit
         '
@@ -210,8 +210,8 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabObjects.ResumeLayout(False)
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabUnhandled.ResumeLayout(False)
-        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCollision.ResumeLayout(False)
+        CType(Me.dgvCollision, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -227,8 +227,8 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvObjects As System.Windows.Forms.DataGridView
     Friend WithEvents tabModels As System.Windows.Forms.TabPage
     Friend WithEvents dgvModels As System.Windows.Forms.DataGridView
-    Friend WithEvents tabUnhandled As System.Windows.Forms.TabPage
-    Friend WithEvents dgvUnhandled As System.Windows.Forms.DataGridView
+    Friend WithEvents tabCollision As System.Windows.Forms.TabPage
+    Friend WithEvents dgvCollision As System.Windows.Forms.DataGridView
     Friend WithEvents tabMapPieces As System.Windows.Forms.TabPage
     Friend WithEvents dgvMapPieces As System.Windows.Forms.DataGridView
 
