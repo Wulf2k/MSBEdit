@@ -35,12 +35,12 @@ Partial Class frmMSBEdit
         Me.dgvModels = New System.Windows.Forms.DataGridView()
         Me.tabObjects = New System.Windows.Forms.TabPage()
         Me.dgvObjects = New System.Windows.Forms.DataGridView()
+        Me.tabCollision0x5 = New System.Windows.Forms.TabPage()
+        Me.dgvCollision0x5 = New System.Windows.Forms.DataGridView()
         Me.tabCollision0xB = New System.Windows.Forms.TabPage()
         Me.dgvCollision0xB = New System.Windows.Forms.DataGridView()
         Me.tabUnhandled = New System.Windows.Forms.TabPage()
         Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
-        Me.tabCollision0x5 = New System.Windows.Forms.TabPage()
-        Me.dgvCollision0x5 = New System.Windows.Forms.DataGridView()
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabCreatures.SuspendLayout()
@@ -50,12 +50,12 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabObjects.SuspendLayout()
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision0x5.SuspendLayout()
+        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabCollision0xB.SuspendLayout()
         CType(Me.dgvCollision0xB, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabUnhandled.SuspendLayout()
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabCollision0x5.SuspendLayout()
-        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -95,6 +95,9 @@ Partial Class frmMSBEdit
         '
         'dgvCreatures
         '
+        Me.dgvCreatures.AllowUserToAddRows = False
+        Me.dgvCreatures.AllowUserToDeleteRows = False
+        Me.dgvCreatures.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCreatures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCreatures.Location = New System.Drawing.Point(6, 6)
         Me.dgvCreatures.Name = "dgvCreatures"
@@ -139,6 +142,9 @@ Partial Class frmMSBEdit
         '
         'dgvMapPieces
         '
+        Me.dgvMapPieces.AllowUserToAddRows = False
+        Me.dgvMapPieces.AllowUserToDeleteRows = False
+        Me.dgvMapPieces.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvMapPieces.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvMapPieces.Location = New System.Drawing.Point(6, 6)
         Me.dgvMapPieces.Name = "dgvMapPieces"
@@ -157,6 +163,9 @@ Partial Class frmMSBEdit
         '
         'dgvModels
         '
+        Me.dgvModels.AllowUserToAddRows = False
+        Me.dgvModels.AllowUserToDeleteRows = False
+        Me.dgvModels.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvModels.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvModels.Location = New System.Drawing.Point(6, 6)
         Me.dgvModels.Name = "dgvModels"
@@ -175,11 +184,35 @@ Partial Class frmMSBEdit
         '
         'dgvObjects
         '
+        Me.dgvObjects.AllowUserToAddRows = False
+        Me.dgvObjects.AllowUserToDeleteRows = False
+        Me.dgvObjects.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvObjects.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvObjects.Location = New System.Drawing.Point(6, 6)
         Me.dgvObjects.Name = "dgvObjects"
         Me.dgvObjects.Size = New System.Drawing.Size(1107, 626)
         Me.dgvObjects.TabIndex = 38
+        '
+        'tabCollision0x5
+        '
+        Me.tabCollision0x5.Controls.Add(Me.dgvCollision0x5)
+        Me.tabCollision0x5.Location = New System.Drawing.Point(4, 22)
+        Me.tabCollision0x5.Name = "tabCollision0x5"
+        Me.tabCollision0x5.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision0x5.TabIndex = 6
+        Me.tabCollision0x5.Text = "Collision0x5"
+        Me.tabCollision0x5.UseVisualStyleBackColor = True
+        '
+        'dgvCollision0x5
+        '
+        Me.dgvCollision0x5.AllowUserToAddRows = False
+        Me.dgvCollision0x5.AllowUserToDeleteRows = False
+        Me.dgvCollision0x5.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCollision0x5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCollision0x5.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCollision0x5.Name = "dgvCollision0x5"
+        Me.dgvCollision0x5.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision0x5.TabIndex = 39
         '
         'tabCollision0xB
         '
@@ -193,6 +226,9 @@ Partial Class frmMSBEdit
         '
         'dgvCollision0xB
         '
+        Me.dgvCollision0xB.AllowUserToAddRows = False
+        Me.dgvCollision0xB.AllowUserToDeleteRows = False
+        Me.dgvCollision0xB.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCollision0xB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCollision0xB.Location = New System.Drawing.Point(6, 6)
         Me.dgvCollision0xB.Name = "dgvCollision0xB"
@@ -211,29 +247,14 @@ Partial Class frmMSBEdit
         '
         'dgvUnhandled
         '
+        Me.dgvUnhandled.AllowUserToAddRows = False
+        Me.dgvUnhandled.AllowUserToDeleteRows = False
+        Me.dgvUnhandled.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvUnhandled.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvUnhandled.Location = New System.Drawing.Point(6, 6)
         Me.dgvUnhandled.Name = "dgvUnhandled"
         Me.dgvUnhandled.Size = New System.Drawing.Size(1107, 626)
         Me.dgvUnhandled.TabIndex = 38
-        '
-        'tabCollision0x5
-        '
-        Me.tabCollision0x5.Controls.Add(Me.dgvCollision0x5)
-        Me.tabCollision0x5.Location = New System.Drawing.Point(4, 22)
-        Me.tabCollision0x5.Name = "tabCollision0x5"
-        Me.tabCollision0x5.Size = New System.Drawing.Size(1119, 638)
-        Me.tabCollision0x5.TabIndex = 6
-        Me.tabCollision0x5.Text = "Collision0x5"
-        Me.tabCollision0x5.UseVisualStyleBackColor = True
-        '
-        'dgvCollision0x5
-        '
-        Me.dgvCollision0x5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvCollision0x5.Location = New System.Drawing.Point(6, 6)
-        Me.dgvCollision0x5.Name = "dgvCollision0x5"
-        Me.dgvCollision0x5.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvCollision0x5.TabIndex = 39
         '
         'frmMSBEdit
         '
@@ -246,7 +267,7 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor v0.210"
+        Me.Text = "Wulf's MSB Editor 2016-07-19"
         CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
         Me.tabCreatures.ResumeLayout(False)
@@ -256,12 +277,12 @@ Partial Class frmMSBEdit
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabObjects.ResumeLayout(False)
         CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCollision0x5.ResumeLayout(False)
+        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabCollision0xB.ResumeLayout(False)
         CType(Me.dgvCollision0xB, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabUnhandled.ResumeLayout(False)
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabCollision0x5.ResumeLayout(False)
-        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
