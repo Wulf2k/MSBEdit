@@ -388,6 +388,9 @@ Public Class frmMSBEdit
                         If j = mapPieces.getNameIndex Then currOffset = 0
 
                         Select Case mapPieces.retrieveType(j)
+                            Case "i8"
+                                mapRow(j) = SIntFromOne(ptr + textboost + currOffset)
+                                currOffset += 1
                             Case "i32"
                                 mapRow(j) = SIntFromFour(ptr + textboost + currOffset)
                                 currOffset += 4
@@ -476,6 +479,9 @@ Public Class frmMSBEdit
                         If j = creatures.getNameIndex Then currOffset = 0
 
                         Select Case creatures.retrieveType(j)
+                            Case "i8"
+                                crtRow(j) = SIntFromOne(ptr + textboost + currOffset)
+                                currOffset += 1
                             Case "i32"
                                 crtRow(j) = SIntFromFour(ptr + textboost + currOffset)
                                 currOffset += 4
@@ -813,6 +819,8 @@ Public Class frmMSBEdit
                 If j = mapPieces.getNameIndex Then MSBStream.Position = curroffset + nameoffset
                 If j = mapPieces.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + padding
                 Select Case mapPieces.retrieveType(j)
+                    Case "i8"
+                        WriteBytes(MSBStream, Int8ToOneByte(dgvMapPieces.Rows(i).Cells(j).Value))
                     Case "i32"
                         WriteBytes(MSBStream, Int32ToFourByte(dgvMapPieces.Rows(i).Cells(j).Value))
                     Case "f32"
@@ -979,10 +987,10 @@ Public Class frmMSBEdit
         mapPieces.add("x30", "f32", 40, Color.LightGray)
         mapPieces.add("x34", "f32", 40, Color.LightGray)
         mapPieces.add("x38", "i32", 75, Color.LightGray)
-        mapPieces.add("x3C", "i32", 75, Color.LightGray)
-        mapPieces.add("x40", "i32", 40, Color.LightGray)
-        mapPieces.add("x44", "i32", 40, Color.LightGray)
-        mapPieces.add("x48", "i32", 40, Color.LightGray)
+        mapPieces.add("DrawGroup1", "i32", 75, Color.White)
+        mapPieces.add("DrawGroup2", "i32", 75, Color.White)
+        mapPieces.add("DrawGroup3", "i32", 75, Color.White)
+        mapPieces.add("DrawGroup4", "i32", 75, Color.White)
         mapPieces.add("x4c", "i32", 40, Color.LightGray)
         mapPieces.add("x50", "i32", 40, Color.LightGray)
         mapPieces.add("x54", "i32", 40, Color.LightGray)
@@ -992,9 +1000,15 @@ Public Class frmMSBEdit
         mapPieces.setNameIndex(mapPieces.fieldCount)
         mapPieces.add("Name", "string", 100, Color.White)
         mapPieces.add("Sibpath", "string", 100, Color.White)
-        mapPieces.add("Script ID", "i32", 60, Color.White)
-        mapPieces.add("p+x04", "i32", 75, Color.LightGray)
-        mapPieces.add("p+x08", "i32", 75, Color.LightGray)
+        mapPieces.add("EventEntityID", "i32", 60, Color.White)
+        mapPieces.add("LightId", "i8", 75, Color.White)
+        mapPieces.add("FogId", "i8", 75, Color.White)
+        mapPieces.add("ScatId", "i8", 75, Color.White)
+        mapPieces.add("p+x07", "i8", 75, Color.LightGray)
+        mapPieces.add("p+x08", "i8", 75, Color.LightGray)
+        mapPieces.add("p+x09", "i8", 75, Color.LightGray)
+        mapPieces.add("p+x0A", "i8", 75, Color.LightGray)
+        mapPieces.add("p+x0B", "i8", 75, Color.LightGray)
         mapPieces.add("p+x0C", "i32", 75, Color.LightGray)
         mapPieces.add("p+x10", "i32", 75, Color.LightGray)
         mapPieces.add("p+x14", "i32", 75, Color.LightGray)
@@ -1030,8 +1044,11 @@ Public Class frmMSBEdit
         creatures.setNameIndex(creatures.fieldCount)
         creatures.add("Name", "string", 100, Color.White)
         creatures.add("Sibpath", "string", 100, Color.White)
-        creatures.add("Script ID", "i32", 60, Color.White)
-        creatures.add("p+x04", "i32", 75, Color.LightGray)
+        creatures.add("EventEntityID", "i32", 60, Color.White)
+        creatures.add("LightId", "i8", 75, Color.White)
+        creatures.add("FogId", "i8", 75, Color.White)
+        creatures.add("ScatId", "i8", 75, Color.White)
+        creatures.add("p+x07", "i8", 75, Color.LightGray)
         creatures.add("p+x08", "i32", 60, Color.LightGray)
         creatures.add("p+x0C", "i32", 60, Color.LightGray)
         creatures.add("p+x10", "i32", 40, Color.LightGray)
@@ -1050,7 +1067,7 @@ Public Class frmMSBEdit
         creatures.add("p+x44", "i32", 75, Color.LightGray)
         creatures.add("p+x48", "i32", 75, Color.LightGray)
         creatures.add("p+x4C", "i32", 75, Color.LightGray)
-        creatures.add("p+x50", "i32", 75, Color.LightGray)
+        creatures.add("AnimID", "i32", 75, Color.White)
         creatures.add("p+x54", "i32", 75, Color.LightGray)
     End Sub
     Private Sub mdlPrep()
@@ -1095,7 +1112,7 @@ Public Class frmMSBEdit
         objects.setNameIndex(objects.fieldCount)
         objects.add("Name", "string", 100, Color.White)
         objects.add("Sibpath", "string", 100, Color.White)
-        objects.add("Script ID", "i32", 60, Color.White)
+        objects.add("EventEntityID", "i32", 60, Color.White)
         objects.add("p+x04", "i8", 40, Color.LightGray)
         objects.add("p+x05", "i8", 40, Color.LightGray)
         objects.add("p+x06", "i8", 40, Color.LightGray)
@@ -1146,7 +1163,7 @@ Public Class frmMSBEdit
         collision0x5.setNameIndex(collision0x5.fieldCount)
         collision0x5.add("Name", "string", 100, Color.White)
         collision0x5.add("Sibpath", "string", 100, Color.White)
-        collision0x5.add("Script ID", "i32", 60, Color.White)
+        collision0x5.add("EventEntityID", "i32", 60, Color.White)
         collision0x5.add("p+x04", "i8", 40, Color.LightGray)
         collision0x5.add("p+x05", "i8", 40, Color.LightGray)
         collision0x5.add("p+x06", "i8", 40, Color.LightGray)
@@ -1225,7 +1242,7 @@ Public Class frmMSBEdit
         collision0xB.setNameIndex(collision0xB.fieldCount)
         collision0xB.add("Name", "string", 100, Color.White)
         collision0xB.add("Sibpath", "string", 100, Color.White)
-        collision0xB.add("Script ID", "i32", 60, Color.White)
+        collision0xB.add("EventEntityID", "i32", 60, Color.White)
         collision0xB.add("p+x04", "i8", 40, Color.LightGray)
         collision0xB.add("p+x05", "i8", 40, Color.LightGray)
         collision0xB.add("p+x06", "i8", 40, Color.LightGray)
