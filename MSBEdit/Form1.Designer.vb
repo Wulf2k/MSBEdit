@@ -26,34 +26,50 @@ Partial Class frmMSBEdit
         Me.btnOpen = New System.Windows.Forms.Button()
         Me.txtMSBfile = New System.Windows.Forms.TextBox()
         Me.lblGAFile = New System.Windows.Forms.Label()
-        Me.dgvCreatures = New System.Windows.Forms.DataGridView()
+        Me.dgvCreatures2 = New System.Windows.Forms.DataGridView()
         Me.tabParams = New System.Windows.Forms.TabControl()
-        Me.tabCreatures = New System.Windows.Forms.TabPage()
-        Me.tabMapPieces = New System.Windows.Forms.TabPage()
-        Me.dgvMapPieces = New System.Windows.Forms.DataGridView()
         Me.tabModels = New System.Windows.Forms.TabPage()
         Me.dgvModels = New System.Windows.Forms.DataGridView()
-        Me.tabObjects = New System.Windows.Forms.TabPage()
-        Me.dgvObjects = New System.Windows.Forms.DataGridView()
-        Me.tabCollision0x5 = New System.Windows.Forms.TabPage()
-        Me.dgvCollision0x5 = New System.Windows.Forms.DataGridView()
-        Me.tabCollision0xB = New System.Windows.Forms.TabPage()
-        Me.dgvCollision0xB = New System.Windows.Forms.DataGridView()
+        Me.tabMapPieces0 = New System.Windows.Forms.TabPage()
+        Me.dgvMapPieces0 = New System.Windows.Forms.DataGridView()
+        Me.tabObjects1 = New System.Windows.Forms.TabPage()
+        Me.dgvObjects1 = New System.Windows.Forms.DataGridView()
+        Me.tabCreatures2 = New System.Windows.Forms.TabPage()
+        Me.tabCreatures4 = New System.Windows.Forms.TabPage()
+        Me.dgvCreatures4 = New System.Windows.Forms.DataGridView()
+        Me.tabCollision5 = New System.Windows.Forms.TabPage()
+        Me.dgvCollision5 = New System.Windows.Forms.DataGridView()
+        Me.tabNavimesh8 = New System.Windows.Forms.TabPage()
+        Me.dgvNavimesh8 = New System.Windows.Forms.DataGridView()
+        Me.tabObjects9 = New System.Windows.Forms.TabPage()
+        Me.dgvObjects9 = New System.Windows.Forms.DataGridView()
+        Me.tabCreatures10 = New System.Windows.Forms.TabPage()
+        Me.dgvCreatures10 = New System.Windows.Forms.DataGridView()
+        Me.tabCollision11 = New System.Windows.Forms.TabPage()
+        Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
         Me.tabUnhandled = New System.Windows.Forms.TabPage()
         Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
-        CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
-        Me.tabCreatures.SuspendLayout()
-        Me.tabMapPieces.SuspendLayout()
-        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabModels.SuspendLayout()
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabObjects.SuspendLayout()
-        CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabCollision0x5.SuspendLayout()
-        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabCollision0xB.SuspendLayout()
-        CType(Me.dgvCollision0xB, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabMapPieces0.SuspendLayout()
+        CType(Me.dgvMapPieces0, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabObjects1.SuspendLayout()
+        CType(Me.dgvObjects1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCreatures2.SuspendLayout()
+        Me.tabCreatures4.SuspendLayout()
+        CType(Me.dgvCreatures4, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision5.SuspendLayout()
+        CType(Me.dgvCollision5, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabNavimesh8.SuspendLayout()
+        CType(Me.dgvNavimesh8, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabObjects9.SuspendLayout()
+        CType(Me.dgvObjects9, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCreatures10.SuspendLayout()
+        CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision11.SuspendLayout()
+        CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabUnhandled.SuspendLayout()
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -93,63 +109,35 @@ Partial Class frmMSBEdit
         Me.lblGAFile.TabIndex = 33
         Me.lblGAFile.Text = "File:"
         '
-        'dgvCreatures
+        'dgvCreatures2
         '
-        Me.dgvCreatures.AllowUserToAddRows = False
-        Me.dgvCreatures.AllowUserToDeleteRows = False
-        Me.dgvCreatures.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvCreatures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvCreatures.Location = New System.Drawing.Point(6, 6)
-        Me.dgvCreatures.Name = "dgvCreatures"
-        Me.dgvCreatures.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvCreatures.TabIndex = 37
+        Me.dgvCreatures2.AllowUserToAddRows = False
+        Me.dgvCreatures2.AllowUserToDeleteRows = False
+        Me.dgvCreatures2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCreatures2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCreatures2.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCreatures2.Name = "dgvCreatures2"
+        Me.dgvCreatures2.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures2.TabIndex = 37
         '
         'tabParams
         '
-        Me.tabParams.Controls.Add(Me.tabCreatures)
-        Me.tabParams.Controls.Add(Me.tabMapPieces)
         Me.tabParams.Controls.Add(Me.tabModels)
-        Me.tabParams.Controls.Add(Me.tabObjects)
-        Me.tabParams.Controls.Add(Me.tabCollision0x5)
-        Me.tabParams.Controls.Add(Me.tabCollision0xB)
+        Me.tabParams.Controls.Add(Me.tabMapPieces0)
+        Me.tabParams.Controls.Add(Me.tabObjects1)
+        Me.tabParams.Controls.Add(Me.tabCreatures2)
+        Me.tabParams.Controls.Add(Me.tabCreatures4)
+        Me.tabParams.Controls.Add(Me.tabCollision5)
+        Me.tabParams.Controls.Add(Me.tabNavimesh8)
+        Me.tabParams.Controls.Add(Me.tabObjects9)
+        Me.tabParams.Controls.Add(Me.tabCreatures10)
+        Me.tabParams.Controls.Add(Me.tabCollision11)
         Me.tabParams.Controls.Add(Me.tabUnhandled)
         Me.tabParams.Location = New System.Drawing.Point(12, 69)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
         Me.tabParams.Size = New System.Drawing.Size(1127, 664)
         Me.tabParams.TabIndex = 38
-        '
-        'tabCreatures
-        '
-        Me.tabCreatures.Controls.Add(Me.dgvCreatures)
-        Me.tabCreatures.Location = New System.Drawing.Point(4, 22)
-        Me.tabCreatures.Name = "tabCreatures"
-        Me.tabCreatures.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabCreatures.Size = New System.Drawing.Size(1119, 638)
-        Me.tabCreatures.TabIndex = 0
-        Me.tabCreatures.Text = "Creatures"
-        Me.tabCreatures.UseVisualStyleBackColor = True
-        '
-        'tabMapPieces
-        '
-        Me.tabMapPieces.Controls.Add(Me.dgvMapPieces)
-        Me.tabMapPieces.Location = New System.Drawing.Point(4, 22)
-        Me.tabMapPieces.Name = "tabMapPieces"
-        Me.tabMapPieces.Size = New System.Drawing.Size(1119, 638)
-        Me.tabMapPieces.TabIndex = 4
-        Me.tabMapPieces.Text = "Map Pieces"
-        Me.tabMapPieces.UseVisualStyleBackColor = True
-        '
-        'dgvMapPieces
-        '
-        Me.dgvMapPieces.AllowUserToAddRows = False
-        Me.dgvMapPieces.AllowUserToDeleteRows = False
-        Me.dgvMapPieces.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvMapPieces.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvMapPieces.Location = New System.Drawing.Point(6, 6)
-        Me.dgvMapPieces.Name = "dgvMapPieces"
-        Me.dgvMapPieces.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvMapPieces.TabIndex = 38
         '
         'tabModels
         '
@@ -172,68 +160,184 @@ Partial Class frmMSBEdit
         Me.dgvModels.Size = New System.Drawing.Size(1107, 626)
         Me.dgvModels.TabIndex = 38
         '
-        'tabObjects
+        'tabMapPieces0
         '
-        Me.tabObjects.Controls.Add(Me.dgvObjects)
-        Me.tabObjects.Location = New System.Drawing.Point(4, 22)
-        Me.tabObjects.Name = "tabObjects"
-        Me.tabObjects.Size = New System.Drawing.Size(1119, 638)
-        Me.tabObjects.TabIndex = 1
-        Me.tabObjects.Text = "Objects"
-        Me.tabObjects.UseVisualStyleBackColor = True
+        Me.tabMapPieces0.Controls.Add(Me.dgvMapPieces0)
+        Me.tabMapPieces0.Location = New System.Drawing.Point(4, 22)
+        Me.tabMapPieces0.Name = "tabMapPieces0"
+        Me.tabMapPieces0.Size = New System.Drawing.Size(1119, 638)
+        Me.tabMapPieces0.TabIndex = 4
+        Me.tabMapPieces0.Text = "Map Pieces (0)"
+        Me.tabMapPieces0.UseVisualStyleBackColor = True
         '
-        'dgvObjects
+        'dgvMapPieces0
         '
-        Me.dgvObjects.AllowUserToAddRows = False
-        Me.dgvObjects.AllowUserToDeleteRows = False
-        Me.dgvObjects.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvObjects.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvObjects.Location = New System.Drawing.Point(6, 6)
-        Me.dgvObjects.Name = "dgvObjects"
-        Me.dgvObjects.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvObjects.TabIndex = 38
+        Me.dgvMapPieces0.AllowUserToAddRows = False
+        Me.dgvMapPieces0.AllowUserToDeleteRows = False
+        Me.dgvMapPieces0.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvMapPieces0.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvMapPieces0.Location = New System.Drawing.Point(6, 6)
+        Me.dgvMapPieces0.Name = "dgvMapPieces0"
+        Me.dgvMapPieces0.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvMapPieces0.TabIndex = 38
         '
-        'tabCollision0x5
+        'tabObjects1
         '
-        Me.tabCollision0x5.Controls.Add(Me.dgvCollision0x5)
-        Me.tabCollision0x5.Location = New System.Drawing.Point(4, 22)
-        Me.tabCollision0x5.Name = "tabCollision0x5"
-        Me.tabCollision0x5.Size = New System.Drawing.Size(1119, 638)
-        Me.tabCollision0x5.TabIndex = 6
-        Me.tabCollision0x5.Text = "Collision0x5"
-        Me.tabCollision0x5.UseVisualStyleBackColor = True
+        Me.tabObjects1.Controls.Add(Me.dgvObjects1)
+        Me.tabObjects1.Location = New System.Drawing.Point(4, 22)
+        Me.tabObjects1.Name = "tabObjects1"
+        Me.tabObjects1.Size = New System.Drawing.Size(1119, 638)
+        Me.tabObjects1.TabIndex = 1
+        Me.tabObjects1.Text = "Objects (1)"
+        Me.tabObjects1.UseVisualStyleBackColor = True
         '
-        'dgvCollision0x5
+        'dgvObjects1
         '
-        Me.dgvCollision0x5.AllowUserToAddRows = False
-        Me.dgvCollision0x5.AllowUserToDeleteRows = False
-        Me.dgvCollision0x5.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvCollision0x5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvCollision0x5.Location = New System.Drawing.Point(6, 6)
-        Me.dgvCollision0x5.Name = "dgvCollision0x5"
-        Me.dgvCollision0x5.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvCollision0x5.TabIndex = 39
+        Me.dgvObjects1.AllowUserToAddRows = False
+        Me.dgvObjects1.AllowUserToDeleteRows = False
+        Me.dgvObjects1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvObjects1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvObjects1.Location = New System.Drawing.Point(6, 6)
+        Me.dgvObjects1.Name = "dgvObjects1"
+        Me.dgvObjects1.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvObjects1.TabIndex = 38
         '
-        'tabCollision0xB
+        'tabCreatures2
         '
-        Me.tabCollision0xB.Controls.Add(Me.dgvCollision0xB)
-        Me.tabCollision0xB.Location = New System.Drawing.Point(4, 22)
-        Me.tabCollision0xB.Name = "tabCollision0xB"
-        Me.tabCollision0xB.Size = New System.Drawing.Size(1119, 638)
-        Me.tabCollision0xB.TabIndex = 3
-        Me.tabCollision0xB.Text = "Collision0xB"
-        Me.tabCollision0xB.UseVisualStyleBackColor = True
+        Me.tabCreatures2.Controls.Add(Me.dgvCreatures2)
+        Me.tabCreatures2.Location = New System.Drawing.Point(4, 22)
+        Me.tabCreatures2.Name = "tabCreatures2"
+        Me.tabCreatures2.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabCreatures2.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures2.TabIndex = 0
+        Me.tabCreatures2.Text = "Creatures (2)"
+        Me.tabCreatures2.UseVisualStyleBackColor = True
         '
-        'dgvCollision0xB
+        'tabCreatures4
         '
-        Me.dgvCollision0xB.AllowUserToAddRows = False
-        Me.dgvCollision0xB.AllowUserToDeleteRows = False
-        Me.dgvCollision0xB.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvCollision0xB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvCollision0xB.Location = New System.Drawing.Point(6, 6)
-        Me.dgvCollision0xB.Name = "dgvCollision0xB"
-        Me.dgvCollision0xB.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvCollision0xB.TabIndex = 38
+        Me.tabCreatures4.Controls.Add(Me.dgvCreatures4)
+        Me.tabCreatures4.Location = New System.Drawing.Point(4, 22)
+        Me.tabCreatures4.Name = "tabCreatures4"
+        Me.tabCreatures4.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures4.TabIndex = 9
+        Me.tabCreatures4.Text = "Creatures (4)"
+        Me.tabCreatures4.UseVisualStyleBackColor = True
+        '
+        'dgvCreatures4
+        '
+        Me.dgvCreatures4.AllowUserToAddRows = False
+        Me.dgvCreatures4.AllowUserToDeleteRows = False
+        Me.dgvCreatures4.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCreatures4.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCreatures4.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCreatures4.Name = "dgvCreatures4"
+        Me.dgvCreatures4.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures4.TabIndex = 38
+        '
+        'tabCollision5
+        '
+        Me.tabCollision5.Controls.Add(Me.dgvCollision5)
+        Me.tabCollision5.Location = New System.Drawing.Point(4, 22)
+        Me.tabCollision5.Name = "tabCollision5"
+        Me.tabCollision5.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision5.TabIndex = 6
+        Me.tabCollision5.Text = "Collision (5)"
+        Me.tabCollision5.UseVisualStyleBackColor = True
+        '
+        'dgvCollision5
+        '
+        Me.dgvCollision5.AllowUserToAddRows = False
+        Me.dgvCollision5.AllowUserToDeleteRows = False
+        Me.dgvCollision5.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCollision5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCollision5.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCollision5.Name = "dgvCollision5"
+        Me.dgvCollision5.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision5.TabIndex = 39
+        '
+        'tabNavimesh8
+        '
+        Me.tabNavimesh8.Controls.Add(Me.dgvNavimesh8)
+        Me.tabNavimesh8.Location = New System.Drawing.Point(4, 22)
+        Me.tabNavimesh8.Name = "tabNavimesh8"
+        Me.tabNavimesh8.Size = New System.Drawing.Size(1119, 638)
+        Me.tabNavimesh8.TabIndex = 8
+        Me.tabNavimesh8.Text = "Navimesh (8)"
+        Me.tabNavimesh8.UseVisualStyleBackColor = True
+        '
+        'dgvNavimesh8
+        '
+        Me.dgvNavimesh8.AllowUserToAddRows = False
+        Me.dgvNavimesh8.AllowUserToDeleteRows = False
+        Me.dgvNavimesh8.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvNavimesh8.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvNavimesh8.Location = New System.Drawing.Point(6, 6)
+        Me.dgvNavimesh8.Name = "dgvNavimesh8"
+        Me.dgvNavimesh8.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvNavimesh8.TabIndex = 39
+        '
+        'tabObjects9
+        '
+        Me.tabObjects9.Controls.Add(Me.dgvObjects9)
+        Me.tabObjects9.Location = New System.Drawing.Point(4, 22)
+        Me.tabObjects9.Name = "tabObjects9"
+        Me.tabObjects9.Size = New System.Drawing.Size(1119, 638)
+        Me.tabObjects9.TabIndex = 11
+        Me.tabObjects9.Text = "Objects (9)"
+        Me.tabObjects9.UseVisualStyleBackColor = True
+        '
+        'dgvObjects9
+        '
+        Me.dgvObjects9.AllowUserToAddRows = False
+        Me.dgvObjects9.AllowUserToDeleteRows = False
+        Me.dgvObjects9.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvObjects9.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvObjects9.Location = New System.Drawing.Point(6, 6)
+        Me.dgvObjects9.Name = "dgvObjects9"
+        Me.dgvObjects9.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvObjects9.TabIndex = 39
+        '
+        'tabCreatures10
+        '
+        Me.tabCreatures10.Controls.Add(Me.dgvCreatures10)
+        Me.tabCreatures10.Location = New System.Drawing.Point(4, 22)
+        Me.tabCreatures10.Name = "tabCreatures10"
+        Me.tabCreatures10.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures10.TabIndex = 10
+        Me.tabCreatures10.Text = "Creatures (10)"
+        Me.tabCreatures10.UseVisualStyleBackColor = True
+        '
+        'dgvCreatures10
+        '
+        Me.dgvCreatures10.AllowUserToAddRows = False
+        Me.dgvCreatures10.AllowUserToDeleteRows = False
+        Me.dgvCreatures10.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCreatures10.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCreatures10.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCreatures10.Name = "dgvCreatures10"
+        Me.dgvCreatures10.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures10.TabIndex = 38
+        '
+        'tabCollision11
+        '
+        Me.tabCollision11.Controls.Add(Me.dgvCollision11)
+        Me.tabCollision11.Location = New System.Drawing.Point(4, 22)
+        Me.tabCollision11.Name = "tabCollision11"
+        Me.tabCollision11.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision11.TabIndex = 3
+        Me.tabCollision11.Text = "Collision (11)"
+        Me.tabCollision11.UseVisualStyleBackColor = True
+        '
+        'dgvCollision11
+        '
+        Me.dgvCollision11.AllowUserToAddRows = False
+        Me.dgvCollision11.AllowUserToDeleteRows = False
+        Me.dgvCollision11.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvCollision11.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvCollision11.Location = New System.Drawing.Point(6, 6)
+        Me.dgvCollision11.Name = "dgvCollision11"
+        Me.dgvCollision11.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision11.TabIndex = 38
         '
         'tabUnhandled
         '
@@ -267,20 +371,28 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor 2016-07-19"
-        CType(Me.dgvCreatures, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.Text = "Wulf's MSB Editor 2016-07-26"
+        CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabParams.ResumeLayout(False)
-        Me.tabCreatures.ResumeLayout(False)
-        Me.tabMapPieces.ResumeLayout(False)
-        CType(Me.dgvMapPieces, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabModels.ResumeLayout(False)
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabObjects.ResumeLayout(False)
-        CType(Me.dgvObjects, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabCollision0x5.ResumeLayout(False)
-        CType(Me.dgvCollision0x5, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabCollision0xB.ResumeLayout(False)
-        CType(Me.dgvCollision0xB, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabMapPieces0.ResumeLayout(False)
+        CType(Me.dgvMapPieces0, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabObjects1.ResumeLayout(False)
+        CType(Me.dgvObjects1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCreatures2.ResumeLayout(False)
+        Me.tabCreatures4.ResumeLayout(False)
+        CType(Me.dgvCreatures4, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCollision5.ResumeLayout(False)
+        CType(Me.dgvCollision5, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabNavimesh8.ResumeLayout(False)
+        CType(Me.dgvNavimesh8, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabObjects9.ResumeLayout(False)
+        CType(Me.dgvObjects9, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCreatures10.ResumeLayout(False)
+        CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCollision11.ResumeLayout(False)
+        CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabUnhandled.ResumeLayout(False)
         CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
@@ -291,20 +403,27 @@ Partial Class frmMSBEdit
     Friend WithEvents btnOpen As System.Windows.Forms.Button
     Friend WithEvents txtMSBfile As System.Windows.Forms.TextBox
     Friend WithEvents lblGAFile As System.Windows.Forms.Label
-    Friend WithEvents dgvCreatures As System.Windows.Forms.DataGridView
+    Friend WithEvents dgvCreatures2 As System.Windows.Forms.DataGridView
     Friend WithEvents tabParams As System.Windows.Forms.TabControl
-    Friend WithEvents tabCreatures As System.Windows.Forms.TabPage
-    Friend WithEvents tabObjects As System.Windows.Forms.TabPage
-    Friend WithEvents dgvObjects As System.Windows.Forms.DataGridView
+    Friend WithEvents tabCreatures2 As System.Windows.Forms.TabPage
+    Friend WithEvents tabObjects1 As System.Windows.Forms.TabPage
+    Friend WithEvents dgvObjects1 As System.Windows.Forms.DataGridView
     Friend WithEvents tabModels As System.Windows.Forms.TabPage
     Friend WithEvents dgvModels As System.Windows.Forms.DataGridView
-    Friend WithEvents tabCollision0xB As System.Windows.Forms.TabPage
-    Friend WithEvents dgvCollision0xB As System.Windows.Forms.DataGridView
-    Friend WithEvents tabMapPieces As System.Windows.Forms.TabPage
-    Friend WithEvents dgvMapPieces As System.Windows.Forms.DataGridView
+    Friend WithEvents tabCollision11 As System.Windows.Forms.TabPage
+    Friend WithEvents dgvCollision11 As System.Windows.Forms.DataGridView
+    Friend WithEvents tabMapPieces0 As System.Windows.Forms.TabPage
+    Friend WithEvents dgvMapPieces0 As System.Windows.Forms.DataGridView
     Friend WithEvents tabUnhandled As System.Windows.Forms.TabPage
     Friend WithEvents dgvUnhandled As System.Windows.Forms.DataGridView
-    Friend WithEvents tabCollision0x5 As System.Windows.Forms.TabPage
-    Friend WithEvents dgvCollision0x5 As System.Windows.Forms.DataGridView
-
+    Friend WithEvents tabCollision5 As System.Windows.Forms.TabPage
+    Friend WithEvents dgvCollision5 As System.Windows.Forms.DataGridView
+    Friend WithEvents tabNavimesh8 As TabPage
+    Friend WithEvents dgvNavimesh8 As DataGridView
+    Friend WithEvents tabCreatures4 As TabPage
+    Friend WithEvents dgvCreatures4 As DataGridView
+    Friend WithEvents tabObjects9 As TabPage
+    Friend WithEvents tabCreatures10 As TabPage
+    Friend WithEvents dgvObjects9 As DataGridView
+    Friend WithEvents dgvCreatures10 As DataGridView
 End Class
