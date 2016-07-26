@@ -47,8 +47,6 @@ Partial Class frmMSBEdit
         Me.dgvCreatures10 = New System.Windows.Forms.DataGridView()
         Me.tabCollision11 = New System.Windows.Forms.TabPage()
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
-        Me.tabUnhandled = New System.Windows.Forms.TabPage()
-        Me.dgvUnhandled = New System.Windows.Forms.DataGridView()
         CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParams.SuspendLayout()
         Me.tabModels.SuspendLayout()
@@ -70,8 +68,6 @@ Partial Class frmMSBEdit
         CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabCollision11.SuspendLayout()
         CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabUnhandled.SuspendLayout()
-        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnSave
@@ -132,7 +128,6 @@ Partial Class frmMSBEdit
         Me.tabParams.Controls.Add(Me.tabObjects9)
         Me.tabParams.Controls.Add(Me.tabCreatures10)
         Me.tabParams.Controls.Add(Me.tabCollision11)
-        Me.tabParams.Controls.Add(Me.tabUnhandled)
         Me.tabParams.Location = New System.Drawing.Point(12, 69)
         Me.tabParams.Name = "tabParams"
         Me.tabParams.SelectedIndex = 0
@@ -339,27 +334,6 @@ Partial Class frmMSBEdit
         Me.dgvCollision11.Size = New System.Drawing.Size(1107, 626)
         Me.dgvCollision11.TabIndex = 38
         '
-        'tabUnhandled
-        '
-        Me.tabUnhandled.Controls.Add(Me.dgvUnhandled)
-        Me.tabUnhandled.Location = New System.Drawing.Point(4, 22)
-        Me.tabUnhandled.Name = "tabUnhandled"
-        Me.tabUnhandled.Size = New System.Drawing.Size(1119, 638)
-        Me.tabUnhandled.TabIndex = 5
-        Me.tabUnhandled.Text = "Unhandled"
-        Me.tabUnhandled.UseVisualStyleBackColor = True
-        '
-        'dgvUnhandled
-        '
-        Me.dgvUnhandled.AllowUserToAddRows = False
-        Me.dgvUnhandled.AllowUserToDeleteRows = False
-        Me.dgvUnhandled.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvUnhandled.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvUnhandled.Location = New System.Drawing.Point(6, 6)
-        Me.dgvUnhandled.Name = "dgvUnhandled"
-        Me.dgvUnhandled.Size = New System.Drawing.Size(1107, 626)
-        Me.dgvUnhandled.TabIndex = 38
-        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -393,8 +367,6 @@ Partial Class frmMSBEdit
         CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabCollision11.ResumeLayout(False)
         CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabUnhandled.ResumeLayout(False)
-        CType(Me.dgvUnhandled, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -414,8 +386,6 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvCollision11 As System.Windows.Forms.DataGridView
     Friend WithEvents tabMapPieces0 As System.Windows.Forms.TabPage
     Friend WithEvents dgvMapPieces0 As System.Windows.Forms.DataGridView
-    Friend WithEvents tabUnhandled As System.Windows.Forms.TabPage
-    Friend WithEvents dgvUnhandled As System.Windows.Forms.DataGridView
     Friend WithEvents tabCollision5 As System.Windows.Forms.TabPage
     Friend WithEvents dgvCollision5 As System.Windows.Forms.DataGridView
     Friend WithEvents tabNavimesh8 As TabPage
