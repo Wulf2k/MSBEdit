@@ -337,7 +337,7 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.txtMSBfile)
         Me.Controls.Add(Me.lblGAFile)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor 2016-07-26"
+        Me.Text = "Wulf's MSB Editor 2016-07-31"
         CType(Me.dgvCreatures2,System.ComponentModel.ISupportInitialize).EndInit
         Me.tabParts.ResumeLayout(false)
         Me.tabModels.ResumeLayout(false)
