@@ -2,6 +2,8 @@
 
 
 'Creature type 0x4 is sized wrong
+'TODO:  Confirm the above
+'TODO:  Update to look at Sib Offset instead of using padding
 
 Public Class frmMSBEdit
 
@@ -596,7 +598,7 @@ Public Class frmMSBEdit
             .add("Name Offset", "i32", Color.White)
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
-            .add("x0C", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("x10", "i32", Color.LightGray)
             .add("x14", "i32", Color.LightGray)
             .add("x18", "i32", Color.LightGray)
@@ -612,7 +614,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -658,7 +660,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -711,7 +713,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -768,7 +770,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -813,7 +815,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -894,7 +896,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -946,7 +948,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -999,7 +1001,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
@@ -1056,7 +1058,7 @@ Public Class frmMSBEdit
             .add("Type", "i32", Color.White)
             .add("Index", "i32", Color.White)
             .add("Model", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
+            .add("Sib Offset", "i32", Color.White)
             .add("X pos", "f32", Color.White)
             .add("Y pos", "f32", Color.White)
             .add("Z pos", "f32", Color.White)
