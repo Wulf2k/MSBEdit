@@ -48,50 +48,51 @@ Partial Class frmMSBEdit
         Me.tabCollision11 = New System.Windows.Forms.TabPage()
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
         Me.btnCopy = New System.Windows.Forms.Button()
-        CType(Me.dgvCreatures2,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabParts.SuspendLayout
-        Me.tabModels.SuspendLayout
-        CType(Me.dgvModels,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabMapPieces0.SuspendLayout
-        CType(Me.dgvMapPieces0,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabObjects1.SuspendLayout
-        CType(Me.dgvObjects1,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabCreatures2.SuspendLayout
-        Me.tabCreatures4.SuspendLayout
-        CType(Me.dgvCreatures4,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabCollision5.SuspendLayout
-        CType(Me.dgvCollision5,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabNavimesh8.SuspendLayout
-        CType(Me.dgvNavimesh8,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabObjects9.SuspendLayout
-        CType(Me.dgvObjects9,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabCreatures10.SuspendLayout
-        CType(Me.dgvCreatures10,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.tabCollision11.SuspendLayout
-        CType(Me.dgvCollision11,System.ComponentModel.ISupportInitialize).BeginInit
-        Me.SuspendLayout
+        Me.btnBrowse = New System.Windows.Forms.Button()
+        CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabParts.SuspendLayout()
+        Me.tabModels.SuspendLayout()
+        CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabMapPieces0.SuspendLayout()
+        CType(Me.dgvMapPieces0, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabObjects1.SuspendLayout()
+        CType(Me.dgvObjects1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCreatures2.SuspendLayout()
+        Me.tabCreatures4.SuspendLayout()
+        CType(Me.dgvCreatures4, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision5.SuspendLayout()
+        CType(Me.dgvCollision5, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabNavimesh8.SuspendLayout()
+        CType(Me.dgvNavimesh8, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabObjects9.SuspendLayout()
+        CType(Me.dgvObjects9, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCreatures10.SuspendLayout()
+        CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCollision11.SuspendLayout()
+        CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.SuspendLayout()
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(618, 40)
+        Me.btnSave.Location = New System.Drawing.Point(699, 40)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 23)
         Me.btnSave.TabIndex = 35
         Me.btnSave.Text = "Save"
-        Me.btnSave.UseVisualStyleBackColor = true
+        Me.btnSave.UseVisualStyleBackColor = True
         '
         'btnOpen
         '
-        Me.btnOpen.Location = New System.Drawing.Point(540, 40)
+        Me.btnOpen.Location = New System.Drawing.Point(621, 40)
         Me.btnOpen.Name = "btnOpen"
         Me.btnOpen.Size = New System.Drawing.Size(75, 23)
         Me.btnOpen.TabIndex = 34
         Me.btnOpen.Text = "Open"
-        Me.btnOpen.UseVisualStyleBackColor = true
+        Me.btnOpen.UseVisualStyleBackColor = True
         '
         'txtMSBfile
         '
-        Me.txtMSBfile.AllowDrop = true
+        Me.txtMSBfile.AllowDrop = True
         Me.txtMSBfile.Location = New System.Drawing.Point(46, 14)
         Me.txtMSBfile.Name = "txtMSBfile"
         Me.txtMSBfile.Size = New System.Drawing.Size(647, 20)
@@ -99,7 +100,7 @@ Partial Class frmMSBEdit
         '
         'lblGAFile
         '
-        Me.lblGAFile.AutoSize = true
+        Me.lblGAFile.AutoSize = True
         Me.lblGAFile.Location = New System.Drawing.Point(14, 17)
         Me.lblGAFile.Name = "lblGAFile"
         Me.lblGAFile.Size = New System.Drawing.Size(26, 13)
@@ -141,7 +142,7 @@ Partial Class frmMSBEdit
         Me.tabModels.Size = New System.Drawing.Size(1119, 638)
         Me.tabModels.TabIndex = 2
         Me.tabModels.Text = "Models"
-        Me.tabModels.UseVisualStyleBackColor = true
+        Me.tabModels.UseVisualStyleBackColor = True
         '
         'dgvModels
         '
@@ -161,7 +162,7 @@ Partial Class frmMSBEdit
         Me.tabMapPieces0.Size = New System.Drawing.Size(1119, 638)
         Me.tabMapPieces0.TabIndex = 4
         Me.tabMapPieces0.Text = "Map Pieces (0)"
-        Me.tabMapPieces0.UseVisualStyleBackColor = true
+        Me.tabMapPieces0.UseVisualStyleBackColor = True
         '
         'dgvMapPieces0
         '
@@ -180,7 +181,7 @@ Partial Class frmMSBEdit
         Me.tabObjects1.Size = New System.Drawing.Size(1119, 638)
         Me.tabObjects1.TabIndex = 1
         Me.tabObjects1.Text = "Objects (1)"
-        Me.tabObjects1.UseVisualStyleBackColor = true
+        Me.tabObjects1.UseVisualStyleBackColor = True
         '
         'dgvObjects1
         '
@@ -200,7 +201,7 @@ Partial Class frmMSBEdit
         Me.tabCreatures2.Size = New System.Drawing.Size(1119, 638)
         Me.tabCreatures2.TabIndex = 0
         Me.tabCreatures2.Text = "Creatures (2)"
-        Me.tabCreatures2.UseVisualStyleBackColor = true
+        Me.tabCreatures2.UseVisualStyleBackColor = True
         '
         'tabCreatures4
         '
@@ -210,7 +211,7 @@ Partial Class frmMSBEdit
         Me.tabCreatures4.Size = New System.Drawing.Size(1119, 638)
         Me.tabCreatures4.TabIndex = 9
         Me.tabCreatures4.Text = "Creatures (4)"
-        Me.tabCreatures4.UseVisualStyleBackColor = true
+        Me.tabCreatures4.UseVisualStyleBackColor = True
         '
         'dgvCreatures4
         '
@@ -229,7 +230,7 @@ Partial Class frmMSBEdit
         Me.tabCollision5.Size = New System.Drawing.Size(1119, 638)
         Me.tabCollision5.TabIndex = 6
         Me.tabCollision5.Text = "Collision (5)"
-        Me.tabCollision5.UseVisualStyleBackColor = true
+        Me.tabCollision5.UseVisualStyleBackColor = True
         '
         'dgvCollision5
         '
@@ -248,7 +249,7 @@ Partial Class frmMSBEdit
         Me.tabNavimesh8.Size = New System.Drawing.Size(1119, 638)
         Me.tabNavimesh8.TabIndex = 8
         Me.tabNavimesh8.Text = "Navimesh (8)"
-        Me.tabNavimesh8.UseVisualStyleBackColor = true
+        Me.tabNavimesh8.UseVisualStyleBackColor = True
         '
         'dgvNavimesh8
         '
@@ -267,7 +268,7 @@ Partial Class frmMSBEdit
         Me.tabObjects9.Size = New System.Drawing.Size(1119, 638)
         Me.tabObjects9.TabIndex = 11
         Me.tabObjects9.Text = "Objects (9)"
-        Me.tabObjects9.UseVisualStyleBackColor = true
+        Me.tabObjects9.UseVisualStyleBackColor = True
         '
         'dgvObjects9
         '
@@ -286,7 +287,7 @@ Partial Class frmMSBEdit
         Me.tabCreatures10.Size = New System.Drawing.Size(1119, 638)
         Me.tabCreatures10.TabIndex = 10
         Me.tabCreatures10.Text = "Creatures (10)"
-        Me.tabCreatures10.UseVisualStyleBackColor = true
+        Me.tabCreatures10.UseVisualStyleBackColor = True
         '
         'dgvCreatures10
         '
@@ -305,7 +306,7 @@ Partial Class frmMSBEdit
         Me.tabCollision11.Size = New System.Drawing.Size(1119, 638)
         Me.tabCollision11.TabIndex = 3
         Me.tabCollision11.Text = "Collision (11)"
-        Me.tabCollision11.UseVisualStyleBackColor = true
+        Me.tabCollision11.UseVisualStyleBackColor = True
         '
         'dgvCollision11
         '
@@ -323,13 +324,24 @@ Partial Class frmMSBEdit
         Me.btnCopy.Size = New System.Drawing.Size(75, 23)
         Me.btnCopy.TabIndex = 39
         Me.btnCopy.Text = "Copy Entry"
-        Me.btnCopy.UseVisualStyleBackColor = true
+        Me.btnCopy.UseVisualStyleBackColor = True
+        '
+        'btnBrowse
+        '
+        Me.btnBrowse.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnBrowse.Location = New System.Drawing.Point(699, 12)
+        Me.btnBrowse.Name = "btnBrowse"
+        Me.btnBrowse.Size = New System.Drawing.Size(75, 23)
+        Me.btnBrowse.TabIndex = 40
+        Me.btnBrowse.Text = "Browse"
+        Me.btnBrowse.UseVisualStyleBackColor = True
         '
         'frmMSBEdit
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6!, 13!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1151, 747)
+        Me.Controls.Add(Me.btnBrowse)
         Me.Controls.Add(Me.btnCopy)
         Me.Controls.Add(Me.tabParts)
         Me.Controls.Add(Me.btnSave)
@@ -389,4 +401,5 @@ End Sub
     Friend WithEvents dgvObjects9 As DataGridView
     Friend WithEvents dgvCreatures10 As DataGridView
     Friend WithEvents btnCopy As Button
+    Friend WithEvents btnBrowse As Button
 End Class

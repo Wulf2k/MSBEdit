@@ -1187,6 +1187,17 @@ Public Class frmMSBEdit
         Next
         dgv.Rows.Add(row)
     End Sub
+
+    Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
+        Dim openDlg As New OpenFileDialog()
+
+        openDlg.Filter = "MSB File|*.MSB"
+        openDlg.Title = "Open your MSB file"
+
+        If openDlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
+            txtMSBfile.Text = openDlg.FileName
+        End If
+    End Sub
 End Class
 
 Public Class msbdata
