@@ -74,7 +74,8 @@ Partial Class frmMSBEdit
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(699, 40)
+        Me.btnSave.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnSave.Location = New System.Drawing.Point(705, 40)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 23)
         Me.btnSave.TabIndex = 35
@@ -83,7 +84,8 @@ Partial Class frmMSBEdit
         '
         'btnOpen
         '
-        Me.btnOpen.Location = New System.Drawing.Point(621, 40)
+        Me.btnOpen.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnOpen.Location = New System.Drawing.Point(627, 40)
         Me.btnOpen.Name = "btnOpen"
         Me.btnOpen.Size = New System.Drawing.Size(75, 23)
         Me.btnOpen.TabIndex = 34
@@ -93,9 +95,11 @@ Partial Class frmMSBEdit
         'txtMSBfile
         '
         Me.txtMSBfile.AllowDrop = True
+        Me.txtMSBfile.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtMSBfile.Location = New System.Drawing.Point(46, 14)
         Me.txtMSBfile.Name = "txtMSBfile"
-        Me.txtMSBfile.Size = New System.Drawing.Size(647, 20)
+        Me.txtMSBfile.Size = New System.Drawing.Size(653, 20)
         Me.txtMSBfile.TabIndex = 31
         '
         'lblGAFile
@@ -109,15 +113,21 @@ Partial Class frmMSBEdit
         '
         'dgvCreatures2
         '
+        Me.dgvCreatures2.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvCreatures2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCreatures2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCreatures2.Location = New System.Drawing.Point(6, 6)
         Me.dgvCreatures2.Name = "dgvCreatures2"
-        Me.dgvCreatures2.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures2.Size = New System.Drawing.Size(752, 658)
         Me.dgvCreatures2.TabIndex = 37
         '
         'tabParts
         '
+        Me.tabParts.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.tabParts.Controls.Add(Me.tabModels)
         Me.tabParts.Controls.Add(Me.tabMapPieces0)
         Me.tabParts.Controls.Add(Me.tabObjects1)
@@ -131,7 +141,7 @@ Partial Class frmMSBEdit
         Me.tabParts.Location = New System.Drawing.Point(12, 69)
         Me.tabParts.Name = "tabParts"
         Me.tabParts.SelectedIndex = 0
-        Me.tabParts.Size = New System.Drawing.Size(1127, 664)
+        Me.tabParts.Size = New System.Drawing.Size(772, 696)
         Me.tabParts.TabIndex = 38
         '
         'tabModels
@@ -139,19 +149,22 @@ Partial Class frmMSBEdit
         Me.tabModels.Controls.Add(Me.dgvModels)
         Me.tabModels.Location = New System.Drawing.Point(4, 22)
         Me.tabModels.Name = "tabModels"
-        Me.tabModels.Size = New System.Drawing.Size(1119, 638)
+        Me.tabModels.Size = New System.Drawing.Size(764, 670)
         Me.tabModels.TabIndex = 2
         Me.tabModels.Text = "Models"
         Me.tabModels.UseVisualStyleBackColor = True
         '
         'dgvModels
         '
+        Me.dgvModels.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvModels.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvModels.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvModels.Location = New System.Drawing.Point(6, 6)
         Me.dgvModels.Name = "dgvModels"
         Me.dgvModels.RowHeadersWidth = 60
-        Me.dgvModels.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvModels.Size = New System.Drawing.Size(752, 658)
         Me.dgvModels.TabIndex = 38
         '
         'tabMapPieces0
@@ -159,18 +172,21 @@ Partial Class frmMSBEdit
         Me.tabMapPieces0.Controls.Add(Me.dgvMapPieces0)
         Me.tabMapPieces0.Location = New System.Drawing.Point(4, 22)
         Me.tabMapPieces0.Name = "tabMapPieces0"
-        Me.tabMapPieces0.Size = New System.Drawing.Size(1119, 638)
+        Me.tabMapPieces0.Size = New System.Drawing.Size(764, 670)
         Me.tabMapPieces0.TabIndex = 4
         Me.tabMapPieces0.Text = "Map Pieces (0)"
         Me.tabMapPieces0.UseVisualStyleBackColor = True
         '
         'dgvMapPieces0
         '
+        Me.dgvMapPieces0.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvMapPieces0.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvMapPieces0.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvMapPieces0.Location = New System.Drawing.Point(6, 6)
         Me.dgvMapPieces0.Name = "dgvMapPieces0"
-        Me.dgvMapPieces0.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvMapPieces0.Size = New System.Drawing.Size(752, 658)
         Me.dgvMapPieces0.TabIndex = 38
         '
         'tabObjects1
@@ -178,18 +194,21 @@ Partial Class frmMSBEdit
         Me.tabObjects1.Controls.Add(Me.dgvObjects1)
         Me.tabObjects1.Location = New System.Drawing.Point(4, 22)
         Me.tabObjects1.Name = "tabObjects1"
-        Me.tabObjects1.Size = New System.Drawing.Size(1119, 638)
+        Me.tabObjects1.Size = New System.Drawing.Size(764, 670)
         Me.tabObjects1.TabIndex = 1
         Me.tabObjects1.Text = "Objects (1)"
         Me.tabObjects1.UseVisualStyleBackColor = True
         '
         'dgvObjects1
         '
+        Me.dgvObjects1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvObjects1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvObjects1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvObjects1.Location = New System.Drawing.Point(6, 6)
         Me.dgvObjects1.Name = "dgvObjects1"
-        Me.dgvObjects1.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvObjects1.Size = New System.Drawing.Size(752, 658)
         Me.dgvObjects1.TabIndex = 38
         '
         'tabCreatures2
@@ -198,7 +217,7 @@ Partial Class frmMSBEdit
         Me.tabCreatures2.Location = New System.Drawing.Point(4, 22)
         Me.tabCreatures2.Name = "tabCreatures2"
         Me.tabCreatures2.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabCreatures2.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures2.Size = New System.Drawing.Size(764, 670)
         Me.tabCreatures2.TabIndex = 0
         Me.tabCreatures2.Text = "Creatures (2)"
         Me.tabCreatures2.UseVisualStyleBackColor = True
@@ -208,18 +227,21 @@ Partial Class frmMSBEdit
         Me.tabCreatures4.Controls.Add(Me.dgvCreatures4)
         Me.tabCreatures4.Location = New System.Drawing.Point(4, 22)
         Me.tabCreatures4.Name = "tabCreatures4"
-        Me.tabCreatures4.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures4.Size = New System.Drawing.Size(764, 670)
         Me.tabCreatures4.TabIndex = 9
         Me.tabCreatures4.Text = "Creatures (4)"
         Me.tabCreatures4.UseVisualStyleBackColor = True
         '
         'dgvCreatures4
         '
+        Me.dgvCreatures4.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvCreatures4.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCreatures4.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCreatures4.Location = New System.Drawing.Point(6, 6)
         Me.dgvCreatures4.Name = "dgvCreatures4"
-        Me.dgvCreatures4.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures4.Size = New System.Drawing.Size(752, 658)
         Me.dgvCreatures4.TabIndex = 38
         '
         'tabCollision5
@@ -227,18 +249,21 @@ Partial Class frmMSBEdit
         Me.tabCollision5.Controls.Add(Me.dgvCollision5)
         Me.tabCollision5.Location = New System.Drawing.Point(4, 22)
         Me.tabCollision5.Name = "tabCollision5"
-        Me.tabCollision5.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision5.Size = New System.Drawing.Size(764, 670)
         Me.tabCollision5.TabIndex = 6
         Me.tabCollision5.Text = "Collision (5)"
         Me.tabCollision5.UseVisualStyleBackColor = True
         '
         'dgvCollision5
         '
+        Me.dgvCollision5.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvCollision5.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCollision5.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCollision5.Location = New System.Drawing.Point(6, 6)
         Me.dgvCollision5.Name = "dgvCollision5"
-        Me.dgvCollision5.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision5.Size = New System.Drawing.Size(752, 658)
         Me.dgvCollision5.TabIndex = 39
         '
         'tabNavimesh8
@@ -246,18 +271,21 @@ Partial Class frmMSBEdit
         Me.tabNavimesh8.Controls.Add(Me.dgvNavimesh8)
         Me.tabNavimesh8.Location = New System.Drawing.Point(4, 22)
         Me.tabNavimesh8.Name = "tabNavimesh8"
-        Me.tabNavimesh8.Size = New System.Drawing.Size(1119, 638)
+        Me.tabNavimesh8.Size = New System.Drawing.Size(764, 670)
         Me.tabNavimesh8.TabIndex = 8
         Me.tabNavimesh8.Text = "Navimesh (8)"
         Me.tabNavimesh8.UseVisualStyleBackColor = True
         '
         'dgvNavimesh8
         '
+        Me.dgvNavimesh8.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvNavimesh8.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvNavimesh8.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvNavimesh8.Location = New System.Drawing.Point(6, 6)
         Me.dgvNavimesh8.Name = "dgvNavimesh8"
-        Me.dgvNavimesh8.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvNavimesh8.Size = New System.Drawing.Size(752, 658)
         Me.dgvNavimesh8.TabIndex = 39
         '
         'tabObjects9
@@ -265,18 +293,21 @@ Partial Class frmMSBEdit
         Me.tabObjects9.Controls.Add(Me.dgvObjects9)
         Me.tabObjects9.Location = New System.Drawing.Point(4, 22)
         Me.tabObjects9.Name = "tabObjects9"
-        Me.tabObjects9.Size = New System.Drawing.Size(1119, 638)
+        Me.tabObjects9.Size = New System.Drawing.Size(764, 670)
         Me.tabObjects9.TabIndex = 11
         Me.tabObjects9.Text = "Objects (9)"
         Me.tabObjects9.UseVisualStyleBackColor = True
         '
         'dgvObjects9
         '
+        Me.dgvObjects9.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvObjects9.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvObjects9.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvObjects9.Location = New System.Drawing.Point(6, 6)
         Me.dgvObjects9.Name = "dgvObjects9"
-        Me.dgvObjects9.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvObjects9.Size = New System.Drawing.Size(752, 658)
         Me.dgvObjects9.TabIndex = 39
         '
         'tabCreatures10
@@ -284,18 +315,21 @@ Partial Class frmMSBEdit
         Me.tabCreatures10.Controls.Add(Me.dgvCreatures10)
         Me.tabCreatures10.Location = New System.Drawing.Point(4, 22)
         Me.tabCreatures10.Name = "tabCreatures10"
-        Me.tabCreatures10.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCreatures10.Size = New System.Drawing.Size(764, 670)
         Me.tabCreatures10.TabIndex = 10
         Me.tabCreatures10.Text = "Creatures (10)"
         Me.tabCreatures10.UseVisualStyleBackColor = True
         '
         'dgvCreatures10
         '
+        Me.dgvCreatures10.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvCreatures10.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCreatures10.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCreatures10.Location = New System.Drawing.Point(6, 6)
         Me.dgvCreatures10.Name = "dgvCreatures10"
-        Me.dgvCreatures10.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCreatures10.Size = New System.Drawing.Size(752, 658)
         Me.dgvCreatures10.TabIndex = 38
         '
         'tabCollision11
@@ -303,18 +337,21 @@ Partial Class frmMSBEdit
         Me.tabCollision11.Controls.Add(Me.dgvCollision11)
         Me.tabCollision11.Location = New System.Drawing.Point(4, 22)
         Me.tabCollision11.Name = "tabCollision11"
-        Me.tabCollision11.Size = New System.Drawing.Size(1119, 638)
+        Me.tabCollision11.Size = New System.Drawing.Size(764, 670)
         Me.tabCollision11.TabIndex = 3
         Me.tabCollision11.Text = "Collision (11)"
         Me.tabCollision11.UseVisualStyleBackColor = True
         '
         'dgvCollision11
         '
+        Me.dgvCollision11.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dgvCollision11.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvCollision11.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvCollision11.Location = New System.Drawing.Point(6, 6)
         Me.dgvCollision11.Name = "dgvCollision11"
-        Me.dgvCollision11.Size = New System.Drawing.Size(1107, 626)
+        Me.dgvCollision11.Size = New System.Drawing.Size(752, 658)
         Me.dgvCollision11.TabIndex = 38
         '
         'btnCopy
@@ -329,7 +366,7 @@ Partial Class frmMSBEdit
         'btnBrowse
         '
         Me.btnBrowse.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnBrowse.Location = New System.Drawing.Point(699, 12)
+        Me.btnBrowse.Location = New System.Drawing.Point(705, 12)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(75, 23)
         Me.btnBrowse.TabIndex = 40
@@ -340,7 +377,7 @@ Partial Class frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1151, 747)
+        Me.ClientSize = New System.Drawing.Size(796, 779)
         Me.Controls.Add(Me.btnBrowse)
         Me.Controls.Add(Me.btnCopy)
         Me.Controls.Add(Me.tabParts)

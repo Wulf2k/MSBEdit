@@ -65,7 +65,6 @@ Public Class frmMSBEdit
         Return BArr
     End Function
 
-
     Private Function Int8ToOneByte(ByVal val As Integer) As Byte()
         Return {CByte(val)}
     End Function
@@ -246,6 +245,13 @@ Public Class frmMSBEdit
 
         dgv.Rows.Add(partRow)
     End Sub
+    Private Sub labelRows(ByVal dgv As DataGridView)
+        'Label row headers with name
+        For i = 0 To dgv.Rows.Count - 2
+            dgv.Rows(i).HeaderCell.Value = dgv.Rows(i).Cells(25).Value
+        Next
+        dgv.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+    End Sub
     Private Sub btnOpen_Click(sender As Object, e As EventArgs) Handles btnOpen.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
 
@@ -355,6 +361,17 @@ Public Class frmMSBEdit
 
         mapstudioPtr = UIntFromFour((partsCnt * &H4) + &H8 + partsPtr)
         mapstudioCnt = UIntFromFour(mapstudioPtr + &H8)
+
+
+        labelRows(dgvMapPieces0)
+        labelRows(dgvObjects1)
+        labelRows(dgvCreatures2)
+        labelRows(dgvCreatures4)
+        labelRows(dgvCollision5)
+        labelRows(dgvNavimesh8)
+        labelRows(dgvObjects9)
+        labelRows(dgvCreatures10)
+        labelRows(dgvCollision11)
 
     End Sub
     Private Sub saveDGV(ByRef MSBStream As FileStream, ByRef dgv As DataGridView, ByRef data As msbdata, ByRef partsPtr As Integer, ByRef curroffset As Integer, ByRef partsidx As Integer)
@@ -1132,48 +1149,12 @@ Public Class frmMSBEdit
 
     End Sub
 
-    Public Sub sizeChange() Handles MyBase.Resize
-        tabParts.Width = MyBase.Width - 35
-        tabParts.Height = MyBase.Height - 115
-
-        dgvModels.Width = MyBase.Width - 55
-        dgvModels.Height = MyBase.Height - 150
-
-        dgvMapPieces0.Width = MyBase.Width - 55
-        dgvMapPieces0.Height = MyBase.Height - 150
-
-        dgvObjects1.Width = MyBase.Width - 55
-        dgvObjects1.Height = MyBase.Height - 150
-
-        dgvCreatures2.Width = MyBase.Width - 55
-        dgvCreatures2.Height = MyBase.Height - 150
-
-        dgvCreatures4.Width = MyBase.Width - 55
-        dgvCreatures4.Height = MyBase.Height - 150
-
-        dgvCollision5.Width = MyBase.Width - 55
-        dgvCollision5.Height = MyBase.Height - 150
-
-        dgvNavimesh8.Width = MyBase.Width - 55
-        dgvNavimesh8.Height = MyBase.Height - 150
-
-        dgvObjects9.Width = MyBase.Width - 55
-        dgvObjects9.Height = MyBase.Height - 150
-
-        dgvCreatures10.Width = MyBase.Width - 55
-        dgvCreatures10.Height = MyBase.Height - 150
-
-        dgvCollision11.Width = MyBase.Width - 55
-        dgvCollision11.Height = MyBase.Height - 150
-
-    End Sub
-
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
 
         Dim idx As Integer
         idx = tabParts.SelectedIndex
 
-        Dim dgvs() as DataGridView
+        Dim dgvs() As DataGridView
 
         dgvs = {dgvModels, dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
