@@ -1,9 +1,9 @@
 ﻿Imports System.IO
+Imports System.Text
 
 
 'Creature type 0x4 is sized wrong
 'TODO:  Confirm the above
-'TODO:  Update to look at Sib Offset instead of using padding
 
 Public Class frmMSBEdit
 
@@ -17,18 +17,22 @@ Public Class frmMSBEdit
     Public objects9 As msbdata = New msbdata
     Public creatures10 As msbdata = New msbdata
     Public collision11 As msbdata = New msbdata
+    Public points0 As msbdata = New msbdata
+    Public points2 As msbdata = New msbdata
+    Public points3 As msbdata = New msbdata
+    Public points5 As msbdata = New msbdata
 
     Dim parts() As msbdata = {}
     Dim partsdgvs() As DataGridView = {}
+
+    Dim points() As msbdata = {}
+    Dim pointsdgvs() As DataGridView = {}
 
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
 
     Public Shared eventParams() As Byte = {}
     Public Shared eventParamsOrigOffset As UInteger
-
-    Public Shared pointParams() As Byte = {}
-    Public Shared pointParamsOrigOffset As UInteger
 
     Private Sub txt_Drop(sender As Object, e As System.Windows.Forms.DragEventArgs) Handles txtMSBfile.DragDrop
         Dim file() As String = e.Data.GetData(DataFormats.FileDrop)
@@ -44,25 +48,38 @@ Public Class frmMSBEdit
         Next
     End Sub
 
-    Private Function StrFromBytes(ByVal loc As UInteger) As String
-        Dim Str As String = ""
+    Private Function RawStrFromBytes(ByVal loc As UInteger) As Byte()
         Dim cont As Boolean = True
+        Dim len As Integer = 0
 
         While cont
-            If bytes(loc) > 0 Then
-                Str = Str + Convert.ToChar(bytes(loc))
-                loc += 1
+            If bytes(loc + len) > 0 Then
+                len += 1
             Else
                 cont = False
             End If
         End While
 
-        Return Str
+        If len = 0 Then
+            Return {}
+        End If
+
+        Dim strBytesJIS(len - 1) As Byte
+        Array.Copy(bytes, loc, strBytesJIS, 0, len)
+
+        Return strBytesJIS
     End Function
     Private Function Str2Bytes(ByVal str As String) As Byte()
         Dim BArr() As Byte
-        BArr = System.Text.Encoding.ASCII.GetBytes(str)
+        BArr = Encoding.GetEncoding("shift_jis").GetBytes(str)
         Return BArr
+    End Function
+    Private Function RawStrToStr(ByVal rawStr As Byte()) As String
+        Dim enc1 = Encoding.GetEncoding("shift_jis")
+        Dim enc2 = Encoding.Unicode
+        Dim strBytesUnicode As Byte() = Encoding.Convert(enc1, enc2, rawStr)
+        Dim str As String = Encoding.Unicode.GetString(strBytesUnicode)
+        Return str
     End Function
 
     Private Function Int8ToOneByte(ByVal val As Integer) As Byte()
@@ -197,26 +214,34 @@ Public Class frmMSBEdit
             dgv.Columns(i).DefaultCellStyle.BackColor = layout.retrieveBackColor(i)
         Next
     End Sub
-    Private Sub readParts(ByRef dgv As DataGridView, ByRef layout As msbdata, ptr As UInteger)
+    Private Sub readRow(ByRef dgv As DataGridView, ByRef layout As msbdata, ptr As UInteger)
 
         Dim currOffset As Integer = 0
         Dim partRow(layout.fieldCount) As String
-        Dim partName As String = ""
-        Dim sibpath As String = ""
+        Dim partName As Byte() = {}
+        Dim sibpath As Byte() = {}
         Dim textboost As Integer
+        Dim hasSib As Boolean
+        Dim Padding As Integer
 
         Dim nameoffset = SIntFromFour(ptr)
-        partName = StrFromBytes(ptr + nameoffset)
-        sibpath = StrFromBytes(ptr + nameoffset + partName.Length + 1)
+        partName = RawStrFromBytes(ptr + nameoffset)
+        partRow(layout.getNameIndex) = RawStrToStr(partName)
+        Padding = partName.Length + 1
 
-        partRow(layout.getNameIndex) = partName
-        partRow(layout.getNameIndex + 1) = sibpath
+        hasSib = layout.retrieveName(layout.getNameIndex + 1) = "Sibpath"
+        If hasSib Then
+            Dim siboffset = SIntFromFour(ptr + &H10)
+            sibpath = RawStrFromBytes(ptr + siboffset)
+            partRow(layout.getNameIndex + 1) = RawStrToStr(sibpath)
 
-        Dim Padding = ((sibpath.Length + partName.Length + 5) And -&H4)
-        If Padding <= &H10 Then
-            Padding = &H10
-            If Not bigEndian Then Padding += &H4
+            Padding += sibpath.Length + 1
+            If sibpath.Length = 0 Then
+                Padding += 5
+            End If
         End If
+
+        Padding = (Padding + 3) And -&H4
 
         For j = 0 To layout.fieldCount - 1
             If j < layout.getNameIndex Then
@@ -238,7 +263,7 @@ Public Class frmMSBEdit
                     partRow(j) = SIntFromFour(ptr + textboost + currOffset)
                     currOffset += 4
                 Case "f32"
-                    partRow(j) = Math.Round(SingleFromFour(ptr + textboost + currOffset), 2)
+                    partRow(j) = SingleFromFour(ptr + textboost + currOffset)
                     currOffset += 4
             End Select
         Next
@@ -260,8 +285,8 @@ Public Class frmMSBEdit
 
         Dim nameoffset As UInteger
 
-        Dim name As String
-        Dim sibpath As String
+        Dim name As Byte()
+        Dim sibpath As Byte()
 
 
         Dim padding As UInteger
@@ -307,12 +332,10 @@ Public Class frmMSBEdit
         ReDim eventParams(pointPtr - eventPtr - 1)
         Array.Copy(bytes, eventPtr, eventParams, 0, eventParams.Length)
 
-        pointParamsOrigOffset = pointPtr
-        ReDim pointParams(partsPtr - pointPtr - 1)
-        Array.Copy(bytes, pointPtr, pointParams, 0, pointParams.Length)
 
-
-
+        For i = 0 To points.Count - 1
+            initDGV(pointsdgvs(i), points(i))
+        Next
 
         For i = 0 To parts.Count - 1
             initDGV(partsdgvs(i), parts(i))
@@ -322,17 +345,15 @@ Public Class frmMSBEdit
         For i = 0 To modelCnt - 2
             Dim currOffset As Integer = 0
             Dim mdlRow(models.fieldCount) As String
-            Dim mdlName As String = ""
-            Dim mdlSibpath As String = ""
 
             ptr = UIntFromFour(modelPtr + &HC + i * &H4)
 
             nameoffset = UIntFromFour(ptr)
-            name = StrFromBytes(ptr + nameoffset)
-            sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
+            name = RawStrFromBytes(ptr + nameoffset)
+            sibpath = RawStrFromBytes(ptr + nameoffset + name.Length + 1)
 
-            mdlRow(models.getNameIndex) = name
-            mdlRow(models.getNameIndex + 1) = sibpath
+            mdlRow(models.getNameIndex) = RawStrToStr(name)
+            mdlRow(models.getNameIndex + 1) = RawStrToStr(sibpath)
 
             For j = 0 To models.fieldCount - 1
                 Select Case models.retrieveType(j)
@@ -348,6 +369,19 @@ Public Class frmMSBEdit
 
 
         Dim idx As Integer
+        Dim pointtype(4) As Integer
+        pointtype = {0, 2, 3, 5}
+
+        For i = 0 To pointCnt - 2
+            padding = 0
+            ptr = UIntFromFour(pointPtr + &HC + i * &H4)
+
+            idx = Array.IndexOf(pointtype, SIntFromFour(ptr + &HC))
+            readRow(pointsdgvs(idx), points(idx), ptr)
+        Next
+
+
+        idx = 0
         Dim parttype(9) As Integer
         parttype = {0, 1, 2, 4, 5, 8, 9, &HA, &HB}
 
@@ -356,8 +390,9 @@ Public Class frmMSBEdit
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
 
             idx = Array.IndexOf(parttype, SIntFromFour(ptr + &H4))
-            readParts(partsdgvs(idx), parts(idx), ptr)
+            readRow(partsdgvs(idx), parts(idx), ptr)
         Next
+
 
         mapstudioPtr = UIntFromFour((partsCnt * &H4) + &H8 + partsPtr)
         mapstudioCnt = UIntFromFour(mapstudioPtr + &H8)
@@ -374,43 +409,52 @@ Public Class frmMSBEdit
         labelRows(dgvCollision11)
 
     End Sub
-    Private Sub saveDGV(ByRef MSBStream As FileStream, ByRef dgv As DataGridView, ByRef data As msbdata, ByRef partsPtr As Integer, ByRef curroffset As Integer, ByRef partsidx As Integer)
-        For i = 0 To dgv.Rows.Count - 2
 
-            curroffset = MSBStream.Position
-            MSBStream.Position = partsPtr + &HC + (i + partsidx) * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-            MSBStream.Position = curroffset
+    Private Sub saveRow(ByRef MSBStream As FileStream, ByRef row As DataGridViewRow, ByRef data As msbdata, ByRef ptr As Integer, ByRef partsidx As Integer)
+        Dim curroffset = MSBStream.Position
+        MSBStream.Position = ptr + &HC + partsidx * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+        MSBStream.Position = curroffset
 
-            Dim nameoffset = dgv.Rows(i).Cells(0).Value
-            Name = dgv.Rows(i).Cells(data.getNameIndex).Value
-            Dim sibpath = dgv.Rows(i).Cells(data.getNameIndex + 1).Value
+        Dim nameoffset = row.Cells(0).Value
+        Dim Name As Byte() = Str2Bytes(row.Cells(data.getNameIndex).Value)
 
-            Dim Padding = ((sibpath.Length + Name.Length + 5) And -&H4)
-            If Padding <= &H10 Then
-                Padding = &H10
-                If Not bigEndian Then Padding += &H4
+        Dim Padding = Name.Length + 1
+
+        Dim hasSib As Boolean = data.retrieveName(data.getNameIndex + 1) = "Sibpath"
+        If hasSib Then
+            Dim sibpath As Byte() = Str2Bytes(row.Cells(data.getNameIndex + 1).Value)
+            Padding += sibpath.Length + 1
+            If sibpath.Length = 0 Then
+                Padding += 5
             End If
+        End If
 
-            For j = 0 To data.fieldCount - 1
-                If j = data.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+        Padding = (Padding + 3) And -&H4
+
+        For j = 0 To data.fieldCount - 1
+            If j = data.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+
+            If hasSib Then
                 If j = data.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + Padding
-                Select Case data.retrieveType(j)
-                    Case "i8"
-                        WriteBytes(MSBStream, Int8ToOneByte(dgv.Rows(i).Cells(j).Value))
-                    Case "i16"
-                        WriteBytes(MSBStream, Int16ToTwoByte(dgv.Rows(i).Cells(j).Value))
-                    Case "i32"
-                        WriteBytes(MSBStream, Int32ToFourByte(dgv.Rows(i).Cells(j).Value))
-                    Case "f32"
-                        WriteBytes(MSBStream, SingleToFourByte(dgv.Rows(i).Cells(j).Value))
-                    Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgv.Rows(i).Cells(j).Value & Chr(0)))
-                End Select
-            Next
+            Else
+                If j = data.getNameIndex + 1 Then MSBStream.Position = curroffset + nameoffset + Padding
+            End If
+            Select Case data.retrieveType(j)
+                Case "i8"
+                    WriteBytes(MSBStream, Int8ToOneByte(row.Cells(j).Value))
+                Case "i16"
+                    WriteBytes(MSBStream, Int16ToTwoByte(row.Cells(j).Value))
+                Case "i32"
+                    WriteBytes(MSBStream, Int32ToFourByte(row.Cells(j).Value))
+                Case "f32"
+                    WriteBytes(MSBStream, SingleToFourByte(row.Cells(j).Value))
+                Case "string"
+                    WriteBytes(MSBStream, Str2Bytes(row.Cells(j).Value))
+                    WriteBytes(MSBStream, Int8ToOneByte(0))
+            End Select
         Next
-        partsidx += dgv.Rows.Count-1
-
+        partsidx += 1
     End Sub
 
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
@@ -461,8 +505,8 @@ Public Class frmMSBEdit
         Dim curroffset As UInteger
         Dim nameoffset As UInteger
 
-        Dim name As String
-        Dim sibpath As String
+        Dim name As Byte()
+        Dim sibpath As Byte()
 
         Dim padding As UInteger
 
@@ -477,27 +521,27 @@ Public Class frmMSBEdit
 
 
         modelPtr = 0
-        modelCnt = dgvModels.Rows.Count - 2
-        curroffset = modelPtr + &H10 + (modelCnt + 1) * &H4
+        modelCnt = dgvModels.Rows.Count
+        curroffset = modelPtr + &HC + (modelCnt) * &H4
 
         MSBStream.Position = &H4
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt + 2))
+        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt))
 
         MSBStream.Position = curroffset
         WriteBytes(MSBStream, Str2Bytes("MODEL_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
         'Models
-        For i As UInteger = 0 To modelCnt
+        For i As UInteger = 0 To modelCnt - 2
             curroffset = MSBStream.Position
             MSBStream.Position = modelPtr + &HC + i * &H4
             WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
             MSBStream.Position = curroffset
 
             nameoffset = dgvModels.Rows(i).Cells(0).Value
-            name = dgvModels.Rows(i).Cells(models.getNameIndex).Value
-            sibpath = dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value
+            name = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex).Value)
+            sibpath = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value)
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
             If padding <= &H10 Then
@@ -512,23 +556,18 @@ Public Class frmMSBEdit
                     Case "i32"
                         WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(j).Value))
                     Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value & Chr(0)))
+                        WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, Int8ToOneByte(0))
                 End Select
             Next
             MSBStream.Position = curroffset + nameoffset + padding
         Next
 
 
-
-
-
         eventPtr = (MSBStream.Length And -&H4) + &H4
-        MSBStream.Position = modelPtr + &H10 + (modelCnt) * &H4
+        MSBStream.Position = modelPtr + &HC + (modelCnt - 1) * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
         MSBStream.Position = eventPtr
-
-
-
 
         bytes = eventParams
         WriteBytes(MSBStream, UInt32ToFourByte(0))
@@ -547,63 +586,64 @@ Public Class frmMSBEdit
 
 
         pointPtr = MSBStream.Length
-        bytes = pointParams
+        MSBStream.Position = eventPtr + &HC + (eventCnt - 1) * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(pointPtr))
+        MSBStream.Position = pointPtr
+
+        pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count - 4 + 1
+        curroffset = pointPtr + &HC + pointCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - pointParamsOrigOffset + pointPtr))
-        pointCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
         WriteBytes(MSBStream, UInt32ToFourByte(pointCnt))
 
-        For i As UInteger = 0 To pointCnt - 1
-            curroffset = &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - pointParamsOrigOffset + pointPtr))
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("POINT_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+        Dim partsidx = 0
+        Dim rowCount = 0
+        ' The game needs each point to be in order, so aggregate each point type, sorted by index
+        Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+        Dim keys = New List(Of Integer)
+        For i = 0 To pointsdgvs.Length - 1
+            For j = 0 To pointsdgvs(i).Rows.Count - 2
+                Dim row = pointsdgvs(i).Rows(j)
+                rows.Add(Tuple.Create(row, points(i)))
+                Dim idx = CInt(row.Cells(2).Value)
+                keys.Add(idx)
+            Next
+        Next
+        Dim sortedRows As Array = rows.ToArray
+        Array.Sort(keys.ToArray, sortedRows)
+
+        For i = 0 To sortedRows.Length - 1
+            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+            saveRow(MSBStream, t.Item1, t.Item2, pointPtr, partsidx)
         Next
 
-        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
-        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
-        WriteBytes(MSBStream, tmpbytes)
+
         partsPtr = MSBStream.Length
+        MSBStream.Position = pointPtr + &HC + (pointCnt - 1) * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(partsPtr))
+        MSBStream.Position = partsPtr
 
-
-
-
-        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count - 9
-        curroffset = partsPtr + &H10 + partsCnt * &H4
-        MSBStream.Position = partsPtr + &H4
+        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count - 9 + 1
+        curroffset = partsPtr + &HC + partsCnt * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(0))
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt + 1))
+        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt))
 
         MSBStream.Position = curroffset
         WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
-        Dim partsidx = 0
+        partsidx = 0
 
-        'Map Pieces 0
-        saveDGV(MSBStream, dgvMapPieces0, mapPieces0, partsPtr, curroffset, partsidx)
-
-        'Objects 1
-        saveDGV(MSBStream, dgvObjects1, objects1, partsPtr, curroffset, partsidx)
-
-        'Creatures 2
-        saveDGV(MSBStream, dgvCreatures2, creatures2, partsPtr, curroffset, partsidx)
-
-        'Creatures 4
-        saveDGV(MSBStream, dgvCreatures4, creatures4, partsPtr, curroffset, partsidx)
-
-        'Collision 5
-        saveDGV(MSBStream, dgvCollision5, collision5, partsPtr, curroffset, partsidx)
-
-        'Navimesh 8
-        saveDGV(MSBStream, dgvNavimesh8, navimesh8, partsPtr, curroffset, partsidx)
-
-        'Objects 9
-        saveDGV(MSBStream, dgvObjects9, objects9, partsPtr, curroffset, partsidx)
-
-        'Creatures 10
-        saveDGV(MSBStream, dgvCreatures10, creatures10, partsPtr, curroffset, partsidx)
-
-        'Collision 11
-        saveDGV(MSBStream, dgvCollision11, collision11, partsPtr, curroffset, partsidx)
+        For i = 0 To partsdgvs.Length - 1
+            For j = 0 To partsdgvs(i).Rows.Count - 2
+                saveRow(MSBStream, partsdgvs(i).Rows(j), parts(i), partsPtr, partsidx)
+            Next
+        Next
 
         MSBStream.Close()
         MsgBox("Save Complete.")
@@ -623,6 +663,104 @@ Public Class frmMSBEdit
             .setNameIndex(.fieldCount)
             .add("Name", "string", Color.White)
             .add("Sibpath", "string", Color.White)
+        End With
+    End Sub
+    Private Sub pointPrep0()
+        With points0
+            .add("Name Offset", "i32", Color.White)
+            .add("x04", "i32", Color.LightGray)
+            .add("index", "i32", Color.White)
+            .add("Type", "i32", Color.White)
+            .add("X pos", "f32", Color.White)
+            .add("Y pos", "f32", Color.White)
+            .add("Z pos", "f32", Color.White)
+            .add("Rot X", "f32", Color.White)
+            .add("Rot Y", "f32", Color.White)
+            .add("Rot Z", "f32", Color.White)
+            .add("x28", "i32", Color.LightGray)
+            .add("x2c", "i32", Color.LightGray)
+            .add("x30", "i32", Color.LightGray)
+            .add("x34", "i32", Color.LightGray)
+            .setNameIndex(.fieldCount)
+            .add("Name", "string", Color.White)
+            .add("p+0x00", "i32", Color.LightGray)
+            .add("p+0x04", "i32", Color.LightGray)
+            .add("EventEntityID", "i32", Color.White)
+        End With
+    End Sub
+    Private Sub pointPrep2()
+        With points2
+            .add("Name Offset", "i32", Color.White)
+            .add("x04", "i32", Color.LightGray)
+            .add("index", "i32", Color.White)
+            .add("Type", "i32", Color.White)
+            .add("X pos", "f32", Color.White)
+            .add("Y pos", "f32", Color.White)
+            .add("Z pos", "f32", Color.White)
+            .add("Rot X", "f32", Color.White)
+            .add("Rot Y", "f32", Color.White)
+            .add("Rot Z", "f32", Color.White)
+            .add("x28", "i32", Color.LightGray)
+            .add("x2c", "i32", Color.LightGray)
+            .add("x30", "i32", Color.LightGray)
+            .add("x34", "i32", Color.LightGray)
+            .setNameIndex(.fieldCount)
+            .add("Name", "string", Color.White)
+            .add("p+0x00", "i32", Color.LightGray)
+            .add("p+0x04", "i32", Color.LightGray)
+            .add("p+0x08", "f32", Color.LightGray)
+            .add("EventEntityID", "i32", Color.White)
+        End With
+    End Sub
+    Private Sub pointPrep3()
+        With points3
+            .add("Name Offset", "i32", Color.White)
+            .add("x04", "i32", Color.LightGray)
+            .add("index", "i32", Color.White)
+            .add("Type", "i32", Color.White)
+            .add("X pos", "f32", Color.White)
+            .add("Y pos", "f32", Color.White)
+            .add("Z pos", "f32", Color.White)
+            .add("Rot X", "f32", Color.White)
+            .add("Rot Y", "f32", Color.White)
+            .add("Rot Z", "f32", Color.White)
+            .add("x28", "i32", Color.LightGray)
+            .add("x2c", "i32", Color.LightGray)
+            .add("x30", "i32", Color.LightGray)
+            .add("x34", "i32", Color.LightGray)
+            .setNameIndex(.fieldCount)
+            .add("Name", "string", Color.White)
+            .add("p+0x00", "i32", Color.LightGray)
+            .add("p+0x04", "i32", Color.LightGray)
+            .add("p+0x08", "f32", Color.LightGray)
+            .add("p+0x0C", "f32", Color.LightGray)
+            .add("EventEntityID", "i32", Color.White)
+        End With
+    End Sub
+    Private Sub pointPrep5()
+        With points5
+            .add("Name Offset", "i32", Color.White)
+            .add("x04", "i32", Color.LightGray)
+            .add("index", "i32", Color.White)
+            .add("Type", "i32", Color.White)
+            .add("X pos", "f32", Color.White)
+            .add("Y pos", "f32", Color.White)
+            .add("Z pos", "f32", Color.White)
+            .add("Rot X", "f32", Color.White)
+            .add("Rot Y", "f32", Color.White)
+            .add("Rot Z", "f32", Color.White)
+            .add("x28", "i32", Color.LightGray)
+            .add("x2c", "i32", Color.LightGray)
+            .add("x30", "i32", Color.LightGray)
+            .add("x34", "i32", Color.LightGray)
+            .setNameIndex(.fieldCount)
+            .add("Name", "string", Color.White)
+            .add("p+0x00", "i32", Color.LightGray)
+            .add("p+0x04", "i32", Color.LightGray)
+            .add("p+0x08", "f32", Color.LightGray)
+            .add("p+0x0C", "f32", Color.LightGray)
+            .add("p+0x10", "f32", Color.LightGray)
+            .add("EventEntityID", "i32", Color.White)
         End With
     End Sub
     Private Sub map0Prep()
@@ -1134,6 +1272,10 @@ Public Class frmMSBEdit
 
     Private Sub frmMSBEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         mdlPrep()
+        pointPrep0()
+        pointPrep2()
+        pointPrep3()
+        pointPrep5()
         map0Prep()
         obj1Prep()
         crt2Prep()
@@ -1144,9 +1286,11 @@ Public Class frmMSBEdit
         crt10Prep()
         coll11Prep()
 
+        points = {points0, points2, points3, points5}
+        pointsdgvs = {dgvPoints0, dgvPoints2, dgvPoints3, dgvPoints5}
+
         parts = {mapPieces0, objects1, creatures2, creatures4, collision5, navimesh8, objects9, creatures10, collision11}
         partsdgvs = {dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
-
     End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
@@ -1156,15 +1300,15 @@ Public Class frmMSBEdit
 
         Dim dgvs() As DataGridView
 
-        dgvs = {dgvModels, dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
+        dgvs = {dgvModels, dgvPoints0, dgvPoints2, dgvPoints3, dgvPoints5, dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
         copyEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
     End Sub
 
-    Sub copyEntry(byref dgv As DataGridView, rowidx As Integer)
-        Dim row(dgv.Columns.count-1)
-        For i = 0 To row.Count-1
-            row(i) = dgv.rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
+    Sub copyEntry(ByRef dgv As DataGridView, rowidx As Integer)
+        Dim row(dgv.Columns.Count - 1)
+        For i = 0 To row.Count - 1
+            row(i) = dgv.Rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
         Next
         dgv.Rows.Add(row)
     End Sub
@@ -1187,7 +1331,6 @@ Public Class msbdata
     Private fieldBackColor As List(Of Color) = New List(Of Color)
 
     Private nameIdx As Integer
-
     Public Sub add(ByVal name As String, ByVal type As String, backColor As Color)
         fieldNames.Add(name)
         fieldtypes.Add(type)
