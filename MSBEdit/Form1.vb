@@ -22,6 +22,8 @@ Public Class frmMSBEdit
     Public points3 As msbdata = New msbdata
     Public points5 As msbdata = New msbdata
 
+    Dim dgvs() As DataGridView = {}
+
     Dim parts() As msbdata = {}
     Dim partsdgvs() As DataGridView = {}
 
@@ -855,7 +857,7 @@ Public Class frmMSBEdit
             .add("p+x13", "i8", Color.LightGray)
             .add("p+x14", "i32", Color.LightGray)
             .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
+            .add("PhysIndex", "i32", Color.White)
             .add("p+x20", "i32", Color.LightGray)
             .add("p+x24", "i32", Color.LightGray)
             .add("p+x28", "i32", Color.LightGray)
@@ -908,7 +910,7 @@ Public Class frmMSBEdit
             .add("TalkID", "i32", Color.White)
             .add("p+x2C", "i32", Color.LightGray)
             .add("ChrInitParam", "i32", Color.White)
-            .add("p+x34", "i32", Color.LightGray)
+            .add("PhysIndex", "i32", Color.White)
             .add("p+x38", "i32", Color.LightGray)
             .add("p+x3C", "i32", Color.LightGray)
             .add("p+x40", "i32", Color.LightGray)
@@ -1143,7 +1145,7 @@ Public Class frmMSBEdit
             .add("p+x13", "i8", Color.LightGray)
             .add("p+x14", "i32", Color.LightGray)
             .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
+            .add("PhysIndex", "i32", Color.White)
             .add("p+x20", "i32", Color.LightGray)
             .add("p+x24", "i32", Color.LightGray)
             .add("p+x28", "i32", Color.LightGray)
@@ -1196,7 +1198,7 @@ Public Class frmMSBEdit
             .add("p+x28", "i32", Color.LightGray)
             .add("p+x2C", "i32", Color.LightGray)
             .add("p+x30", "i32", Color.LightGray)
-            .add("p+x34", "i32", Color.LightGray)
+            .add("PhysIndex", "i32", Color.White)
             .add("p+x38", "i32", Color.LightGray)
             .add("p+x3C", "i32", Color.LightGray)
             .add("p+x40", "i32", Color.LightGray)
@@ -1291,16 +1293,14 @@ Public Class frmMSBEdit
 
         parts = {mapPieces0, objects1, creatures2, creatures4, collision5, navimesh8, objects9, creatures10, collision11}
         partsdgvs = {dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
+
+        dgvs = {dgvModels}.Concat(pointsdgvs).Concat(partsdgvs).ToArray()
     End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
 
         Dim idx As Integer
         idx = tabParts.SelectedIndex
-
-        Dim dgvs() As DataGridView
-
-        dgvs = {dgvModels, dgvPoints0, dgvPoints2, dgvPoints3, dgvPoints5, dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
         copyEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
     End Sub
@@ -1311,6 +1311,17 @@ Public Class frmMSBEdit
             row(i) = dgv.Rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
         Next
         dgv.Rows.Add(row)
+    End Sub
+
+    Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
+        Dim idx As Integer
+        idx = tabParts.SelectedIndex
+
+        deleteEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
+    End Sub
+
+    Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
+        dgv.Rows.RemoveAt(rowidx)
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click

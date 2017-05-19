@@ -57,6 +57,7 @@ Partial Class frmMSBEdit
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
         Me.btnCopy = New System.Windows.Forms.Button()
         Me.btnBrowse = New System.Windows.Forms.Button()
+        Me.btnDelete = New System.Windows.Forms.Button()
         CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParts.SuspendLayout()
         Me.tabModels.SuspendLayout()
@@ -129,6 +130,7 @@ Partial Class frmMSBEdit
         '
         'dgvCreatures2
         '
+        Me.dgvCreatures2.AllowUserToDeleteRows = False
         Me.dgvCreatures2.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -176,6 +178,7 @@ Partial Class frmMSBEdit
         '
         'dgvModels
         '
+        Me.dgvModels.AllowUserToDeleteRows = False
         Me.dgvModels.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -199,6 +202,7 @@ Partial Class frmMSBEdit
         '
         'dgvPoints0
         '
+        Me.dgvPoints0.AllowUserToDeleteRows = False
         Me.dgvPoints0.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -221,6 +225,7 @@ Partial Class frmMSBEdit
         '
         'dgvPoints2
         '
+        Me.dgvPoints2.AllowUserToDeleteRows = False
         Me.dgvPoints2.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -243,6 +248,7 @@ Partial Class frmMSBEdit
         '
         'dgvPoints3
         '
+        Me.dgvPoints3.AllowUserToDeleteRows = False
         Me.dgvPoints3.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -265,6 +271,7 @@ Partial Class frmMSBEdit
         '
         'dgvPoints5
         '
+        Me.dgvPoints5.AllowUserToDeleteRows = False
         Me.dgvPoints5.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -287,6 +294,7 @@ Partial Class frmMSBEdit
         '
         'dgvMapPieces0
         '
+        Me.dgvMapPieces0.AllowUserToDeleteRows = False
         Me.dgvMapPieces0.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -309,6 +317,7 @@ Partial Class frmMSBEdit
         '
         'dgvObjects1
         '
+        Me.dgvObjects1.AllowUserToDeleteRows = False
         Me.dgvObjects1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -342,6 +351,7 @@ Partial Class frmMSBEdit
         '
         'dgvCreatures4
         '
+        Me.dgvCreatures4.AllowUserToDeleteRows = False
         Me.dgvCreatures4.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -364,6 +374,7 @@ Partial Class frmMSBEdit
         '
         'dgvCollision5
         '
+        Me.dgvCollision5.AllowUserToDeleteRows = False
         Me.dgvCollision5.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -386,6 +397,7 @@ Partial Class frmMSBEdit
         '
         'dgvNavimesh8
         '
+        Me.dgvNavimesh8.AllowUserToDeleteRows = False
         Me.dgvNavimesh8.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -408,6 +420,7 @@ Partial Class frmMSBEdit
         '
         'dgvObjects9
         '
+        Me.dgvObjects9.AllowUserToDeleteRows = False
         Me.dgvObjects9.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -430,6 +443,7 @@ Partial Class frmMSBEdit
         '
         'dgvCreatures10
         '
+        Me.dgvCreatures10.AllowUserToDeleteRows = False
         Me.dgvCreatures10.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -452,6 +466,7 @@ Partial Class frmMSBEdit
         '
         'dgvCollision11
         '
+        Me.dgvCollision11.AllowUserToDeleteRows = False
         Me.dgvCollision11.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -481,11 +496,22 @@ Partial Class frmMSBEdit
         Me.btnBrowse.Text = "Browse"
         Me.btnBrowse.UseVisualStyleBackColor = True
         '
+        '
+        'btnDelete
+        '
+        Me.btnDelete.Location = New System.Drawing.Point(93, 40)
+        Me.btnDelete.Name = "btnDelete"
+        Me.btnDelete.Size = New System.Drawing.Size(75, 23)
+        Me.btnDelete.TabIndex = 43
+        Me.btnDelete.Text = "Delete Entry"
+        Me.btnDelete.UseVisualStyleBackColor = True
+        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(834, 761)
+        Me.Controls.Add(Me.btnDelete)
         Me.Controls.Add(Me.btnBrowse)
         Me.Controls.Add(Me.btnCopy)
         Me.Controls.Add(Me.tabParts)
@@ -563,4 +589,5 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvPoints2 As DataGridView
     Friend WithEvents dgvPoints3 As DataGridView
     Friend WithEvents dgvPoints5 As DataGridView
+    Friend WithEvents btnDelete As Button
 End Class
