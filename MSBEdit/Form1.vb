@@ -23,6 +23,7 @@ Public Class frmMSBEdit
     Public points5 As msbdata = New msbdata
 
     Dim dgvs() As DataGridView = {}
+    Dim layouts() As msbdata = {}
 
     Dim parts() As msbdata = {}
     Dim partsdgvs() As DataGridView = {}
@@ -1294,11 +1295,11 @@ Public Class frmMSBEdit
         parts = {mapPieces0, objects1, creatures2, creatures4, collision5, navimesh8, objects9, creatures10, collision11}
         partsdgvs = {dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
+        layouts = {models}.Concat(points).Concat(parts).ToArray()
         dgvs = {dgvModels}.Concat(pointsdgvs).Concat(partsdgvs).ToArray()
     End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
-
         Dim idx As Integer
         idx = tabParts.SelectedIndex
 
@@ -1311,6 +1312,10 @@ Public Class frmMSBEdit
             row(i) = dgv.Rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
         Next
         dgv.Rows.Add(row)
+
+        If ChkUpdatePhysIndices.Checked Then
+            UpdatePhysIndices(tabParts.SelectedIndex, 1)
+        End If
     End Sub
 
     Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
@@ -1322,6 +1327,45 @@ Public Class frmMSBEdit
 
     Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
         dgv.Rows.RemoveAt(rowidx)
+
+        If ChkUpdatePhysIndices.Checked Then
+            UpdatePhysIndices(tabParts.SelectedIndex, -1)
+        End If
+    End Sub
+
+    ' Won't work properly if the user edits map parts or collision5 parts, can be fixed later if there's ever a need.
+    Sub UpdatePhysIndices(dgvSourceIdx As Integer, delta As Integer)
+        Dim colIdx = Array.IndexOf(layouts, collision5)
+        Dim mapIdx = Array.IndexOf(layouts, mapPieces0)
+
+        If dgvSourceIdx > colidx Then
+            Return
+        End If
+
+        Dim firstPhysIdx As Integer = -1
+        For i = mapIdx To colIdx - 1
+            firstPhysIdx += dgvs(i).Rows.Count - 1
+        Next
+
+        For i = 0 To dgvs.Length - 1
+            Dim idx = layouts(i).getFieldIndex("PhysIndex")
+            If idx = -1 Then
+                Continue For
+            End If
+
+            For j = 0 To dgvs(i).Rows.Count - 2
+                Dim row = dgvs(i).Rows(j)
+
+                Dim oldValue = CInt(row.Cells(idx).Value)
+                If oldValue < firstPhysIdx Then
+                    ' I don't know why some things use map part indices and most others use collision indices.
+                    Continue For
+                End If
+
+                Dim newValue = oldValue + delta
+                row.Cells(idx).Value = newValue
+            Next
+        Next
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
@@ -1365,4 +1409,7 @@ Public Class msbdata
     Public Sub setNameIndex(ByVal idx As Integer)
         nameIdx = idx
     End Sub
+    Public Function getFieldIndex(ByVal name As String) As Integer
+        Return fieldNames.IndexOf(name)
+    End Function
 End Class

@@ -57,6 +57,7 @@ Partial Class frmMSBEdit
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
         Me.btnCopy = New System.Windows.Forms.Button()
         Me.btnBrowse = New System.Windows.Forms.Button()
+        Me.ChkUpdatePhysIndices = New System.Windows.Forms.CheckBox()
         Me.btnDelete = New System.Windows.Forms.Button()
         CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParts.SuspendLayout()
@@ -496,6 +497,17 @@ Partial Class frmMSBEdit
         Me.btnBrowse.Text = "Browse"
         Me.btnBrowse.UseVisualStyleBackColor = True
         '
+        'ChkUpdatePhysIndices
+        '
+        Me.ChkUpdatePhysIndices.AutoSize = True
+        Me.ChkUpdatePhysIndices.Checked = True
+        Me.ChkUpdatePhysIndices.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ChkUpdatePhysIndices.Location = New System.Drawing.Point(218, 46)
+        Me.ChkUpdatePhysIndices.Name = "ChkUpdatePhysIndices"
+        Me.ChkUpdatePhysIndices.Size = New System.Drawing.Size(124, 17)
+        Me.ChkUpdatePhysIndices.TabIndex = 42
+        Me.ChkUpdatePhysIndices.Text = "Update Phys Indices"
+        Me.ChkUpdatePhysIndices.UseVisualStyleBackColor = True
         '
         'btnDelete
         '
@@ -512,6 +524,7 @@ Partial Class frmMSBEdit
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(834, 761)
         Me.Controls.Add(Me.btnDelete)
+        Me.Controls.Add(Me.ChkUpdatePhysIndices)
         Me.Controls.Add(Me.btnBrowse)
         Me.Controls.Add(Me.btnCopy)
         Me.Controls.Add(Me.tabParts)
@@ -589,5 +602,6 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvPoints2 As DataGridView
     Friend WithEvents dgvPoints3 As DataGridView
     Friend WithEvents dgvPoints5 As DataGridView
+    Friend WithEvents ChkUpdatePhysIndices As CheckBox
     Friend WithEvents btnDelete As Button
 End Class
