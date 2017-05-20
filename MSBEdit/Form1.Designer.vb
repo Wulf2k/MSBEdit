@@ -59,6 +59,8 @@ Partial Class frmMSBEdit
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.ChkUpdatePhysIndices = New System.Windows.Forms.CheckBox()
         Me.btnDelete = New System.Windows.Forms.Button()
+        Me.btnMoveUp = New System.Windows.Forms.Button()
+        Me.btnMoveDown = New System.Windows.Forms.Button()
         CType(Me.dgvCreatures2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabParts.SuspendLayout()
         Me.tabModels.SuspendLayout()
@@ -502,7 +504,7 @@ Partial Class frmMSBEdit
         Me.ChkUpdatePhysIndices.AutoSize = True
         Me.ChkUpdatePhysIndices.Checked = True
         Me.ChkUpdatePhysIndices.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.ChkUpdatePhysIndices.Location = New System.Drawing.Point(218, 46)
+        Me.ChkUpdatePhysIndices.Location = New System.Drawing.Point(366, 46)
         Me.ChkUpdatePhysIndices.Name = "ChkUpdatePhysIndices"
         Me.ChkUpdatePhysIndices.Size = New System.Drawing.Size(124, 17)
         Me.ChkUpdatePhysIndices.TabIndex = 42
@@ -518,11 +520,31 @@ Partial Class frmMSBEdit
         Me.btnDelete.Text = "Delete Entry"
         Me.btnDelete.UseVisualStyleBackColor = True
         '
+        'btnMoveUp
+        '
+        Me.btnMoveUp.Location = New System.Drawing.Point(186, 40)
+        Me.btnMoveUp.Name = "btnMoveUp"
+        Me.btnMoveUp.Size = New System.Drawing.Size(75, 23)
+        Me.btnMoveUp.TabIndex = 44
+        Me.btnMoveUp.Text = "Move Up"
+        Me.btnMoveUp.UseVisualStyleBackColor = True
+        '
+        'btnMoveDown
+        '
+        Me.btnMoveDown.Location = New System.Drawing.Point(267, 40)
+        Me.btnMoveDown.Name = "btnMoveDown"
+        Me.btnMoveDown.Size = New System.Drawing.Size(75, 23)
+        Me.btnMoveDown.TabIndex = 45
+        Me.btnMoveDown.Text = "Move Down"
+        Me.btnMoveDown.UseVisualStyleBackColor = True
+        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(834, 761)
+        Me.Controls.Add(Me.btnMoveDown)
+        Me.Controls.Add(Me.btnMoveUp)
         Me.Controls.Add(Me.btnDelete)
         Me.Controls.Add(Me.ChkUpdatePhysIndices)
         Me.Controls.Add(Me.btnBrowse)
@@ -604,4 +626,6 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvPoints5 As DataGridView
     Friend WithEvents ChkUpdatePhysIndices As CheckBox
     Friend WithEvents btnDelete As Button
+    Friend WithEvents btnMoveUp As Button
+    Friend WithEvents btnMoveDown As Button
 End Class

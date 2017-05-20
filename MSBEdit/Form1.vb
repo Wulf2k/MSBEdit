@@ -1368,6 +1368,34 @@ Public Class frmMSBEdit
         Next
     End Sub
 
+    Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
+        Dim dgv = dgvs(tabParts.SelectedIndex)
+        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+
+        If rowIndex = 0 Or dgv.Rows.Count < 2 Then
+            Return
+        End If
+
+        Dim rowAbove As DataGridViewRow = dgv.Rows(rowIndex - 1)
+
+        dgv.Rows.RemoveAt(rowIndex - 1)
+        dgv.Rows.Insert(rowIndex, rowAbove)
+    End Sub
+
+    Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
+        Dim dgv = dgvs(tabParts.SelectedIndex)
+        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+
+        If rowIndex > dgv.Rows.Count - 3 Or dgv.Rows.Count < 2 Then
+            Return
+        End If
+
+        Dim rowBelow As DataGridViewRow = dgv.Rows(rowIndex + 1)
+
+        dgv.Rows.RemoveAt(rowIndex + 1)
+        dgv.Rows.Insert(rowIndex, rowBelow)
+    End Sub
+
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
         Dim openDlg As New OpenFileDialog()
 
