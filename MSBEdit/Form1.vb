@@ -1339,10 +1339,10 @@ Public Class frmMSBEdit
 
     ' Won't work properly if the user edits map parts or collision5 parts, can be fixed later if there's ever a need.
     Sub UpdatePhysIndices(dgvSourceIdx As Integer, delta As Integer)
-        Dim colIdx = Array.IndexOf(layouts, collision5)
         Dim mapIdx = Array.IndexOf(layouts, mapPieces0)
+        Dim colIdx = Array.IndexOf(layouts, collision5)
 
-        If dgvSourceIdx > colidx Then
+        If dgvSourceIdx < mapIdx Or dgvSourceIdx > colIdx Then
             Return
         End If
 
