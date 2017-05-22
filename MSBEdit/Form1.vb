@@ -275,7 +275,7 @@ Public Class frmMSBEdit
     End Sub
     Private Sub labelRows(ByVal dgv As DataGridView)
         'Label row headers with name
-        For i = 0 To dgv.Rows.Count - 2
+        For i = 0 To dgv.Rows.Count - 1
             dgv.Rows(i).HeaderCell.Value = dgv.Rows(i).Cells(25).Value
         Next
         dgv.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
@@ -524,7 +524,7 @@ Public Class frmMSBEdit
 
 
         modelPtr = 0
-        modelCnt = dgvModels.Rows.Count
+        modelCnt = dgvModels.Rows.Count + 1
         curroffset = modelPtr + &HC + (modelCnt) * &H4
 
         MSBStream.Position = &H4
@@ -593,7 +593,7 @@ Public Class frmMSBEdit
         WriteBytes(MSBStream, UInt32ToFourByte(pointPtr))
         MSBStream.Position = pointPtr
 
-        pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count - 4 + 1
+        pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count + 1
         curroffset = pointPtr + &HC + pointCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
@@ -604,12 +604,11 @@ Public Class frmMSBEdit
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
         Dim partsidx = 0
-        Dim rowCount = 0
         ' The game needs each point to be in order, so aggregate each point type, sorted by index
         Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
         Dim keys = New List(Of Integer)
         For i = 0 To pointsdgvs.Length - 1
-            For j = 0 To pointsdgvs(i).Rows.Count - 2
+            For j = 0 To pointsdgvs(i).Rows.Count - 1
                 Dim row = pointsdgvs(i).Rows(j)
                 rows.Add(Tuple.Create(row, points(i)))
                 Dim idx = CInt(row.Cells(2).Value)
@@ -630,7 +629,7 @@ Public Class frmMSBEdit
         WriteBytes(MSBStream, UInt32ToFourByte(partsPtr))
         MSBStream.Position = partsPtr
 
-        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count - 9 + 1
+        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count + 1
         curroffset = partsPtr + &HC + partsCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
@@ -643,7 +642,7 @@ Public Class frmMSBEdit
         partsidx = 0
 
         For i = 0 To partsdgvs.Length - 1
-            For j = 0 To partsdgvs(i).Rows.Count - 2
+            For j = 0 To partsdgvs(i).Rows.Count - 1
                 saveRow(MSBStream, partsdgvs(i).Rows(j), parts(i), partsPtr, partsidx)
             Next
         Next
@@ -1322,6 +1321,11 @@ Public Class frmMSBEdit
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
         Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count = 0 Then
+            Return
+        End If
+
         copyEntry(dgv, dgv.SelectedCells(0).RowIndex)
     End Sub
 
@@ -1339,6 +1343,11 @@ Public Class frmMSBEdit
 
     Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
         Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count = 0 Then
+            Return
+        End If
+
         deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
     End Sub
 
@@ -1366,7 +1375,7 @@ Public Class frmMSBEdit
 
         Dim firstPhysIdx As Integer = -1
         For i = mapIdx To colIdx - 1
-            firstPhysIdx += dgvs(i).Rows.Count - 1
+            firstPhysIdx += dgvs(i).Rows.Count
         Next
 
         For i = 0 To dgvs.Length - 1
@@ -1375,7 +1384,7 @@ Public Class frmMSBEdit
                 Continue For
             End If
 
-            For j = 0 To dgvs(i).Rows.Count - 2
+            For j = 0 To dgvs(i).Rows.Count - 1
                 Dim row = dgvs(i).Rows(j)
 
                 Dim oldValue = CInt(row.Cells(idx).Value)
@@ -1392,9 +1401,14 @@ Public Class frmMSBEdit
 
     Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
         Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count < 2 Then
+            Return
+        End If
+
         Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
-        If rowIndex = 0 Or dgv.Rows.Count < 2 Then
+        If rowIndex = 0 Then
             Return
         End If
 
@@ -1406,9 +1420,14 @@ Public Class frmMSBEdit
 
     Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
         Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count < 2 Then
+            Return
+        End If
+
         Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
-        If rowIndex > dgv.Rows.Count - 3 Or dgv.Rows.Count < 2 Then
+        If rowIndex = dgv.Rows.Count - 1 Then
             Return
         End If
 
@@ -1462,11 +1481,8 @@ Public Class frmMSBEdit
         Dim startRow = cell.RowIndex
         Dim endRow = startRow + sourceRowCount - 1
 
-        If startRow > dgv.RowCount - 2 Then
-            Return
-        End If
-        If endRow > dgv.RowCount - 2 Then
-            endRow = dgv.RowCount - 2
+        If endRow > dgv.RowCount - 1 Then
+            endRow = dgv.RowCount - 1
         End If
         If endColumn > dgv.ColumnCount - 1 Then
             endColumn = dgv.ColumnCount - 1
