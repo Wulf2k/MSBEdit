@@ -1303,11 +1303,26 @@ Public Class frmMSBEdit
         Next
     End Sub
 
-    Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
-        Dim idx As Integer
-        idx = tabParts.SelectedIndex
+    Private Function getCurrentRootTab()
+        Return tabControlRoot.SelectedTab
+    End Function
 
-        copyEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
+    Private Function getCurrentDgv()
+        Dim rootTab As TabPage = getCurrentRootTab()
+        If (rootTab Is tabModels) Then
+            Return dgvModels
+        ElseIf rootTab Is tabPoints Then
+            Return pointsdgvs(tabControlPoints.SelectedIndex)
+        ElseIf rootTab Is tabParts Then
+            Return partsdgvs(tabControlParts.SelectedIndex)
+        Else
+            Throw New Exception()
+        End If
+    End Function
+
+    Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
+        Dim dgv = getCurrentDgv()
+        copyEntry(dgv, dgv.SelectedCells(0).RowIndex)
     End Sub
 
     Sub copyEntry(ByRef dgv As DataGridView, rowidx As Integer)
@@ -1318,31 +1333,34 @@ Public Class frmMSBEdit
         dgv.Rows.Add(row)
 
         If ChkUpdatePhysIndices.Checked Then
-            UpdatePhysIndices(tabParts.SelectedIndex, 1)
+            UpdatePhysIndices(getCurrentDgv(), 1)
         End If
     End Sub
 
     Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
-        Dim idx As Integer
-        idx = tabParts.SelectedIndex
-
-        deleteEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
+        Dim dgv = getCurrentDgv()
+        deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
     End Sub
 
     Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
         dgv.Rows.RemoveAt(rowidx)
 
         If ChkUpdatePhysIndices.Checked Then
-            UpdatePhysIndices(tabParts.SelectedIndex, -1)
+            UpdatePhysIndices(getCurrentDgv(), -1)
         End If
     End Sub
 
     ' Won't work properly if the user edits map parts or collision5 parts, can be fixed later if there's ever a need.
-    Sub UpdatePhysIndices(dgvSourceIdx As Integer, delta As Integer)
-        Dim mapIdx = Array.IndexOf(layouts, mapPieces0)
-        Dim colIdx = Array.IndexOf(layouts, collision5)
+    Sub UpdatePhysIndices(sourceDgv As DataGridView, delta As Integer)
+        If getCurrentRootTab() IsNot tabParts Then
+            Return
+        End If
 
-        If dgvSourceIdx < mapIdx Or dgvSourceIdx > colIdx Then
+        Dim sourceDgvIndex = Array.IndexOf(partsdgvs, sourceDgv)
+        Dim mapIdx = Array.IndexOf(partsdgvs, dgvMapPieces0)
+        Dim colIdx = Array.IndexOf(partsdgvs, dgvCollision5)
+
+        If sourceDgvIndex < mapIdx Or sourceDgvIndex > colIdx Then
             Return
         End If
 
@@ -1373,7 +1391,7 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
-        Dim dgv = dgvs(tabParts.SelectedIndex)
+        Dim dgv = getCurrentDgv()
         Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
         If rowIndex = 0 Or dgv.Rows.Count < 2 Then
@@ -1387,7 +1405,7 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
-        Dim dgv = dgvs(tabParts.SelectedIndex)
+        Dim dgv = getCurrentDgv()
         Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
         If rowIndex > dgv.Rows.Count - 3 Or dgv.Rows.Count < 2 Then
