@@ -215,6 +215,7 @@ Public Class frmMSBEdit
         For i = 0 To layout.fieldCount - 1
             dgv.Columns.Add(layout.retrieveName(i), layout.retrieveName(i))
             dgv.Columns(i).DefaultCellStyle.BackColor = layout.retrieveBackColor(i)
+            dgv.Columns(i).DefaultCellStyle.ForeColor = layout.retrieveForeColor(i)
             dgv.Columns(i).SortMode = DataGridViewColumnSortMode.NotSortable
         Next
     End Sub
