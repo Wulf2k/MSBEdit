@@ -217,6 +217,10 @@ Public Class frmMSBEdit
             dgv.Columns(i).DefaultCellStyle.BackColor = layout.retrieveBackColor(i)
             dgv.Columns(i).DefaultCellStyle.ForeColor = layout.retrieveForeColor(i)
             dgv.Columns(i).SortMode = DataGridViewColumnSortMode.NotSortable
+
+            If layout.isKnown(i) = False Then
+                dgv.Columns(i).Visible = chkShowUnknowns.Checked
+            End If
         Next
     End Sub
     Private Sub readRow(ByRef dgv As DataGridView, ByRef layout As msbdata, ptr As UInteger)
@@ -828,6 +832,18 @@ Public Class frmMSBEdit
         If openDlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
             txtMSBfile.Text = openDlg.FileName
         End If
+    End Sub
+
+    Private Sub chkShowUnknownsChanged(sender As Object, e As EventArgs) Handles chkShowUnknowns.CheckedChanged
+        For i = 0 To dgvs.Count - 1
+            Dim dgv = dgvs(i)
+            Dim layout = layouts(i)
+            For j = 0 To layout.fieldCount - 1
+                If layout.isKnown(j) = False Then
+                    dgv.Columns(j).Visible = chkShowUnknowns.Checked
+                End If
+            Next
+        Next
     End Sub
 
     Private Sub onDgvKeyDown(sender As Object, e As KeyEventArgs)

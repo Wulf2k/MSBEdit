@@ -65,6 +65,7 @@ Partial Class frmMSBEdit
         Me.dgvCreatures10 = New System.Windows.Forms.DataGridView()
         Me.tabCollision11 = New System.Windows.Forms.TabPage()
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
+        Me.chkShowUnknowns = New System.Windows.Forms.CheckBox()
         Me.tabControlRoot.SuspendLayout()
         Me.tabModels.SuspendLayout()
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -653,11 +654,22 @@ Partial Class frmMSBEdit
         Me.dgvCollision11.Size = New System.Drawing.Size(778, 618)
         Me.dgvCollision11.TabIndex = 39
         '
+        'chkShowUnknowns
+        '
+        Me.chkShowUnknowns.AutoSize = True
+        Me.chkShowUnknowns.Location = New System.Drawing.Point(496, 46)
+        Me.chkShowUnknowns.Name = "chkShowUnknowns"
+        Me.chkShowUnknowns.Size = New System.Drawing.Size(107, 17)
+        Me.chkShowUnknowns.TabIndex = 47
+        Me.chkShowUnknowns.Text = "Show Unknowns"
+        Me.chkShowUnknowns.UseVisualStyleBackColor = True
+        '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(834, 761)
+        Me.Controls.Add(Me.chkShowUnknowns)
         Me.Controls.Add(Me.tabControlRoot)
         Me.Controls.Add(Me.btnMoveDown)
         Me.Controls.Add(Me.btnMoveUp)
@@ -751,4 +763,5 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvCreatures10 As DataGridView
     Friend WithEvents tabCollision11 As TabPage
     Friend WithEvents dgvCollision11 As DataGridView
+    Friend WithEvents chkShowUnknowns As CheckBox
 End Class

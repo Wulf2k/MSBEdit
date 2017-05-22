@@ -1,6 +1,6 @@
 ﻿
 Public Class msbdata
-    Public Structure columnStyle
+    Public Class columnStyle
         Public backgroundColor As Color
         Public textColor As Color
 
@@ -8,7 +8,7 @@ Public Class msbdata
             backgroundColor = c1
             textColor = c2
         End Sub
-    End Structure
+    End Class
 
     Private Shared known As columnStyle = New columnStyle(Color.White, Color.Black)
     Private Shared unknown As columnStyle = New columnStyle(Color.LightGray, Color.Black)
@@ -35,6 +35,9 @@ Public Class msbdata
     End Function
     Public Function retrieveForeColor(ByVal i As Integer) As Color
         Return fieldStyles(i).textColor
+    End Function
+    Public Function isKnown(ByVal i As Integer) As Boolean
+        Return fieldStyles(i) Is known
     End Function
     Public Function fieldCount() As Integer
         Return fieldNames.Count
