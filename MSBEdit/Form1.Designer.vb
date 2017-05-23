@@ -61,6 +61,8 @@ Partial Class frmMSBEdit
         Me.dgvEvents10 = New System.Windows.Forms.DataGridView()
         Me.tabEvents11 = New System.Windows.Forms.TabPage()
         Me.dgvEvents11 = New System.Windows.Forms.DataGridView()
+        Me.tabEvents12 = New System.Windows.Forms.TabPage()
+        Me.dgvEvents12 = New System.Windows.Forms.DataGridView()
         Me.tabPoints = New System.Windows.Forms.TabPage()
         Me.tabControlPoints = New System.Windows.Forms.TabControl()
         Me.tabPoints0 = New System.Windows.Forms.TabPage()
@@ -92,8 +94,9 @@ Partial Class frmMSBEdit
         Me.tabCollision11 = New System.Windows.Forms.TabPage()
         Me.dgvCollision11 = New System.Windows.Forms.DataGridView()
         Me.chkShowUnknowns = New System.Windows.Forms.CheckBox()
-        Me.tabEvents12 = New System.Windows.Forms.TabPage()
-        Me.dgvEvents12 = New System.Windows.Forms.DataGridView()
+        Me.labelSectionIndex = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
+        Me.labelRowCount = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tabControlRoot.SuspendLayout()
         Me.tabModels.SuspendLayout()
         CType(Me.dgvModels, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -123,6 +126,8 @@ Partial Class frmMSBEdit
         CType(Me.dgvEvents10, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabEvents11.SuspendLayout()
         CType(Me.dgvEvents11, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabEvents12.SuspendLayout()
+        CType(Me.dgvEvents12, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabPoints.SuspendLayout()
         Me.tabControlPoints.SuspendLayout()
         Me.tabPoints0.SuspendLayout()
@@ -153,8 +158,7 @@ Partial Class frmMSBEdit
         CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabCollision11.SuspendLayout()
         CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabEvents12.SuspendLayout()
-        CType(Me.dgvEvents12, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.StatusStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnSave
@@ -268,7 +272,7 @@ Partial Class frmMSBEdit
         Me.tabControlRoot.Name = "tabControlRoot"
         Me.tabControlRoot.Padding = New System.Drawing.Point(10, 4)
         Me.tabControlRoot.SelectedIndex = 0
-        Me.tabControlRoot.Size = New System.Drawing.Size(806, 686)
+        Me.tabControlRoot.Size = New System.Drawing.Size(806, 670)
         Me.tabControlRoot.TabIndex = 46
         '
         'tabModels
@@ -278,7 +282,7 @@ Partial Class frmMSBEdit
         Me.tabModels.Margin = New System.Windows.Forms.Padding(0)
         Me.tabModels.Name = "tabModels"
         Me.tabModels.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabModels.Size = New System.Drawing.Size(798, 658)
+        Me.tabModels.Size = New System.Drawing.Size(798, 642)
         Me.tabModels.TabIndex = 2
         Me.tabModels.Text = "Models"
         Me.tabModels.UseVisualStyleBackColor = True
@@ -294,7 +298,7 @@ Partial Class frmMSBEdit
         Me.dgvModels.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvModels.Name = "dgvModels"
         Me.dgvModels.RowHeadersWidth = 60
-        Me.dgvModels.Size = New System.Drawing.Size(792, 652)
+        Me.dgvModels.Size = New System.Drawing.Size(792, 636)
         Me.dgvModels.TabIndex = 39
         '
         'tabEvents
@@ -304,7 +308,7 @@ Partial Class frmMSBEdit
         Me.tabEvents.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents.Name = "tabEvents"
         Me.tabEvents.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents.Size = New System.Drawing.Size(798, 658)
+        Me.tabEvents.Size = New System.Drawing.Size(798, 645)
         Me.tabEvents.TabIndex = 5
         Me.tabEvents.Text = "Events"
         Me.tabEvents.UseVisualStyleBackColor = True
@@ -332,7 +336,7 @@ Partial Class frmMSBEdit
         Me.tabControlEvents.Name = "tabControlEvents"
         Me.tabControlEvents.Padding = New System.Drawing.Point(10, 4)
         Me.tabControlEvents.SelectedIndex = 0
-        Me.tabControlEvents.Size = New System.Drawing.Size(792, 652)
+        Me.tabControlEvents.Size = New System.Drawing.Size(792, 639)
         Me.tabControlEvents.TabIndex = 40
         '
         'tabEvents0
@@ -342,7 +346,7 @@ Partial Class frmMSBEdit
         Me.tabEvents0.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents0.Name = "tabEvents0"
         Me.tabEvents0.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents0.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents0.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents0.TabIndex = 0
         Me.tabEvents0.Text = "Events (0)"
         Me.tabEvents0.UseVisualStyleBackColor = True
@@ -359,7 +363,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents0.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents0.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents0.Name = "dgvEvents0"
-        Me.dgvEvents0.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents0.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents0.TabIndex = 39
         '
         'tabEvents1
@@ -369,7 +373,7 @@ Partial Class frmMSBEdit
         Me.tabEvents1.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents1.Name = "tabEvents1"
         Me.tabEvents1.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents1.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents1.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents1.TabIndex = 1
         Me.tabEvents1.Text = "Events (1)"
         Me.tabEvents1.UseVisualStyleBackColor = True
@@ -386,7 +390,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents1.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents1.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents1.Name = "dgvEvents1"
-        Me.dgvEvents1.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents1.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents1.TabIndex = 39
         '
         'tabEvents2
@@ -396,7 +400,7 @@ Partial Class frmMSBEdit
         Me.tabEvents2.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents2.Name = "tabEvents2"
         Me.tabEvents2.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents2.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents2.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents2.TabIndex = 2
         Me.tabEvents2.Text = "Events (2)"
         Me.tabEvents2.UseVisualStyleBackColor = True
@@ -413,7 +417,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents2.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents2.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents2.Name = "dgvEvents2"
-        Me.dgvEvents2.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents2.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents2.TabIndex = 39
         '
         'tabEvents3
@@ -423,7 +427,7 @@ Partial Class frmMSBEdit
         Me.tabEvents3.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents3.Name = "tabEvents3"
         Me.tabEvents3.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents3.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents3.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents3.TabIndex = 3
         Me.tabEvents3.Text = "Events (3)"
         Me.tabEvents3.UseVisualStyleBackColor = True
@@ -440,7 +444,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents3.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents3.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents3.Name = "dgvEvents3"
-        Me.dgvEvents3.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents3.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents3.TabIndex = 39
         '
         'tabEvents4
@@ -450,7 +454,7 @@ Partial Class frmMSBEdit
         Me.tabEvents4.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents4.Name = "tabEvents4"
         Me.tabEvents4.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents4.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents4.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents4.TabIndex = 4
         Me.tabEvents4.Text = "Events (4)"
         Me.tabEvents4.UseVisualStyleBackColor = True
@@ -467,7 +471,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents4.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents4.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents4.Name = "dgvEvents4"
-        Me.dgvEvents4.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents4.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents4.TabIndex = 39
         '
         'tabEvents5
@@ -477,7 +481,7 @@ Partial Class frmMSBEdit
         Me.tabEvents5.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents5.Name = "tabEvents5"
         Me.tabEvents5.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents5.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents5.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents5.TabIndex = 5
         Me.tabEvents5.Text = "Events (5)"
         Me.tabEvents5.UseVisualStyleBackColor = True
@@ -494,7 +498,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents5.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents5.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents5.Name = "dgvEvents5"
-        Me.dgvEvents5.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents5.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents5.TabIndex = 39
         '
         'tabEvents6
@@ -504,7 +508,7 @@ Partial Class frmMSBEdit
         Me.tabEvents6.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents6.Name = "tabEvents6"
         Me.tabEvents6.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents6.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents6.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents6.TabIndex = 6
         Me.tabEvents6.Text = "Events (6)"
         Me.tabEvents6.UseVisualStyleBackColor = True
@@ -521,7 +525,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents6.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents6.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents6.Name = "dgvEvents6"
-        Me.dgvEvents6.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents6.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents6.TabIndex = 39
         '
         'tabEvents7
@@ -531,7 +535,7 @@ Partial Class frmMSBEdit
         Me.tabEvents7.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents7.Name = "tabEvents7"
         Me.tabEvents7.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents7.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents7.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents7.TabIndex = 7
         Me.tabEvents7.Text = "Events (7)"
         Me.tabEvents7.UseVisualStyleBackColor = True
@@ -548,7 +552,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents7.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents7.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents7.Name = "dgvEvents7"
-        Me.dgvEvents7.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents7.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents7.TabIndex = 39
         '
         'tabEvents8
@@ -558,7 +562,7 @@ Partial Class frmMSBEdit
         Me.tabEvents8.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents8.Name = "tabEvents8"
         Me.tabEvents8.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents8.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents8.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents8.TabIndex = 8
         Me.tabEvents8.Text = "Events (8)"
         Me.tabEvents8.UseVisualStyleBackColor = True
@@ -575,7 +579,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents8.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents8.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents8.Name = "dgvEvents8"
-        Me.dgvEvents8.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents8.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents8.TabIndex = 39
         '
         'tabEvents9
@@ -585,7 +589,7 @@ Partial Class frmMSBEdit
         Me.tabEvents9.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents9.Name = "tabEvents9"
         Me.tabEvents9.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents9.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents9.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents9.TabIndex = 9
         Me.tabEvents9.Text = "Events (9)"
         Me.tabEvents9.UseVisualStyleBackColor = True
@@ -602,7 +606,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents9.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents9.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents9.Name = "dgvEvents9"
-        Me.dgvEvents9.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents9.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents9.TabIndex = 39
         '
         'tabEvents10
@@ -612,7 +616,7 @@ Partial Class frmMSBEdit
         Me.tabEvents10.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents10.Name = "tabEvents10"
         Me.tabEvents10.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents10.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents10.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents10.TabIndex = 10
         Me.tabEvents10.Text = "Events (10)"
         Me.tabEvents10.UseVisualStyleBackColor = True
@@ -629,7 +633,7 @@ Partial Class frmMSBEdit
         Me.dgvEvents10.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents10.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents10.Name = "dgvEvents10"
-        Me.dgvEvents10.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents10.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents10.TabIndex = 39
         '
         'tabEvents11
@@ -639,7 +643,7 @@ Partial Class frmMSBEdit
         Me.tabEvents11.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents11.Name = "tabEvents11"
         Me.tabEvents11.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents11.Size = New System.Drawing.Size(784, 624)
+        Me.tabEvents11.Size = New System.Drawing.Size(784, 611)
         Me.tabEvents11.TabIndex = 11
         Me.tabEvents11.Text = "Events (11)"
         Me.tabEvents11.UseVisualStyleBackColor = True
@@ -656,8 +660,35 @@ Partial Class frmMSBEdit
         Me.dgvEvents11.Location = New System.Drawing.Point(3, 3)
         Me.dgvEvents11.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvEvents11.Name = "dgvEvents11"
-        Me.dgvEvents11.Size = New System.Drawing.Size(778, 618)
+        Me.dgvEvents11.Size = New System.Drawing.Size(778, 605)
         Me.dgvEvents11.TabIndex = 39
+        '
+        'tabEvents12
+        '
+        Me.tabEvents12.Controls.Add(Me.dgvEvents12)
+        Me.tabEvents12.Location = New System.Drawing.Point(4, 24)
+        Me.tabEvents12.Margin = New System.Windows.Forms.Padding(0)
+        Me.tabEvents12.Name = "tabEvents12"
+        Me.tabEvents12.Padding = New System.Windows.Forms.Padding(3)
+        Me.tabEvents12.Size = New System.Drawing.Size(784, 611)
+        Me.tabEvents12.TabIndex = 12
+        Me.tabEvents12.Text = "Events (12)"
+        Me.tabEvents12.UseVisualStyleBackColor = True
+        '
+        'dgvEvents12
+        '
+        Me.dgvEvents12.AllowUserToAddRows = False
+        Me.dgvEvents12.AllowUserToDeleteRows = False
+        Me.dgvEvents12.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.dgvEvents12.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.dgvEvents12.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvEvents12.Location = New System.Drawing.Point(3, 3)
+        Me.dgvEvents12.Margin = New System.Windows.Forms.Padding(0)
+        Me.dgvEvents12.Name = "dgvEvents12"
+        Me.dgvEvents12.Size = New System.Drawing.Size(778, 605)
+        Me.dgvEvents12.TabIndex = 39
         '
         'tabPoints
         '
@@ -666,7 +697,7 @@ Partial Class frmMSBEdit
         Me.tabPoints.Margin = New System.Windows.Forms.Padding(0)
         Me.tabPoints.Name = "tabPoints"
         Me.tabPoints.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabPoints.Size = New System.Drawing.Size(798, 658)
+        Me.tabPoints.Size = New System.Drawing.Size(798, 645)
         Me.tabPoints.TabIndex = 3
         Me.tabPoints.Text = "Points"
         Me.tabPoints.UseVisualStyleBackColor = True
@@ -803,7 +834,7 @@ Partial Class frmMSBEdit
         Me.tabParts.Margin = New System.Windows.Forms.Padding(0)
         Me.tabParts.Name = "tabParts"
         Me.tabParts.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabParts.Size = New System.Drawing.Size(798, 658)
+        Me.tabParts.Size = New System.Drawing.Size(798, 642)
         Me.tabParts.TabIndex = 4
         Me.tabParts.Text = "Parts"
         Me.tabParts.UseVisualStyleBackColor = True
@@ -827,7 +858,7 @@ Partial Class frmMSBEdit
         Me.tabControlParts.Name = "tabControlParts"
         Me.tabControlParts.Padding = New System.Drawing.Point(10, 4)
         Me.tabControlParts.SelectedIndex = 0
-        Me.tabControlParts.Size = New System.Drawing.Size(792, 652)
+        Me.tabControlParts.Size = New System.Drawing.Size(792, 649)
         Me.tabControlParts.TabIndex = 40
         '
         'tabMapPieces0
@@ -837,7 +868,7 @@ Partial Class frmMSBEdit
         Me.tabMapPieces0.Margin = New System.Windows.Forms.Padding(0)
         Me.tabMapPieces0.Name = "tabMapPieces0"
         Me.tabMapPieces0.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabMapPieces0.Size = New System.Drawing.Size(784, 624)
+        Me.tabMapPieces0.Size = New System.Drawing.Size(784, 621)
         Me.tabMapPieces0.TabIndex = 0
         Me.tabMapPieces0.Text = "Map Pieces (0)"
         Me.tabMapPieces0.UseVisualStyleBackColor = True
@@ -854,7 +885,7 @@ Partial Class frmMSBEdit
         Me.dgvMapPieces0.Location = New System.Drawing.Point(3, 3)
         Me.dgvMapPieces0.Margin = New System.Windows.Forms.Padding(0)
         Me.dgvMapPieces0.Name = "dgvMapPieces0"
-        Me.dgvMapPieces0.Size = New System.Drawing.Size(778, 618)
+        Me.dgvMapPieces0.Size = New System.Drawing.Size(778, 615)
         Me.dgvMapPieces0.TabIndex = 39
         '
         'tabObjects1
@@ -1083,38 +1114,35 @@ Partial Class frmMSBEdit
         Me.chkShowUnknowns.Text = "Show Unknowns"
         Me.chkShowUnknowns.UseVisualStyleBackColor = True
         '
-        'tabEvents12
+        'labelSectionIndex
         '
-        Me.tabEvents12.Controls.Add(Me.dgvEvents12)
-        Me.tabEvents12.Location = New System.Drawing.Point(4, 24)
-        Me.tabEvents12.Margin = New System.Windows.Forms.Padding(0)
-        Me.tabEvents12.Name = "tabEvents12"
-        Me.tabEvents12.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents12.Size = New System.Drawing.Size(784, 624)
-        Me.tabEvents12.TabIndex = 12
-        Me.tabEvents12.Text = "Events (12)"
-        Me.tabEvents12.UseVisualStyleBackColor = True
+        Me.labelSectionIndex.Name = "labelSectionIndex"
+        Me.labelSectionIndex.Size = New System.Drawing.Size(83, 17)
+        Me.labelSectionIndex.Text = "Section index: "
         '
-        'dgvEvents12
+        'StatusStrip1
         '
-        Me.dgvEvents12.AllowUserToAddRows = False
-        Me.dgvEvents12.AllowUserToDeleteRows = False
-        Me.dgvEvents12.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.dgvEvents12.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
-        Me.dgvEvents12.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvEvents12.Location = New System.Drawing.Point(3, 3)
-        Me.dgvEvents12.Margin = New System.Windows.Forms.Padding(0)
-        Me.dgvEvents12.Name = "dgvEvents12"
-        Me.dgvEvents12.Size = New System.Drawing.Size(778, 618)
-        Me.dgvEvents12.TabIndex = 39
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.labelRowCount, Me.labelSectionIndex})
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 739)
+        Me.StatusStrip1.Name = "StatusStrip1"
+        Me.StatusStrip1.RightToLeft = System.Windows.Forms.RightToLeft.No
+        Me.StatusStrip1.Size = New System.Drawing.Size(834, 22)
+        Me.StatusStrip1.SizingGrip = False
+        Me.StatusStrip1.TabIndex = 48
+        Me.StatusStrip1.Text = "StatusStrip1"
+        '
+        'labelRowCount
+        '
+        Me.labelRowCount.Name = "labelRowCount"
+        Me.labelRowCount.Size = New System.Drawing.Size(76, 17)
+        Me.labelRowCount.Text = "Row count:   "
         '
         'frmMSBEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(834, 761)
+        Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.chkShowUnknowns)
         Me.Controls.Add(Me.tabControlRoot)
         Me.Controls.Add(Me.btnMoveDown)
@@ -1158,6 +1186,8 @@ Partial Class frmMSBEdit
         CType(Me.dgvEvents10, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabEvents11.ResumeLayout(False)
         CType(Me.dgvEvents11, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabEvents12.ResumeLayout(False)
+        CType(Me.dgvEvents12, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabPoints.ResumeLayout(False)
         Me.tabControlPoints.ResumeLayout(False)
         Me.tabPoints0.ResumeLayout(False)
@@ -1188,8 +1218,8 @@ Partial Class frmMSBEdit
         CType(Me.dgvCreatures10, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabCollision11.ResumeLayout(False)
         CType(Me.dgvCollision11, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabEvents12.ResumeLayout(False)
-        CType(Me.dgvEvents12, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.StatusStrip1.ResumeLayout(False)
+        Me.StatusStrip1.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1266,4 +1296,7 @@ Partial Class frmMSBEdit
     Friend WithEvents dgvEvents11 As DataGridView
     Friend WithEvents tabEvents12 As TabPage
     Friend WithEvents dgvEvents12 As DataGridView
+    Friend WithEvents labelSectionIndex As ToolStripStatusLabel
+    Friend WithEvents StatusStrip1 As StatusStrip
+    Friend WithEvents labelRowCount As ToolStripStatusLabel
 End Class

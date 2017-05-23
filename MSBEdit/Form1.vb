@@ -437,6 +437,7 @@ Public Class frmMSBEdit
         labelRows(dgvCreatures10)
         labelRows(dgvCollision11)
 
+        updateStatusBar()
     End Sub
 
     Private Sub saveRow(ByRef MSBStream As FileStream, ByRef row As DataGridViewRow, ByRef data As msbdata, ByRef ptr As Integer, ByRef partsidx As Integer)
@@ -735,15 +736,21 @@ Public Class frmMSBEdit
         dgvs = {dgvModels}.Concat(eventsdgvs).Concat(pointsdgvs).Concat(partsdgvs).ToArray()
 
         For Each dgv In dgvs
+            AddHandler dgv.SelectionChanged, AddressOf Me.onDgvSelectionChanged
             AddHandler dgv.KeyDown, AddressOf Me.onDgvKeyDown
         Next
+
+        AddHandler tabControlRoot.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlEvents.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlPoints.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlParts.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
     End Sub
 
     Private Function getCurrentRootTab()
         Return tabControlRoot.SelectedTab
     End Function
 
-    Private Function getCurrentDgv()
+    Private Function getCurrentDgv() As DataGridView
         Dim rootTab As TabPage = getCurrentRootTab()
         If (rootTab Is tabModels) Then
             Return dgvModels
@@ -757,6 +764,41 @@ Public Class frmMSBEdit
             Throw New Exception()
         End If
     End Function
+
+    Private Sub updateStatusBar()
+        Dim currentDgv = getCurrentDgv()
+
+        labelRowCount.Text = "Row count: " & currentDgv.Rows.Count.ToString & " "
+
+        If currentDgv.Rows.Count = 0 Then
+            Return
+        End If
+
+        Dim cell = currentDgv.SelectedCells(currentDgv.SelectedCells.Count - 1)
+
+        Dim currentSection() As DataGridView = Nothing
+        Dim dgvModelsArray = {dgvModels}
+        For Each section() As DataGridView In {dgvModelsArray, eventsdgvs, pointsdgvs, partsdgvs}
+            If section.Contains(currentDgv) Then
+                currentSection = section
+
+                Exit For
+            End If
+        Next
+
+        Dim idx As Integer = 0
+        For Each dgv In currentSection
+            If dgv Is currentDgv Then
+                Exit For
+            End If
+
+            idx += dgv.Rows.Count
+        Next
+
+        idx += cell.RowIndex
+
+        labelSectionIndex.Text = "Section index: " & idx.ToString
+    End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
         Dim dgv = getCurrentDgv()
@@ -855,6 +897,8 @@ Public Class frmMSBEdit
 
         dgv.Rows.RemoveAt(rowIndex - 1)
         dgv.Rows.Insert(rowIndex, rowAbove)
+
+        updateStatusBar()
     End Sub
 
     Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
@@ -874,6 +918,8 @@ Public Class frmMSBEdit
 
         dgv.Rows.RemoveAt(rowIndex + 1)
         dgv.Rows.Insert(rowIndex, rowBelow)
+
+        updateStatusBar()
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
@@ -897,6 +943,14 @@ Public Class frmMSBEdit
                 End If
             Next
         Next
+    End Sub
+
+    Private Sub onDgvSelectionChanged(sender As Object, e As EventArgs)
+        updateStatusBar()
+    End Sub
+
+    Private Sub onTabControlSelectedIndexChanged(sender As Object, e As EventArgs)
+        updateStatusBar()
     End Sub
 
     Private Sub onDgvKeyDown(sender As Object, e As KeyEventArgs)
