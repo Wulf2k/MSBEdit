@@ -770,7 +770,7 @@ Public Class frmMSBEdit
 
         labelRowCount.Text = "Row count: " & currentDgv.Rows.Count.ToString & " "
 
-        If currentDgv.Rows.Count = 0 Then
+        If currentDgv.Rows.Count = 0 Or currentDgv.SelectedCells.Count = 0 Then
             Return
         End If
 
