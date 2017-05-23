@@ -8,6 +8,23 @@ Imports System.Text
 Public Class frmMSBEdit
 
     Public models As msbdata
+    Public events0 As msbdata
+    Public events1 As msbdata
+    Public events2 As msbdata
+    Public events3 As msbdata
+    Public events4 As msbdata
+    Public events5 As msbdata
+    Public events6 As msbdata
+    Public events7 As msbdata
+    Public events8 As msbdata
+    Public events9 As msbdata
+    Public events10 As msbdata
+    Public events11 As msbdata
+    Public events12 As msbdata
+    Public points0 As msbdata
+    Public points2 As msbdata
+    Public points3 As msbdata
+    Public points5 As msbdata
     Public mapPieces0 As msbdata
     Public objects1 As msbdata
     Public creatures2 As msbdata
@@ -17,25 +34,21 @@ Public Class frmMSBEdit
     Public objects9 As msbdata
     Public creatures10 As msbdata
     Public collision11 As msbdata
-    Public points0 As msbdata
-    Public points2 As msbdata
-    Public points3 As msbdata
-    Public points5 As msbdata
 
     Dim dgvs() As DataGridView = {}
     Dim layouts() As msbdata = {}
 
-    Dim parts() As msbdata = {}
-    Dim partsdgvs() As DataGridView = {}
+    Dim Shadows events() As msbdata = {}
+    Dim eventsdgvs() As DataGridView = {}
 
     Dim points() As msbdata = {}
     Dim pointsdgvs() As DataGridView = {}
 
+    Dim parts() As msbdata = {}
+    Dim partsdgvs() As DataGridView = {}
+
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
-
-    Public Shared eventParams() As Byte = {}
-    Public Shared eventParamsOrigOffset As UInteger
 
     Private Sub txt_Drop(sender As Object, e As System.Windows.Forms.DragEventArgs) Handles txtMSBfile.DragDrop
         Dim file() As String = e.Data.GetData(DataFormats.FileDrop)
@@ -298,7 +311,6 @@ Public Class frmMSBEdit
         Dim sibpath As Byte()
 
 
-        Dim padding As UInteger
         Dim row(40) As String
 
         Dim modelPtr As UInteger
@@ -325,9 +337,6 @@ Public Class frmMSBEdit
         modelPtr = 0
         modelCnt = UIntFromFour(&H8)
 
-        initDGV(dgvModels, models)
-
-
         eventPtr = UIntFromFour((modelCnt * &H4) + &H8)
         eventCnt = UIntFromFour(eventPtr + &H8)
 
@@ -337,10 +346,11 @@ Public Class frmMSBEdit
         partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
         partsCnt = UIntFromFour(partsPtr + &H8)
 
-        eventParamsOrigOffset = eventPtr
-        ReDim eventParams(pointPtr - eventPtr - 1)
-        Array.Copy(bytes, eventPtr, eventParams, 0, eventParams.Length)
+        initDGV(dgvModels, models)
 
+        For i = 0 To events.Count - 1
+            initDGV(eventsdgvs(i), events(i))
+        Next
 
         For i = 0 To points.Count - 1
             initDGV(pointsdgvs(i), points(i))
@@ -378,11 +388,22 @@ Public Class frmMSBEdit
 
 
         Dim idx As Integer
+        Dim eventtype(13) As Integer
+        eventtype = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+
+        For i = 0 To eventCnt - 2
+            ptr = UIntFromFour(eventPtr + &HC + i * &H4)
+
+            idx = Array.IndexOf(eventtype, SIntFromFour(ptr + &H8))
+            readRow(eventsdgvs(idx), Events(idx), ptr)
+        Next
+
+
+        idx = 0
         Dim pointtype(4) As Integer
         pointtype = {0, 2, 3, 5}
 
         For i = 0 To pointCnt - 2
-            padding = 0
             ptr = UIntFromFour(pointPtr + &HC + i * &H4)
 
             idx = Array.IndexOf(pointtype, SIntFromFour(ptr + &HC))
@@ -395,7 +416,6 @@ Public Class frmMSBEdit
         parttype = {0, 1, 2, 4, 5, 8, 9, &HA, &HB}
 
         For i = 0 To partsCnt - 2
-            padding = 0
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
 
             idx = Array.IndexOf(parttype, SIntFromFour(ptr + &H4))
@@ -469,8 +489,6 @@ Public Class frmMSBEdit
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
 
-        Dim tmpbytes() As Byte
-
         Dim msbIndex As Byte() = {}
         Dim msbData As Byte() = {}
 
@@ -508,7 +526,6 @@ Public Class frmMSBEdit
 
         partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
         partsCnt = UIntFromFour(partsPtr + &H8)
-
 
 
         Dim curroffset As UInteger
@@ -578,20 +595,38 @@ Public Class frmMSBEdit
         WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
         MSBStream.Position = eventPtr
 
-        bytes = eventParams
+        eventCnt = 1
+        For Each dgv In eventsdgvs
+            eventCnt += dgv.Rows.Count
+        Next
+        curroffset = eventPtr + &HC + eventCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - eventParamsOrigOffset + eventPtr))
-        eventCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
         WriteBytes(MSBStream, UInt32ToFourByte(eventCnt))
 
-        For i As UInteger = 0 To eventCnt - 1
-            curroffset = &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - eventParamsOrigOffset + eventPtr))
-        Next
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("EVENT_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
-        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
-        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
-        WriteBytes(MSBStream, tmpbytes)
+        ' I haven't tested if the game wants events to be in order (like points) but it probably does.
+        Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+        Dim keys = New List(Of Integer)
+        For i = 0 To eventsdgvs.Length - 1
+            For j = 0 To eventsdgvs(i).Rows.Count - 1
+                Dim row = eventsdgvs(i).Rows(j)
+                rows.Add(Tuple.Create(row, events(i)))
+                Dim idx = CInt(row.Cells(3).Value)
+                keys.Add(idx)
+            Next
+        Next
+        Dim sortedRows As Array = rows.ToArray
+        Array.Sort(keys.ToArray, rows.ToArray)
+
+        Dim eventsidx = 0
+        For i = 0 To sortedRows.Length - 1
+            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+            saveRow(MSBStream, t.Item1, t.Item2, eventPtr, eventsidx)
+        Next
 
 
         pointPtr = MSBStream.Length
@@ -609,10 +644,9 @@ Public Class frmMSBEdit
         WriteBytes(MSBStream, Str2Bytes("POINT_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
-        Dim partsidx = 0
         ' The game needs each point to be in order, so aggregate each point type, sorted by index
-        Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
-        Dim keys = New List(Of Integer)
+        rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+        keys = New List(Of Integer)
         For i = 0 To pointsdgvs.Length - 1
             For j = 0 To pointsdgvs(i).Rows.Count - 1
                 Dim row = pointsdgvs(i).Rows(j)
@@ -621,9 +655,10 @@ Public Class frmMSBEdit
                 keys.Add(idx)
             Next
         Next
-        Dim sortedRows As Array = rows.ToArray
+        sortedRows = rows.ToArray
         Array.Sort(keys.ToArray, sortedRows)
 
+        Dim partsidx = 0
         For i = 0 To sortedRows.Length - 1
             Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
             saveRow(MSBStream, t.Item1, t.Item2, pointPtr, partsidx)
@@ -660,6 +695,19 @@ Public Class frmMSBEdit
 
     Private Sub frmMSBEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         models = msbdata.generate("models")
+        events0 = msbdata.generate("events0")
+        events1 = msbdata.generate("events1")
+        events2 = msbdata.generate("events2")
+        events3 = msbdata.generate("events3")
+        events4 = msbdata.generate("events4")
+        events5 = msbdata.generate("events5")
+        events6 = msbdata.generate("events6")
+        events7 = msbdata.generate("events7")
+        events8 = msbdata.generate("events8")
+        events9 = msbdata.generate("events9")
+        events10 = msbdata.generate("events10")
+        events11 = msbdata.generate("events11")
+        events12 = msbdata.generate("events12")
         points0 = msbdata.generate("points0")
         points2 = msbdata.generate("points2")
         points3 = msbdata.generate("points3")
@@ -674,14 +722,17 @@ Public Class frmMSBEdit
         creatures10 = msbdata.generate("creatures10")
         collision11 = msbdata.generate("collision11")
 
+        events = {events0, events1, events2, events3, events4, events5, events6, events7, events8, events9, events10, events11, events12}
+        eventsdgvs = {dgvEvents0, dgvEvents1, dgvEvents2, dgvEvents3, dgvEvents4, dgvEvents5, dgvEvents6, dgvEvents7, dgvEvents8, dgvEvents9, dgvEvents10, dgvEvents11, dgvEvents12}
+
         points = {points0, points2, points3, points5}
         pointsdgvs = {dgvPoints0, dgvPoints2, dgvPoints3, dgvPoints5}
 
         parts = {mapPieces0, objects1, creatures2, creatures4, collision5, navimesh8, objects9, creatures10, collision11}
         partsdgvs = {dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
-        layouts = {models}.Concat(points).Concat(parts).ToArray()
-        dgvs = {dgvModels}.Concat(pointsdgvs).Concat(partsdgvs).ToArray()
+        layouts = {models}.Concat(events).Concat(points).Concat(parts).ToArray()
+        dgvs = {dgvModels}.Concat(eventsdgvs).Concat(pointsdgvs).Concat(partsdgvs).ToArray()
 
         For Each dgv In dgvs
             AddHandler dgv.KeyDown, AddressOf Me.onDgvKeyDown
@@ -696,6 +747,8 @@ Public Class frmMSBEdit
         Dim rootTab As TabPage = getCurrentRootTab()
         If (rootTab Is tabModels) Then
             Return dgvModels
+        ElseIf rootTab Is tabEvents Then
+            Return eventsdgvs(tabControlEvents.SelectedIndex)
         ElseIf rootTab Is tabPoints Then
             Return pointsdgvs(tabControlPoints.SelectedIndex)
         ElseIf rootTab Is tabParts Then
