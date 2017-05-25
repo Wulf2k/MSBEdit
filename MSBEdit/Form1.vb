@@ -765,6 +765,30 @@ Public Class frmMSBEdit
         End If
     End Function
 
+    Private Function getSectionIndex(sourceDgv As DataGridView, Optional ByVal currentSection() As DataGridView = Nothing)
+        If currentSection Is Nothing Then
+            Dim dgvModelsArray = {dgvModels}
+            For Each section() As DataGridView In {dgvModelsArray, eventsdgvs, pointsdgvs, partsdgvs}
+                If section.Contains(sourceDgv) Then
+                    currentSection = section
+
+                    Exit For
+                End If
+            Next
+        End If
+
+        Dim idx As Integer = 0
+        For Each dgv In currentSection
+            If dgv Is sourceDgv Then
+                Exit For
+            End If
+
+            idx += dgv.Rows.Count
+        Next
+
+        Return idx
+    End Function
+
     Private Sub updateStatusBar()
         Dim currentDgv = getCurrentDgv()
 
@@ -776,24 +800,7 @@ Public Class frmMSBEdit
 
         Dim cell = currentDgv.SelectedCells(currentDgv.SelectedCells.Count - 1)
 
-        Dim currentSection() As DataGridView = Nothing
-        Dim dgvModelsArray = {dgvModels}
-        For Each section() As DataGridView In {dgvModelsArray, eventsdgvs, pointsdgvs, partsdgvs}
-            If section.Contains(currentDgv) Then
-                currentSection = section
-
-                Exit For
-            End If
-        Next
-
-        Dim idx As Integer = 0
-        For Each dgv In currentSection
-            If dgv Is currentDgv Then
-                Exit For
-            End If
-
-            idx += dgv.Rows.Count
-        Next
+        Dim idx As Integer = getSectionIndex(currentDgv)
 
         idx += cell.RowIndex
 
@@ -817,8 +824,13 @@ Public Class frmMSBEdit
         Next
         dgv.Rows.Add(row)
 
-        If ChkUpdatePhysIndices.Checked Then
-            UpdatePhysIndices(getCurrentDgv(), 1)
+        If ChkUpdatePointerIndices.Checked Then
+            If pointsdgvs.Contains(dgv) Then
+                Dim totalPoints = getSectionIndex(pointsdgvs.Last, pointsdgvs) + pointsdgvs.Last.Rows.Count
+                dgv.Rows(dgv.Rows.Count - 1).Cells(2).Value = totalPoints - 1
+            Else
+                UpdatePointerIndices(dgv, dgv.Rows.Count - 1, 1)
+            End If
         End If
     End Sub
 
@@ -833,51 +845,11 @@ Public Class frmMSBEdit
     End Sub
 
     Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowidx, -1)
+        End If
+
         dgv.Rows.RemoveAt(rowidx)
-
-        If ChkUpdatePhysIndices.Checked Then
-            UpdatePhysIndices(getCurrentDgv(), -1)
-        End If
-    End Sub
-
-    ' Won't work properly if the user edits map parts or collision5 parts, can be fixed later if there's ever a need.
-    Sub UpdatePhysIndices(sourceDgv As DataGridView, delta As Integer)
-        If getCurrentRootTab() IsNot tabParts Then
-            Return
-        End If
-
-        Dim sourceDgvIndex = Array.IndexOf(partsdgvs, sourceDgv)
-        Dim mapIdx = Array.IndexOf(partsdgvs, dgvMapPieces0)
-        Dim colIdx = Array.IndexOf(partsdgvs, dgvCollision5)
-
-        If sourceDgvIndex < mapIdx Or sourceDgvIndex > colIdx Then
-            Return
-        End If
-
-        Dim firstPhysIdx As Integer = -1
-        For i = mapIdx To colIdx - 1
-            firstPhysIdx += dgvs(i).Rows.Count
-        Next
-
-        For i = 0 To dgvs.Length - 1
-            Dim idx = layouts(i).getFieldIndex("PhysIndex")
-            If idx = -1 Then
-                Continue For
-            End If
-
-            For j = 0 To dgvs(i).Rows.Count - 1
-                Dim row = dgvs(i).Rows(j)
-
-                Dim oldValue = CInt(row.Cells(idx).Value)
-                If oldValue < firstPhysIdx Then
-                    ' I don't know why some things use map part indices and most others use collision indices.
-                    Continue For
-                End If
-
-                Dim newValue = oldValue + delta
-                row.Cells(idx).Value = newValue
-            Next
-        Next
     End Sub
 
     Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
@@ -891,6 +863,10 @@ Public Class frmMSBEdit
 
         If rowIndex = 0 Then
             Return
+        End If
+
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowIndex, -1, True)
         End If
 
         Dim rowAbove As DataGridViewRow = dgv.Rows(rowIndex - 1)
@@ -914,12 +890,97 @@ Public Class frmMSBEdit
             Return
         End If
 
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowIndex, 1, True)
+        End If
+
         Dim rowBelow As DataGridViewRow = dgv.Rows(rowIndex + 1)
 
         dgv.Rows.RemoveAt(rowIndex + 1)
         dgv.Rows.Insert(rowIndex, rowBelow)
 
         updateStatusBar()
+    End Sub
+
+    ' When a row is added/deleted/moved in the points or parts section, update anything in the entire file that points to
+    ' elements past that one.
+    Sub UpdatePointerIndices(sourceDgv As DataGridView, sourceRowIdx As Integer, delta As Integer, Optional swap As Boolean = False)
+        Dim currentRootTab = getCurrentRootTab()
+
+        Dim isPoints As Boolean = currentRootTab Is tabPoints
+        Dim isParts As Boolean = currentRootTab Is tabParts
+
+        If isPoints = False And isParts = False Then
+            Return
+        End If
+
+        ' Things that point to parts use their position in the parts section. For points, it's similar, but points are sorted
+        ' by their index cell when the file is saved and they also need to have proper index values or the game doesn't like it.
+
+        If isParts And swap = True Then
+            Return
+        End If
+
+        Dim fromSectionIdx As Integer = 0
+        If isPoints Then
+            fromSectionIdx = CInt(sourceDgv.Rows(sourceRowIdx).Cells(2).Value)
+
+            shiftPointIndices(sourceDgv, sourceRowIdx, delta)
+        Else
+            fromSectionIdx = getSectionIndex(sourceDgv) + sourceRowIdx
+        End If
+
+        For i = 0 To dgvs.Count - 1
+            Dim dgv = dgvs(i)
+            Dim layout = layouts(i)
+
+            Dim indices As List(Of Integer) = Nothing
+            If isPoints Then
+                indices = layout.getPointIndices()
+            ElseIf isParts Then
+                indices = layout.getPartIndices()
+            End If
+
+            If indices.Count = 0 Then
+                Continue For
+            End If
+
+            Dim otherSourceRowIdx = fromSectionIdx + delta
+
+            For Each columnIdx In indices
+                For rowIdx = 0 To dgv.Rows.Count - 1
+                    Dim cell = dgv.Rows(rowIdx).Cells(columnIdx)
+                    Dim sectionIdx = CInt(cell.Value)
+
+                    If swap Then
+                        If sectionIdx = fromSectionIdx Then
+                            cell.Value = otherSourceRowIdx.ToString()
+                        ElseIf sectionIdx = otherSourceRowIdx Then
+                            cell.Value = fromSectionIdx.ToString()
+                        End If
+                    Else
+                        If sectionIdx >= fromSectionIdx Then
+                            cell.Value = (sectionIdx + delta).ToString()
+                        End If
+                    End If
+                Next
+            Next
+        Next
+    End Sub
+
+    ' Shift the "index" of every point past a certain number
+    ' (for the point type, naming things is hard)
+    Private Sub shiftPointIndices(sourceDgv As DataGridView, rowIdx As Integer, delta As Integer)
+        Dim fromPointIdx = CInt(sourceDgv.Rows(rowIdx).Cells(2).Value)
+
+        For Each dgv In pointsdgvs
+            For i = 0 To dgv.Rows.Count - 1
+                Dim pointIdx = CInt(dgv.Rows(i).Cells(2).Value)
+                If pointIdx >= fromPointIdx Then
+                    dgv.Rows(i).Cells(2).Value = (pointIdx + delta).ToString
+                End If
+            Next
+        Next
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click

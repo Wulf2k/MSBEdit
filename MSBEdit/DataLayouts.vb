@@ -19,6 +19,11 @@ Public Class msbdata
     Private fieldStyles As List(Of columnStyle) = New List(Of columnStyle)
 
     Private nameIdx As Integer
+    Private pointIndex1 As Integer = -1
+    Private pointIndex2 As Integer = -1
+    Private partIndex1 As Integer = -1
+    Private partIndex2 As Integer = -1
+    Private partIndex3 As Integer = -1
 
     Public Sub add(ByVal name As String, ByVal type As String, style As columnStyle)
         fieldNames.Add(name)
@@ -52,6 +57,24 @@ Public Class msbdata
     Public Function getFieldIndex(ByVal name As String) As Integer
         Return fieldNames.IndexOf(name)
     End Function
+    Public Function getPointIndices() As List(Of Integer)
+        Dim result = New List(Of Integer)
+
+        ' <> is such an odd way to write !=
+        If pointIndex1 <> -1 Then result.Add(pointIndex1)
+        If pointIndex2 <> -1 Then result.Add(pointIndex2)
+
+        Return result
+    End Function
+    Public Function getPartIndices() As List(Of Integer)
+        Dim result = New List(Of Integer)
+
+        If partIndex1 <> -1 Then result.Add(partIndex1)
+        If partIndex2 <> -1 Then result.Add(partIndex2)
+        If partIndex3 <> -1 Then result.Add(partIndex3)
+
+        Return result
+    End Function
 
     Private Shared Sub eventTemplate(ByRef layout As msbdata)
         With layout
@@ -64,8 +87,10 @@ Public Class msbdata
             .add("x18", "i32", unknown)
             .setNameIndex(.fieldCount)
             .add("Name", "string", known)
-            .add("PhysIndex", "i32", important)
-            .add("Point Index", "i32", known)
+            .partIndex1 = .fieldCount
+            .add("PartIndex1", "i32", important)
+            .pointIndex1 = .fieldCount
+            .add("PointIndex1", "i32", important)
             .add("EventEntityID", "i32", important)
             .add("p+0x0c", "i32", unknown)
         End With
@@ -118,7 +143,8 @@ Public Class msbdata
             ElseIf name = "events4" Then
                 eventTemplate(layout)
                 .add("p+0x10", "i32", unknown)
-                .add("p+0x14", "i32", unknown)
+                .partIndex2 = .fieldCount
+                .add("PartIndex2", "i32", important)
                 .add("p+0x18", "i32", unknown)
                 .add("p+0x1C", "i32", unknown)
                 .add("p+0x20", "i32", unknown)
@@ -131,6 +157,7 @@ Public Class msbdata
                 .add("p+0x3C", "i32", unknown)
                 .add("p+0x40", "i32", unknown)
             ElseIf name = "events5" Then
+                ' Enemy spawner, like for the blighttown mosquitoes
                 eventTemplate(layout)
                 .add("p+0x10", "i32", unknown)
                 .add("p+0x14", "i32", unknown)
@@ -144,12 +171,15 @@ Public Class msbdata
                 .add("p+0x34", "i32", unknown)
                 .add("p+0x38", "i32", unknown)
                 .add("p+0x3C", "i32", unknown)
-                .add("p+0x40", "i32", unknown)
+                .pointIndex2 = .fieldCount
+                .add("PointIndex2", "i32", important)
                 .add("p+0x44", "i32", unknown)
                 .add("p+0x48", "i32", unknown)
                 .add("p+0x4C", "i32", unknown)
-                .add("p+0x50", "i32", unknown)
-                .add("p+0x54", "i32", unknown)
+                .partIndex2 = .fieldCount
+                .add("PartIndex2", "i32", important)
+                .partIndex3 = .fieldCount
+                .add("PartIndex3", "i32", important)
                 .add("p+0x58", "i32", unknown)
                 .add("p+0x5C", "i32", unknown)
                 .add("p+0x60", "i32", unknown)
@@ -197,18 +227,21 @@ Public Class msbdata
                 .add("p+0x108", "i32", unknown)
                 .add("p+0x10C", "i32", unknown)
             ElseIf name = "events6" Then
+                ' Magic blood characters and the tutorial message near Petrus? Sounds like orange soapstone messages.
                 eventTemplate(layout)
                 .add("p+0x10", "i32", unknown)
                 .add("p+0x14", "i32", unknown)
             ElseIf name = "events7" Then
                 eventTemplate(layout)
                 .add("p+0x10", "i32", unknown)
-                .add("p+0x14", "i32", unknown)
+                .partIndex2 = .fieldCount
+                .add("PartIndex2", "i32", important)
                 .add("p+0x18", "i32", unknown)
                 .add("p+0x1C", "i32", unknown)
             ElseIf name = "events8" Then
                 eventTemplate(layout)
-                .add("p+0x10", "i32", unknown)
+                .partIndex2 = .fieldCount
+                .add("PartIndex2", "i32", important)
                 .add("p+0x14", "i32", unknown)
                 .add("p+0x18", "i32", unknown)
                 .add("p+0x1C", "i32", unknown)
@@ -220,7 +253,8 @@ Public Class msbdata
                 .add("p+0x1C", "i32", unknown)
             ElseIf name = "events10" Then
                 eventTemplate(layout)
-                .add("p+0x10", "i32", unknown)
+                .pointIndex2 = .fieldCount
+                .add("PointIndex2", "i32", important)
                 .add("p+0x14", "i32", unknown)
                 .add("p+0x18", "i32", unknown)
                 .add("p+0x1C", "i32", unknown)
@@ -237,10 +271,12 @@ Public Class msbdata
             ElseIf name = "events12" Then
                 ' Only used once, in the Painted World
                 ' Rough translation: "The world of NPC (a warrior)"
+                ' Point name: "Event: Initial position of the boss"
                 eventTemplate(layout)
                 .add("p+0x10", "i32", unknown)
                 .add("p+0x14", "i32", unknown)
-                .add("p+0x18", "i32", unknown)
+                .pointIndex2 = .fieldCount
+                .add("PointIndex2", "i32", important)
                 .add("p+0x1C", "i32", unknown)
             ElseIf name = "points0" Then
                 .add("Name Offset", "i32", known)
@@ -416,7 +452,8 @@ Public Class msbdata
                 .add("p+x13", "i8", unknown)
                 .add("p+x14", "i32", unknown)
                 .add("p+x18", "i32", unknown)
-                .add("PhysIndex", "i32", important)
+                .partIndex1 = .fieldCount
+                .add("PartIndex", "i32", important)
                 .add("p+x20", "i32", unknown)
                 .add("p+x24", "i32", unknown)
                 .add("p+x28", "i32", unknown)
@@ -466,7 +503,8 @@ Public Class msbdata
                 .add("TalkID", "i32", known)
                 .add("p+x2C", "i32", unknown)
                 .add("ChrInitParam", "i32", known)
-                .add("PhysIndex", "i32", important)
+                .partIndex1 = .fieldCount
+                .add("PartIndex", "i32", important)
                 .add("p+x38", "i32", unknown)
                 .add("p+x3C", "i32", unknown)
                 .add("p+x40", "i32", unknown)
@@ -689,7 +727,8 @@ Public Class msbdata
                 .add("p+x13", "i8", unknown)
                 .add("p+x14", "i32", unknown)
                 .add("p+x18", "i32", unknown)
-                .add("PhysIndex", "i32", important)
+                .partIndex1 = .fieldCount
+                .add("PartIndex", "i32", important)
                 .add("p+x20", "i32", unknown)
                 .add("p+x24", "i32", unknown)
                 .add("p+x28", "i32", unknown)
@@ -739,7 +778,8 @@ Public Class msbdata
                 .add("p+x28", "i32", unknown)
                 .add("p+x2C", "i32", unknown)
                 .add("p+x30", "i32", unknown)
-                .add("PhysIndex", "i32", important)
+                .partIndex1 = .fieldCount
+                .add("PartIndex", "i32", important)
                 .add("p+x38", "i32", unknown)
                 .add("p+x3C", "i32", unknown)
                 .add("p+x40", "i32", unknown)
