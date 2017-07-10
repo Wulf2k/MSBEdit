@@ -1,34 +1,54 @@
 ﻿Imports System.IO
+Imports System.Text
 
 
 'Creature type 0x4 is sized wrong
 'TODO:  Confirm the above
-'TODO:  Update to look at Sib Offset instead of using padding
 
 Public Class frmMSBEdit
 
-    Public models As msbdata = New msbdata
-    Public mapPieces0 As msbdata = New msbdata
-    Public objects1 As msbdata = New msbdata
-    Public creatures2 As msbdata = New msbdata
-    Public creatures4 As msbdata = New msbdata
-    Public collision5 As msbdata = New msbdata
-    Public navimesh8 As msbdata = New msbdata
-    Public objects9 As msbdata = New msbdata
-    Public creatures10 As msbdata = New msbdata
-    Public collision11 As msbdata = New msbdata
+    Public models As msbdata
+    Public events0 As msbdata
+    Public events1 As msbdata
+    Public events2 As msbdata
+    Public events3 As msbdata
+    Public events4 As msbdata
+    Public events5 As msbdata
+    Public events6 As msbdata
+    Public events7 As msbdata
+    Public events8 As msbdata
+    Public events9 As msbdata
+    Public events10 As msbdata
+    Public events11 As msbdata
+    Public events12 As msbdata
+    Public points0 As msbdata
+    Public points2 As msbdata
+    Public points3 As msbdata
+    Public points5 As msbdata
+    Public mapPieces0 As msbdata
+    Public objects1 As msbdata
+    Public creatures2 As msbdata
+    Public creatures4 As msbdata
+    Public collision5 As msbdata
+    Public navimesh8 As msbdata
+    Public objects9 As msbdata
+    Public creatures10 As msbdata
+    Public collision11 As msbdata
+
+    Dim dgvs() As DataGridView = {}
+    Dim layouts() As msbdata = {}
+
+    Dim Shadows events() As msbdata = {}
+    Dim eventsdgvs() As DataGridView = {}
+
+    Dim points() As msbdata = {}
+    Dim pointsdgvs() As DataGridView = {}
 
     Dim parts() As msbdata = {}
     Dim partsdgvs() As DataGridView = {}
 
     Public Shared bytes() As Byte
     Public Shared bigEndian As Boolean = True
-
-    Public Shared eventParams() As Byte = {}
-    Public Shared eventParamsOrigOffset As UInteger
-
-    Public Shared pointParams() As Byte = {}
-    Public Shared pointParamsOrigOffset As UInteger
 
     Private Sub txt_Drop(sender As Object, e As System.Windows.Forms.DragEventArgs) Handles txtMSBfile.DragDrop
         Dim file() As String = e.Data.GetData(DataFormats.FileDrop)
@@ -44,25 +64,38 @@ Public Class frmMSBEdit
         Next
     End Sub
 
-    Private Function StrFromBytes(ByVal loc As UInteger) As String
-        Dim Str As String = ""
+    Private Function RawStrFromBytes(ByVal loc As UInteger) As Byte()
         Dim cont As Boolean = True
+        Dim len As Integer = 0
 
         While cont
-            If bytes(loc) > 0 Then
-                Str = Str + Convert.ToChar(bytes(loc))
-                loc += 1
+            If bytes(loc + len) > 0 Then
+                len += 1
             Else
                 cont = False
             End If
         End While
 
-        Return Str
+        If len = 0 Then
+            Return {}
+        End If
+
+        Dim strBytesJIS(len - 1) As Byte
+        Array.Copy(bytes, loc, strBytesJIS, 0, len)
+
+        Return strBytesJIS
     End Function
     Private Function Str2Bytes(ByVal str As String) As Byte()
         Dim BArr() As Byte
-        BArr = System.Text.Encoding.ASCII.GetBytes(str)
+        BArr = Encoding.GetEncoding("shift_jis").GetBytes(str)
         Return BArr
+    End Function
+    Private Function RawStrToStr(ByVal rawStr As Byte()) As String
+        Dim enc1 = Encoding.GetEncoding("shift_jis")
+        Dim enc2 = Encoding.Unicode
+        Dim strBytesUnicode As Byte() = Encoding.Convert(enc1, enc2, rawStr)
+        Dim str As String = Encoding.Unicode.GetString(strBytesUnicode)
+        Return str
     End Function
 
     Private Function Int8ToOneByte(ByVal val As Integer) As Byte()
@@ -195,28 +228,42 @@ Public Class frmMSBEdit
         For i = 0 To layout.fieldCount - 1
             dgv.Columns.Add(layout.retrieveName(i), layout.retrieveName(i))
             dgv.Columns(i).DefaultCellStyle.BackColor = layout.retrieveBackColor(i)
+            dgv.Columns(i).DefaultCellStyle.ForeColor = layout.retrieveForeColor(i)
+            dgv.Columns(i).SortMode = DataGridViewColumnSortMode.NotSortable
+
+            If layout.isKnown(i) = False Then
+                dgv.Columns(i).Visible = chkShowUnknowns.Checked
+            End If
         Next
     End Sub
-    Private Sub readParts(ByRef dgv As DataGridView, ByRef layout As msbdata, ptr As UInteger)
+    Private Sub readRow(ByRef dgv As DataGridView, ByRef layout As msbdata, ptr As UInteger)
 
         Dim currOffset As Integer = 0
         Dim partRow(layout.fieldCount) As String
-        Dim partName As String = ""
-        Dim sibpath As String = ""
+        Dim partName As Byte() = {}
+        Dim sibpath As Byte() = {}
         Dim textboost As Integer
+        Dim hasSib As Boolean
+        Dim Padding As Integer
 
         Dim nameoffset = SIntFromFour(ptr)
-        partName = StrFromBytes(ptr + nameoffset)
-        sibpath = StrFromBytes(ptr + nameoffset + partName.Length + 1)
+        partName = RawStrFromBytes(ptr + nameoffset)
+        partRow(layout.getNameIndex) = RawStrToStr(partName)
+        Padding = partName.Length + 1
 
-        partRow(layout.getNameIndex) = partName
-        partRow(layout.getNameIndex + 1) = sibpath
+        hasSib = layout.retrieveName(layout.getNameIndex + 1) = "Sibpath"
+        If hasSib Then
+            Dim siboffset = SIntFromFour(ptr + &H10)
+            sibpath = RawStrFromBytes(ptr + siboffset)
+            partRow(layout.getNameIndex + 1) = RawStrToStr(sibpath)
 
-        Dim Padding = ((sibpath.Length + partName.Length + 5) And -&H4)
-        If Padding <= &H10 Then
-            Padding = &H10
-            If Not bigEndian Then Padding += &H4
+            Padding += sibpath.Length + 1
+            If sibpath.Length = 0 Then
+                Padding += 5
+            End If
         End If
+
+        Padding = (Padding + 3) And -&H4
 
         For j = 0 To layout.fieldCount - 1
             If j < layout.getNameIndex Then
@@ -238,7 +285,7 @@ Public Class frmMSBEdit
                     partRow(j) = SIntFromFour(ptr + textboost + currOffset)
                     currOffset += 4
                 Case "f32"
-                    partRow(j) = Math.Round(SingleFromFour(ptr + textboost + currOffset), 2)
+                    partRow(j) = SingleFromFour(ptr + textboost + currOffset)
                     currOffset += 4
             End Select
         Next
@@ -247,7 +294,7 @@ Public Class frmMSBEdit
     End Sub
     Private Sub labelRows(ByVal dgv As DataGridView)
         'Label row headers with name
-        For i = 0 To dgv.Rows.Count - 2
+        For i = 0 To dgv.Rows.Count - 1
             dgv.Rows(i).HeaderCell.Value = dgv.Rows(i).Cells(25).Value
         Next
         dgv.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
@@ -260,11 +307,10 @@ Public Class frmMSBEdit
 
         Dim nameoffset As UInteger
 
-        Dim name As String
-        Dim sibpath As String
+        Dim name As Byte()
+        Dim sibpath As Byte()
 
 
-        Dim padding As UInteger
         Dim row(40) As String
 
         Dim modelPtr As UInteger
@@ -291,9 +337,6 @@ Public Class frmMSBEdit
         modelPtr = 0
         modelCnt = UIntFromFour(&H8)
 
-        initDGV(dgvModels, models)
-
-
         eventPtr = UIntFromFour((modelCnt * &H4) + &H8)
         eventCnt = UIntFromFour(eventPtr + &H8)
 
@@ -303,16 +346,15 @@ Public Class frmMSBEdit
         partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
         partsCnt = UIntFromFour(partsPtr + &H8)
 
-        eventParamsOrigOffset = eventPtr
-        ReDim eventParams(pointPtr - eventPtr - 1)
-        Array.Copy(bytes, eventPtr, eventParams, 0, eventParams.Length)
+        initDGV(dgvModels, models)
 
-        pointParamsOrigOffset = pointPtr
-        ReDim pointParams(partsPtr - pointPtr - 1)
-        Array.Copy(bytes, pointPtr, pointParams, 0, pointParams.Length)
+        For i = 0 To events.Count - 1
+            initDGV(eventsdgvs(i), events(i))
+        Next
 
-
-
+        For i = 0 To points.Count - 1
+            initDGV(pointsdgvs(i), points(i))
+        Next
 
         For i = 0 To parts.Count - 1
             initDGV(partsdgvs(i), parts(i))
@@ -322,17 +364,15 @@ Public Class frmMSBEdit
         For i = 0 To modelCnt - 2
             Dim currOffset As Integer = 0
             Dim mdlRow(models.fieldCount) As String
-            Dim mdlName As String = ""
-            Dim mdlSibpath As String = ""
 
             ptr = UIntFromFour(modelPtr + &HC + i * &H4)
 
             nameoffset = UIntFromFour(ptr)
-            name = StrFromBytes(ptr + nameoffset)
-            sibpath = StrFromBytes(ptr + nameoffset + name.Length + 1)
+            name = RawStrFromBytes(ptr + nameoffset)
+            sibpath = RawStrFromBytes(ptr + nameoffset + name.Length + 1)
 
-            mdlRow(models.getNameIndex) = name
-            mdlRow(models.getNameIndex + 1) = sibpath
+            mdlRow(models.getNameIndex) = RawStrToStr(name)
+            mdlRow(models.getNameIndex + 1) = RawStrToStr(sibpath)
 
             For j = 0 To models.fieldCount - 1
                 Select Case models.retrieveType(j)
@@ -348,16 +388,40 @@ Public Class frmMSBEdit
 
 
         Dim idx As Integer
+        Dim eventtype(13) As Integer
+        eventtype = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+
+        For i = 0 To eventCnt - 2
+            ptr = UIntFromFour(eventPtr + &HC + i * &H4)
+
+            idx = Array.IndexOf(eventtype, SIntFromFour(ptr + &H8))
+            readRow(eventsdgvs(idx), Events(idx), ptr)
+        Next
+
+
+        idx = 0
+        Dim pointtype(4) As Integer
+        pointtype = {0, 2, 3, 5}
+
+        For i = 0 To pointCnt - 2
+            ptr = UIntFromFour(pointPtr + &HC + i * &H4)
+
+            idx = Array.IndexOf(pointtype, SIntFromFour(ptr + &HC))
+            readRow(pointsdgvs(idx), points(idx), ptr)
+        Next
+
+
+        idx = 0
         Dim parttype(9) As Integer
         parttype = {0, 1, 2, 4, 5, 8, 9, &HA, &HB}
 
         For i = 0 To partsCnt - 2
-            padding = 0
             ptr = UIntFromFour(partsPtr + &HC + i * &H4)
 
             idx = Array.IndexOf(parttype, SIntFromFour(ptr + &H4))
-            readParts(partsdgvs(idx), parts(idx), ptr)
+            readRow(partsdgvs(idx), parts(idx), ptr)
         Next
+
 
         mapstudioPtr = UIntFromFour((partsCnt * &H4) + &H8 + partsPtr)
         mapstudioCnt = UIntFromFour(mapstudioPtr + &H8)
@@ -373,50 +437,58 @@ Public Class frmMSBEdit
         labelRows(dgvCreatures10)
         labelRows(dgvCollision11)
 
+        updateStatusBar()
     End Sub
-    Private Sub saveDGV(ByRef MSBStream As FileStream, ByRef dgv As DataGridView, ByRef data As msbdata, ByRef partsPtr As Integer, ByRef curroffset As Integer, ByRef partsidx As Integer)
-        For i = 0 To dgv.Rows.Count - 2
 
-            curroffset = MSBStream.Position
-            MSBStream.Position = partsPtr + &HC + (i + partsidx) * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-            MSBStream.Position = curroffset
+    Private Sub saveRow(ByRef MSBStream As FileStream, ByRef row As DataGridViewRow, ByRef data As msbdata, ByRef ptr As Integer, ByRef partsidx As Integer)
+        Dim curroffset = MSBStream.Position
+        MSBStream.Position = ptr + &HC + partsidx * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+        MSBStream.Position = curroffset
 
-            Dim nameoffset = dgv.Rows(i).Cells(0).Value
-            Name = dgv.Rows(i).Cells(data.getNameIndex).Value
-            Dim sibpath = dgv.Rows(i).Cells(data.getNameIndex + 1).Value
+        Dim nameoffset = row.Cells(0).Value
+        Dim Name As Byte() = Str2Bytes(row.Cells(data.getNameIndex).Value)
 
-            Dim Padding = ((sibpath.Length + Name.Length + 5) And -&H4)
-            If Padding <= &H10 Then
-                Padding = &H10
-                If Not bigEndian Then Padding += &H4
+        Dim Padding = Name.Length + 1
+
+        Dim hasSib As Boolean = data.retrieveName(data.getNameIndex + 1) = "Sibpath"
+        If hasSib Then
+            Dim sibpath As Byte() = Str2Bytes(row.Cells(data.getNameIndex + 1).Value)
+            Padding += sibpath.Length + 1
+            If sibpath.Length = 0 Then
+                Padding += 5
             End If
+        End If
 
-            For j = 0 To data.fieldCount - 1
-                If j = data.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+        Padding = (Padding + 3) And -&H4
+
+        For j = 0 To data.fieldCount - 1
+            If j = data.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+
+            If hasSib Then
                 If j = data.getNameIndex + 2 Then MSBStream.Position = curroffset + nameoffset + Padding
-                Select Case data.retrieveType(j)
-                    Case "i8"
-                        WriteBytes(MSBStream, Int8ToOneByte(dgv.Rows(i).Cells(j).Value))
-                    Case "i16"
-                        WriteBytes(MSBStream, Int16ToTwoByte(dgv.Rows(i).Cells(j).Value))
-                    Case "i32"
-                        WriteBytes(MSBStream, Int32ToFourByte(dgv.Rows(i).Cells(j).Value))
-                    Case "f32"
-                        WriteBytes(MSBStream, SingleToFourByte(dgv.Rows(i).Cells(j).Value))
-                    Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgv.Rows(i).Cells(j).Value & Chr(0)))
-                End Select
-            Next
+            Else
+                If j = data.getNameIndex + 1 Then MSBStream.Position = curroffset + nameoffset + Padding
+            End If
+            Select Case data.retrieveType(j)
+                Case "i8"
+                    WriteBytes(MSBStream, Int8ToOneByte(row.Cells(j).Value))
+                Case "i16"
+                    WriteBytes(MSBStream, Int16ToTwoByte(row.Cells(j).Value))
+                Case "i32"
+                    WriteBytes(MSBStream, Int32ToFourByte(row.Cells(j).Value))
+                Case "f32"
+                    WriteBytes(MSBStream, SingleToFourByte(row.Cells(j).Value))
+                Case "string"
+                    WriteBytes(MSBStream, Str2Bytes(row.Cells(j).Value))
+                    WriteBytes(MSBStream, Int8ToOneByte(0))
+            End Select
         Next
-        partsidx += dgv.Rows.Count-1
-
+        partsidx += 1
     End Sub
 
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         bytes = File.ReadAllBytes(txtMSBfile.Text)
-
-        Dim tmpbytes() As Byte
 
         Dim msbIndex As Byte() = {}
         Dim msbData As Byte() = {}
@@ -457,12 +529,11 @@ Public Class frmMSBEdit
         partsCnt = UIntFromFour(partsPtr + &H8)
 
 
-
         Dim curroffset As UInteger
         Dim nameoffset As UInteger
 
-        Dim name As String
-        Dim sibpath As String
+        Dim name As Byte()
+        Dim sibpath As Byte()
 
         Dim padding As UInteger
 
@@ -477,27 +548,27 @@ Public Class frmMSBEdit
 
 
         modelPtr = 0
-        modelCnt = dgvModels.Rows.Count - 2
-        curroffset = modelPtr + &H10 + (modelCnt + 1) * &H4
+        modelCnt = dgvModels.Rows.Count + 1
+        curroffset = modelPtr + &HC + (modelCnt) * &H4
 
         MSBStream.Position = &H4
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt + 2))
+        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt))
 
         MSBStream.Position = curroffset
         WriteBytes(MSBStream, Str2Bytes("MODEL_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
         'Models
-        For i As UInteger = 0 To modelCnt
+        For i As UInteger = 0 To modelCnt - 2
             curroffset = MSBStream.Position
             MSBStream.Position = modelPtr + &HC + i * &H4
             WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
             MSBStream.Position = curroffset
 
             nameoffset = dgvModels.Rows(i).Cells(0).Value
-            name = dgvModels.Rows(i).Cells(models.getNameIndex).Value
-            sibpath = dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value
+            name = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex).Value)
+            sibpath = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value)
 
             padding = ((sibpath.Length + name.Length + 5) And -&H4)
             If padding <= &H10 Then
@@ -512,661 +583,404 @@ Public Class frmMSBEdit
                     Case "i32"
                         WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(j).Value))
                     Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value & Chr(0)))
+                        WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value))
+                        WriteBytes(MSBStream, Int8ToOneByte(0))
                 End Select
             Next
             MSBStream.Position = curroffset + nameoffset + padding
         Next
 
 
-
-
-
         eventPtr = (MSBStream.Length And -&H4) + &H4
-        MSBStream.Position = modelPtr + &H10 + (modelCnt) * &H4
+        MSBStream.Position = modelPtr + &HC + (modelCnt - 1) * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
         MSBStream.Position = eventPtr
 
-
-
-
-        bytes = eventParams
+        eventCnt = 1
+        For Each dgv In eventsdgvs
+            eventCnt += dgv.Rows.Count
+        Next
+        curroffset = eventPtr + &HC + eventCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - eventParamsOrigOffset + eventPtr))
-        eventCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
         WriteBytes(MSBStream, UInt32ToFourByte(eventCnt))
 
-        For i As UInteger = 0 To eventCnt - 1
-            curroffset = &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - eventParamsOrigOffset + eventPtr))
-        Next
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("EVENT_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
-        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
-        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
-        WriteBytes(MSBStream, tmpbytes)
+        ' I haven't tested if the game wants events to be in order (like points) but it probably does.
+        Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+        Dim keys = New List(Of Integer)
+        For i = 0 To eventsdgvs.Length - 1
+            For j = 0 To eventsdgvs(i).Rows.Count - 1
+                Dim row = eventsdgvs(i).Rows(j)
+                rows.Add(Tuple.Create(row, events(i)))
+                Dim idx = CInt(row.Cells(3).Value)
+                keys.Add(idx)
+            Next
+        Next
+        Dim sortedRows As Array = rows.ToArray
+        Array.Sort(keys.ToArray, rows.ToArray)
+
+        Dim eventsidx = 0
+        For i = 0 To sortedRows.Length - 1
+            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+            saveRow(MSBStream, t.Item1, t.Item2, eventPtr, eventsidx)
+        Next
 
 
         pointPtr = MSBStream.Length
-        bytes = pointParams
+        MSBStream.Position = eventPtr + &HC + (eventCnt - 1) * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(pointPtr))
+        MSBStream.Position = pointPtr
+
+        pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count + 1
+        curroffset = pointPtr + &HC + pointCnt * &H4
         WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(&H4) - pointParamsOrigOffset + pointPtr))
-        pointCnt = UIntFromFour(&H8)
+        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
         WriteBytes(MSBStream, UInt32ToFourByte(pointCnt))
 
-        For i As UInteger = 0 To pointCnt - 1
-            curroffset = &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(UIntFromFour(curroffset) - pointParamsOrigOffset + pointPtr))
+        MSBStream.Position = curroffset
+        WriteBytes(MSBStream, Str2Bytes("POINT_PARAM_ST"))
+        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+        ' The game needs each point to be in order, so aggregate each point type, sorted by index
+        rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+        keys = New List(Of Integer)
+        For i = 0 To pointsdgvs.Length - 1
+            For j = 0 To pointsdgvs(i).Rows.Count - 1
+                Dim row = pointsdgvs(i).Rows(j)
+                rows.Add(Tuple.Create(row, points(i)))
+                Dim idx = CInt(row.Cells(2).Value)
+                keys.Add(idx)
+            Next
+        Next
+        sortedRows = rows.ToArray
+        Array.Sort(keys.ToArray, sortedRows)
+
+        Dim partsidx = 0
+        For i = 0 To sortedRows.Length - 1
+            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+            saveRow(MSBStream, t.Item1, t.Item2, pointPtr, partsidx)
         Next
 
-        ReDim tmpbytes(bytes.Length - curroffset - &H4 - 1)
-        Array.Copy(bytes, curroffset + &H4, tmpbytes, 0, tmpbytes.Length)
-        WriteBytes(MSBStream, tmpbytes)
+
         partsPtr = MSBStream.Length
+        MSBStream.Position = pointPtr + &HC + (pointCnt - 1) * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(partsPtr))
+        MSBStream.Position = partsPtr
 
-
-
-
-        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count - 9
-        curroffset = partsPtr + &H10 + partsCnt * &H4
-        MSBStream.Position = partsPtr + &H4
+        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count + 1
+        curroffset = partsPtr + &HC + partsCnt * &H4
+        WriteBytes(MSBStream, UInt32ToFourByte(0))
         WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt + 1))
+        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt))
 
         MSBStream.Position = curroffset
         WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
         MSBStream.Position = (MSBStream.Length And -&H4) + &H4
 
-        Dim partsidx = 0
+        partsidx = 0
 
-        'Map Pieces 0
-        saveDGV(MSBStream, dgvMapPieces0, mapPieces0, partsPtr, curroffset, partsidx)
-
-        'Objects 1
-        saveDGV(MSBStream, dgvObjects1, objects1, partsPtr, curroffset, partsidx)
-
-        'Creatures 2
-        saveDGV(MSBStream, dgvCreatures2, creatures2, partsPtr, curroffset, partsidx)
-
-        'Creatures 4
-        saveDGV(MSBStream, dgvCreatures4, creatures4, partsPtr, curroffset, partsidx)
-
-        'Collision 5
-        saveDGV(MSBStream, dgvCollision5, collision5, partsPtr, curroffset, partsidx)
-
-        'Navimesh 8
-        saveDGV(MSBStream, dgvNavimesh8, navimesh8, partsPtr, curroffset, partsidx)
-
-        'Objects 9
-        saveDGV(MSBStream, dgvObjects9, objects9, partsPtr, curroffset, partsidx)
-
-        'Creatures 10
-        saveDGV(MSBStream, dgvCreatures10, creatures10, partsPtr, curroffset, partsidx)
-
-        'Collision 11
-        saveDGV(MSBStream, dgvCollision11, collision11, partsPtr, curroffset, partsidx)
+        For i = 0 To partsdgvs.Length - 1
+            For j = 0 To partsdgvs(i).Rows.Count - 1
+                saveRow(MSBStream, partsdgvs(i).Rows(j), parts(i), partsPtr, partsidx)
+            Next
+        Next
 
         MSBStream.Close()
         MsgBox("Save Complete.")
     End Sub
 
 
-    Private Sub mdlPrep()
-        With models
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("x10", "i32", Color.LightGray)
-            .add("x14", "i32", Color.LightGray)
-            .add("x18", "i32", Color.LightGray)
-            .add("x1C", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-        End With
-    End Sub
-    Private Sub map0Prep()
-        With mapPieces0
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("DrawGroup1", "i32", Color.White)
-            .add("DrawGroup2", "i32", Color.White)
-            .add("DrawGroup3", "i32", Color.White)
-            .add("DrawGroup4", "i32", Color.White)
-            .add("x4c", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i8", Color.LightGray)
-            .add("p+x09", "i8", Color.LightGray)
-            .add("p+x0A", "i8", Color.LightGray)
-            .add("p+x0B", "i8", Color.LightGray)
-            .add("p+x0C", "i32", Color.LightGray)
-            .add("p+x10", "i32", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub obj1Prep()
-        With objects1
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i32", Color.LightGray)
-            .add("p+x0C", "i8", Color.LightGray)
-            .add("p+x0D", "i8", Color.LightGray)
-            .add("p+x0E", "i8", Color.LightGray)
-            .add("p+x0F", "i8", Color.LightGray)
-            .add("p+x10", "i8", Color.LightGray)
-            .add("p+x11", "i8", Color.LightGray)
-            .add("p+x12", "i8", Color.LightGray)
-            .add("p+x13", "i8", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-            .add("p+x28", "i32", Color.LightGray)
-            .add("p+x2C", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub crt2Prep()
-        With creatures2
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i32", Color.LightGray)
-            .add("p+x0C", "i32", Color.LightGray)
-            .add("p+x10", "i32", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("AI", "i32", Color.White)
-            .add("NPCParam", "i32", Color.White)
-            .add("TalkID", "i32", Color.White)
-            .add("p+x2C", "i32", Color.LightGray)
-            .add("ChrInitParam", "i32", Color.White)
-            .add("p+x34", "i32", Color.LightGray)
-            .add("p+x38", "i32", Color.LightGray)
-            .add("p+x3C", "i32", Color.LightGray)
-            .add("p+x40", "i32", Color.LightGray)
-            .add("p+x44", "i32", Color.LightGray)
-            .add("p+x48", "i32", Color.LightGray)
-            .add("p+x4C", "i32", Color.LightGray)
-            .add("AnimID", "i32", Color.White)
-            .add("p+x54", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub crt4Prep()
-        With creatures4
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i32", Color.LightGray)
-            .add("p+x0C", "i32", Color.LightGray)
-            .add("p+x10", "i32", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub coll5Prep()
-        With collision5
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("p+x04", "i8", Color.LightGray)
-            .add("p+x05", "i8", Color.LightGray)
-            .add("p+x06", "i8", Color.LightGray)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i8", Color.LightGray)
-            .add("p+x09", "i8", Color.LightGray)
-            .add("p+x0A", "i8", Color.LightGray)
-            .add("p+x0B", "i8", Color.LightGray)
-            .add("p+x0C", "i8", Color.LightGray)
-            .add("p+x0D", "i8", Color.LightGray)
-            .add("p+x0E", "i8", Color.LightGray)
-            .add("p+x0F", "i8", Color.LightGray)
-            .add("p+x10", "i8", Color.LightGray)
-            .add("p+x11", "i8", Color.LightGray)
-            .add("p+x12", "i8", Color.LightGray)
-            .add("p+x13", "i8", Color.LightGray)
-            .add("p+x14", "i8", Color.LightGray)
-            .add("p+x15", "i8", Color.LightGray)
-            .add("p+x16", "i8", Color.LightGray)
-            .add("p+x17", "i8", Color.LightGray)
-            .add("p+x18", "i8", Color.LightGray)
-            .add("p+x19", "i8", Color.LightGray)
-            .add("p+x1A", "i8", Color.LightGray)
-            .add("p+x1B", "i8", Color.LightGray)
-            .add("p+x1C", "i8", Color.LightGray)
-            .add("p+x1D", "i8", Color.LightGray)
-            .add("p+x1E", "i8", Color.LightGray)
-            .add("p+x1F", "i8", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-            .add("p+x28", "i32", Color.LightGray)
-            .add("p+x2C", "i32", Color.LightGray)
-            .add("p+x30", "i32", Color.LightGray)
-            .add("p+x34", "i32", Color.LightGray)
-            .add("p+x38", "i32", Color.LightGray)
-            .add("p+x3C", "i16", Color.LightGray)
-            .add("p+x3E", "i16", Color.LightGray)
-            .add("p+x40", "i32", Color.LightGray)
-            .add("p+x44", "i32", Color.LightGray)
-            .add("p+x48", "i32", Color.LightGray)
-            .add("p+x4C", "i32", Color.LightGray)
-            .add("p+x50", "i32", Color.LightGray)
-            .add("p+x54", "i16", Color.LightGray)
-            .add("p+x56", "i16", Color.LightGray)
-            .add("p+x58", "i32", Color.LightGray)
-            .add("p+x5C", "i32", Color.LightGray)
-            .add("p+x60", "i32", Color.LightGray)
-            .add("p+x64", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub navi8Prep()
-        With navimesh8
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("DrawGroup1", "i32", Color.White)
-            .add("DrawGroup2", "i32", Color.White)
-            .add("DrawGroup3", "i32", Color.White)
-            .add("DrawGroup4", "i32", Color.White)
-            .add("x4c", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i8", Color.LightGray)
-            .add("p+x09", "i8", Color.LightGray)
-            .add("p+x0A", "i8", Color.LightGray)
-            .add("p+x0B", "i8", Color.LightGray)
-            .add("p+x0C", "i32", Color.LightGray)
-            .add("p+x10", "i32", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-            .add("p+x28", "i32", Color.LightGray)
-            .add("p+x2C", "i32", Color.LightGray)
-            .add("p+x30", "i32", Color.LightGray)
-            .add("p+x34", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub obj9Prep()
-        With objects9
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("p+x04", "i8", Color.LightGray)
-            .add("p+x05", "i8", Color.LightGray)
-            .add("p+x06", "i8", Color.LightGray)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i32", Color.LightGray)
-            .add("p+x0C", "i8", Color.LightGray)
-            .add("p+x0D", "i8", Color.LightGray)
-            .add("p+x0E", "i8", Color.LightGray)
-            .add("p+x0F", "i8", Color.LightGray)
-            .add("p+x10", "i8", Color.LightGray)
-            .add("p+x11", "i8", Color.LightGray)
-            .add("p+x12", "i8", Color.LightGray)
-            .add("p+x13", "i8", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-            .add("p+x28", "i32", Color.LightGray)
-            .add("p+x2C", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub crt10Prep()
-        With creatures10
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("LightId", "i8", Color.White)
-            .add("FogId", "i8", Color.White)
-            .add("ScatId", "i8", Color.White)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i32", Color.LightGray)
-            .add("p+x0C", "i32", Color.LightGray)
-            .add("p+x10", "i32", Color.LightGray)
-            .add("p+x14", "i32", Color.LightGray)
-            .add("p+x18", "i32", Color.LightGray)
-            .add("p+x1C", "i32", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("NPC ID", "i32", Color.White)
-            .add("p+x28", "i32", Color.LightGray)
-            .add("p+x2C", "i32", Color.LightGray)
-            .add("p+x30", "i32", Color.LightGray)
-            .add("p+x34", "i32", Color.LightGray)
-            .add("p+x38", "i32", Color.LightGray)
-            .add("p+x3C", "i32", Color.LightGray)
-            .add("p+x40", "i32", Color.LightGray)
-            .add("p+x44", "i32", Color.LightGray)
-            .add("p+x48", "i32", Color.LightGray)
-            .add("p+x4C", "i32", Color.LightGray)
-            .add("AnimID", "i32", Color.White)
-            .add("p+x54", "i32", Color.LightGray)
-        End With
-    End Sub
-    Private Sub coll11Prep()
-        With collision11
-            .add("Name Offset", "i32", Color.White)
-            .add("Type", "i32", Color.White)
-            .add("Index", "i32", Color.White)
-            .add("Model", "i32", Color.White)
-            .add("Sib Offset", "i32", Color.White)
-            .add("X pos", "f32", Color.White)
-            .add("Y pos", "f32", Color.White)
-            .add("Z pos", "f32", Color.White)
-            .add("Rot X", "f32", Color.White)
-            .add("Rot Y", "f32", Color.White)
-            .add("Rot Z", "f32", Color.White)
-            .add("Scale X", "f32", Color.White)
-            .add("Scale Y", "f32", Color.White)
-            .add("Scale Z", "f32", Color.White)
-            .add("x38", "i32", Color.LightGray)
-            .add("x3C", "i32", Color.LightGray)
-            .add("x40", "i32", Color.LightGray)
-            .add("x44", "i32", Color.LightGray)
-            .add("x48", "i32", Color.LightGray)
-            .add("x4C", "i32", Color.LightGray)
-            .add("x50", "i32", Color.LightGray)
-            .add("x54", "i32", Color.LightGray)
-            .add("x58", "i32", Color.LightGray)
-            .add("x5C", "i32", Color.LightGray)
-            .add("x60", "i32", Color.LightGray)
-            .setNameIndex(.fieldCount)
-            .add("Name", "string", Color.White)
-            .add("Sibpath", "string", Color.White)
-            .add("EventEntityID", "i32", Color.White)
-            .add("p+x04", "i8", Color.LightGray)
-            .add("p+x05", "i8", Color.LightGray)
-            .add("p+x06", "i8", Color.LightGray)
-            .add("p+x07", "i8", Color.LightGray)
-            .add("p+x08", "i8", Color.LightGray)
-            .add("p+x09", "i8", Color.LightGray)
-            .add("p+x0A", "i8", Color.LightGray)
-            .add("p+x0B", "i8", Color.LightGray)
-            .add("p+x0C", "i8", Color.LightGray)
-            .add("p+x0D", "i8", Color.LightGray)
-            .add("p+x0E", "i8", Color.LightGray)
-            .add("p+x0F", "i8", Color.LightGray)
-            .add("p+x10", "i8", Color.LightGray)
-            .add("p+x11", "i8", Color.LightGray)
-            .add("p+x12", "i8", Color.LightGray)
-            .add("p+x13", "i8", Color.LightGray)
-            .add("p+x14", "i8", Color.LightGray)
-            .add("p+x15", "i8", Color.LightGray)
-            .add("p+x16", "i8", Color.LightGray)
-            .add("p+x17", "i8", Color.LightGray)
-            .add("p+x18", "i8", Color.LightGray)
-            .add("p+x19", "i8", Color.LightGray)
-            .add("p+x1A", "i8", Color.LightGray)
-            .add("p+x1B", "i8", Color.LightGray)
-            .add("p+x1C", "i16", Color.LightGray)
-            .add("p+x1E", "i16", Color.LightGray)
-            .add("p+x20", "i32", Color.LightGray)
-            .add("p+x24", "i32", Color.LightGray)
-        End With
-    End Sub
-
-
     Private Sub frmMSBEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        mdlPrep()
-        map0Prep()
-        obj1Prep()
-        crt2Prep()
-        crt4Prep()
-        coll5Prep()
-        navi8Prep()
-        obj9Prep()
-        crt10Prep()
-        coll11Prep()
+        models = msbdata.generate("models")
+        events0 = msbdata.generate("events0")
+        events1 = msbdata.generate("events1")
+        events2 = msbdata.generate("events2")
+        events3 = msbdata.generate("events3")
+        events4 = msbdata.generate("events4")
+        events5 = msbdata.generate("events5")
+        events6 = msbdata.generate("events6")
+        events7 = msbdata.generate("events7")
+        events8 = msbdata.generate("events8")
+        events9 = msbdata.generate("events9")
+        events10 = msbdata.generate("events10")
+        events11 = msbdata.generate("events11")
+        events12 = msbdata.generate("events12")
+        points0 = msbdata.generate("points0")
+        points2 = msbdata.generate("points2")
+        points3 = msbdata.generate("points3")
+        points5 = msbdata.generate("points5")
+        mapPieces0 = msbdata.generate("mapPieces0")
+        objects1 = msbdata.generate("objects1")
+        creatures2 = msbdata.generate("creatures2")
+        creatures4 = msbdata.generate("creatures4")
+        collision5 = msbdata.generate("collision5")
+        navimesh8 = msbdata.generate("navimesh8")
+        objects9 = msbdata.generate("objects9")
+        creatures10 = msbdata.generate("creatures10")
+        collision11 = msbdata.generate("collision11")
+
+        events = {events0, events1, events2, events3, events4, events5, events6, events7, events8, events9, events10, events11, events12}
+        eventsdgvs = {dgvEvents0, dgvEvents1, dgvEvents2, dgvEvents3, dgvEvents4, dgvEvents5, dgvEvents6, dgvEvents7, dgvEvents8, dgvEvents9, dgvEvents10, dgvEvents11, dgvEvents12}
+
+        points = {points0, points2, points3, points5}
+        pointsdgvs = {dgvPoints0, dgvPoints2, dgvPoints3, dgvPoints5}
 
         parts = {mapPieces0, objects1, creatures2, creatures4, collision5, navimesh8, objects9, creatures10, collision11}
         partsdgvs = {dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
 
+        layouts = {models}.Concat(events).Concat(points).Concat(parts).ToArray()
+        dgvs = {dgvModels}.Concat(eventsdgvs).Concat(pointsdgvs).Concat(partsdgvs).ToArray()
+
+        For Each dgv In dgvs
+            AddHandler dgv.SelectionChanged, AddressOf Me.onDgvSelectionChanged
+            AddHandler dgv.KeyDown, AddressOf Me.onDgvKeyDown
+        Next
+
+        AddHandler tabControlRoot.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlEvents.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlPoints.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+        AddHandler tabControlParts.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+    End Sub
+
+    Private Function getCurrentRootTab()
+        Return tabControlRoot.SelectedTab
+    End Function
+
+    Private Function getCurrentDgv() As DataGridView
+        Dim rootTab As TabPage = getCurrentRootTab()
+        If (rootTab Is tabModels) Then
+            Return dgvModels
+        ElseIf rootTab Is tabEvents Then
+            Return eventsdgvs(tabControlEvents.SelectedIndex)
+        ElseIf rootTab Is tabPoints Then
+            Return pointsdgvs(tabControlPoints.SelectedIndex)
+        ElseIf rootTab Is tabParts Then
+            Return partsdgvs(tabControlParts.SelectedIndex)
+        Else
+            Throw New Exception()
+        End If
+    End Function
+
+    Private Function getSectionIndex(sourceDgv As DataGridView, Optional ByVal currentSection() As DataGridView = Nothing)
+        If currentSection Is Nothing Then
+            Dim dgvModelsArray = {dgvModels}
+            For Each section() As DataGridView In {dgvModelsArray, eventsdgvs, pointsdgvs, partsdgvs}
+                If section.Contains(sourceDgv) Then
+                    currentSection = section
+
+                    Exit For
+                End If
+            Next
+        End If
+
+        Dim idx As Integer = 0
+        For Each dgv In currentSection
+            If dgv Is sourceDgv Then
+                Exit For
+            End If
+
+            idx += dgv.Rows.Count
+        Next
+
+        Return idx
+    End Function
+
+    Private Sub updateStatusBar()
+        Dim currentDgv = getCurrentDgv()
+
+        labelRowCount.Text = "Row count: " & currentDgv.Rows.Count.ToString & " "
+
+        If currentDgv.Rows.Count = 0 Or currentDgv.SelectedCells.Count = 0 Then
+            Return
+        End If
+
+        Dim cell = currentDgv.SelectedCells(currentDgv.SelectedCells.Count - 1)
+
+        Dim idx As Integer = getSectionIndex(currentDgv)
+
+        idx += cell.RowIndex
+
+        labelSectionIndex.Text = "Section index: " & idx.ToString
     End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
+        Dim dgv = getCurrentDgv()
 
-        Dim idx As Integer
-        idx = tabParts.SelectedIndex
+        If dgv.Rows.Count = 0 Then
+            Return
+        End If
 
-        Dim dgvs() As DataGridView
-
-        dgvs = {dgvModels, dgvMapPieces0, dgvObjects1, dgvCreatures2, dgvCreatures4, dgvCollision5, dgvNavimesh8, dgvObjects9, dgvCreatures10, dgvCollision11}
-
-        copyEntry(dgvs(idx), dgvs(idx).SelectedCells(0).RowIndex)
+        copyEntry(dgv, dgv.SelectedCells(0).RowIndex)
     End Sub
 
-    Sub copyEntry(byref dgv As DataGridView, rowidx As Integer)
-        Dim row(dgv.Columns.count-1)
-        For i = 0 To row.Count-1
-            row(i) = dgv.rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
+    Sub copyEntry(ByRef dgv As DataGridView, rowidx As Integer)
+        Dim row(dgv.Columns.Count - 1)
+        For i = 0 To row.Count - 1
+            row(i) = dgv.Rows(dgv.SelectedCells(0).RowIndex).Cells(i).FormattedValue
         Next
         dgv.Rows.Add(row)
+
+        If ChkUpdatePointerIndices.Checked Then
+            If pointsdgvs.Contains(dgv) Then
+                Dim totalPoints = getSectionIndex(pointsdgvs.Last, pointsdgvs) + pointsdgvs.Last.Rows.Count
+                dgv.Rows(dgv.Rows.Count - 1).Cells(2).Value = totalPoints - 1
+            Else
+                UpdatePointerIndices(dgv, dgv.Rows.Count - 1, 1)
+            End If
+        End If
+    End Sub
+
+    Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
+        Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count = 0 Then
+            Return
+        End If
+
+        deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
+    End Sub
+
+    Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowidx, -1)
+        End If
+
+        dgv.Rows.RemoveAt(rowidx)
+    End Sub
+
+    Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
+        Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count < 2 Then
+            Return
+        End If
+
+        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+
+        If rowIndex = 0 Then
+            Return
+        End If
+
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowIndex, -1, True)
+        End If
+
+        Dim rowAbove As DataGridViewRow = dgv.Rows(rowIndex - 1)
+
+        dgv.Rows.RemoveAt(rowIndex - 1)
+        dgv.Rows.Insert(rowIndex, rowAbove)
+
+        updateStatusBar()
+    End Sub
+
+    Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
+        Dim dgv = getCurrentDgv()
+
+        If dgv.Rows.Count < 2 Then
+            Return
+        End If
+
+        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+
+        If rowIndex = dgv.Rows.Count - 1 Then
+            Return
+        End If
+
+        If ChkUpdatePointerIndices.Checked Then
+            UpdatePointerIndices(dgv, rowIndex, 1, True)
+        End If
+
+        Dim rowBelow As DataGridViewRow = dgv.Rows(rowIndex + 1)
+
+        dgv.Rows.RemoveAt(rowIndex + 1)
+        dgv.Rows.Insert(rowIndex, rowBelow)
+
+        updateStatusBar()
+    End Sub
+
+    ' When a row is added/deleted/moved in the points or parts section, update anything in the entire file that points to
+    ' elements past that one.
+    Sub UpdatePointerIndices(sourceDgv As DataGridView, sourceRowIdx As Integer, delta As Integer, Optional swap As Boolean = False)
+        Dim currentRootTab = getCurrentRootTab()
+
+        Dim isPoints As Boolean = currentRootTab Is tabPoints
+        Dim isParts As Boolean = currentRootTab Is tabParts
+
+        If isPoints = False And isParts = False Then
+            Return
+        End If
+
+        ' Things that point to parts use their position in the parts section. For points, it's similar, but points are sorted
+        ' by their index cell when the file is saved and they also need to have proper index values or the game doesn't like it.
+
+        If isParts And swap = True Then
+            Return
+        End If
+
+        Dim fromSectionIdx As Integer = 0
+        If isPoints Then
+            fromSectionIdx = CInt(sourceDgv.Rows(sourceRowIdx).Cells(2).Value)
+
+            shiftPointIndices(sourceDgv, sourceRowIdx, delta)
+        Else
+            fromSectionIdx = getSectionIndex(sourceDgv) + sourceRowIdx
+        End If
+
+        For i = 0 To dgvs.Count - 1
+            Dim dgv = dgvs(i)
+            Dim layout = layouts(i)
+
+            Dim indices As List(Of Integer) = Nothing
+            If isPoints Then
+                indices = layout.getPointIndices()
+            ElseIf isParts Then
+                indices = layout.getPartIndices()
+            End If
+
+            If indices.Count = 0 Then
+                Continue For
+            End If
+
+            Dim otherSourceRowIdx = fromSectionIdx + delta
+
+            For Each columnIdx In indices
+                For rowIdx = 0 To dgv.Rows.Count - 1
+                    Dim cell = dgv.Rows(rowIdx).Cells(columnIdx)
+                    Dim sectionIdx = CInt(cell.Value)
+
+                    If swap Then
+                        If sectionIdx = fromSectionIdx Then
+                            cell.Value = otherSourceRowIdx.ToString()
+                        ElseIf sectionIdx = otherSourceRowIdx Then
+                            cell.Value = fromSectionIdx.ToString()
+                        End If
+                    Else
+                        If sectionIdx >= fromSectionIdx Then
+                            cell.Value = (sectionIdx + delta).ToString()
+                        End If
+                    End If
+                Next
+            Next
+        Next
+    End Sub
+
+    ' Shift the "index" of every point past a certain number
+    ' (for the point type, naming things is hard)
+    Private Sub shiftPointIndices(sourceDgv As DataGridView, rowIdx As Integer, delta As Integer)
+        Dim fromPointIdx = CInt(sourceDgv.Rows(rowIdx).Cells(2).Value)
+
+        For Each dgv In pointsdgvs
+            For i = 0 To dgv.Rows.Count - 1
+                Dim pointIdx = CInt(dgv.Rows(i).Cells(2).Value)
+                If pointIdx >= fromPointIdx Then
+                    dgv.Rows(i).Cells(2).Value = (pointIdx + delta).ToString
+                End If
+            Next
+        Next
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
@@ -1179,36 +993,78 @@ Public Class frmMSBEdit
             txtMSBfile.Text = openDlg.FileName
         End If
     End Sub
-End Class
 
-Public Class msbdata
-    Private fieldNames As List(Of String) = New List(Of String)
-    Private fieldtypes As List(Of String) = New List(Of String)
-    Private fieldBackColor As List(Of Color) = New List(Of Color)
-
-    Private nameIdx As Integer
-
-    Public Sub add(ByVal name As String, ByVal type As String, backColor As Color)
-        fieldNames.Add(name)
-        fieldtypes.Add(type)
-        fieldBackColor.Add(backColor)
+    Private Sub chkShowUnknownsChanged(sender As Object, e As EventArgs) Handles chkShowUnknowns.CheckedChanged
+        For i = 0 To dgvs.Count - 1
+            Dim dgv = dgvs(i)
+            Dim layout = layouts(i)
+            For j = 0 To layout.fieldCount - 1
+                If layout.isKnown(j) = False Then
+                    dgv.Columns(j).Visible = chkShowUnknowns.Checked
+                End If
+            Next
+        Next
     End Sub
-    Public Function retrieveName(ByVal i As Integer) As String
-        Return fieldNames(i)
-    End Function
-    Public Function retrieveType(ByVal i As Integer) As String
-        Return fieldtypes(i)
-    End Function
-    Public Function retrieveBackColor(ByVal i As Integer) As Color
-        Return fieldBackColor(i)
-    End Function
-    Public Function fieldCount() As Integer
-        Return fieldNames.Count
-    End Function
-    Public Function getNameIndex() As Integer
-        Return nameIdx
-    End Function
-    Public Sub setNameIndex(ByVal idx As Integer)
-        nameIdx = idx
+
+    Private Sub onDgvSelectionChanged(sender As Object, e As EventArgs)
+        updateStatusBar()
+    End Sub
+
+    Private Sub onTabControlSelectedIndexChanged(sender As Object, e As EventArgs)
+        updateStatusBar()
+    End Sub
+
+    Private Sub onDgvKeyDown(sender As Object, e As KeyEventArgs)
+        If (e.Modifiers = Keys.Control AndAlso e.KeyCode = Keys.V) = False Then
+            Return
+        End If
+
+        Dim o = CType(Clipboard.GetDataObject(), DataObject)
+        If o.GetDataPresent(DataFormats.Text) = False Then
+            Return
+        End If
+        Dim text = o.GetData(DataFormats.Text).ToString
+        text = text.Replace(vbCr, "").TrimEnd(vbLf)
+        Dim lines As String() = text.Split(vbLf)
+
+        Dim sourceRows = New List(Of String())(lines.Length)
+        Dim sourceMaxColumnCount = 0
+        Dim sourceRowCount = lines.Length
+        For i = 0 To lines.Length - 1
+            Dim words = lines(i).Split(vbTab)
+            sourceRows.Add(words)
+
+            If words.Count > sourceMaxColumnCount Then
+                sourceMaxColumnCount = words.Count
+            End If
+        Next
+
+        Dim dgv = CType(sender, DataGridView)
+
+        Dim cell As DataGridViewCell = dgv.SelectedCells(dgv.SelectedCells.Count - 1)
+        Dim startColumn = cell.ColumnIndex
+        Dim endColumn = startColumn + sourceMaxColumnCount - 1
+        Dim startRow = cell.RowIndex
+        Dim endRow = startRow + sourceRowCount - 1
+
+        If endRow > dgv.RowCount - 1 Then
+            endRow = dgv.RowCount - 1
+        End If
+        If endColumn > dgv.ColumnCount - 1 Then
+            endColumn = dgv.ColumnCount - 1
+        End If
+
+        Dim destColumnCount = endColumn - startColumn + 1
+        Dim destRowCount = endRow - startRow + 1
+
+        For x = 0 To destColumnCount - 1
+            For y = 0 To destRowCount - 1
+                Dim newValue As String = ""
+                If x < sourceRows(y).Count Then
+                    newValue = sourceRows(y)(x)
+                End If
+                dgv.Rows(startRow + y).Cells(startColumn + x).Value = newValue
+            Next
+        Next
     End Sub
 End Class
