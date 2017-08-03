@@ -841,7 +841,15 @@ Public Class frmMSBEdit
             Return
         End If
 
-        deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
+        If dgv.SelectedRows.Count > 0 Then
+            For each cell In dgv.SelectedRows
+                deleteEntry(dgv, dgv.SelectedRows(0).Index)
+            Next
+        Else
+            deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
+        End If
+
+        
     End Sub
 
     Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
