@@ -5,7 +5,58 @@ Imports System.Text
 'Creature type 0x4 is sized wrong
 'TODO:  Confirm the above
 
+Public Enum FileState
+    None
+    Loaded
+    UnsavedChanges
+End Enum
+
 Public Class frmMSBEdit
+
+    Public Const VERSION = "2018-06-13"
+
+    Public Shared AutoOpenMsbFile As String = ""
+
+    Private __current_state As FileState = FileState.None
+    Public Property CURRENT_STATE() As FileState
+        Get
+            Return __current_state
+        End Get
+        Set(value As FileState)
+            Dim isChanged = (CURRENT_STATE <> value)
+            __current_state = value
+            If isChanged Then
+                CURRENT_STATE_CHANGED()
+            End If
+        End Set
+    End Property
+
+    Public Sub CURRENT_STATE_CHANGED()
+
+        btnSave.Enabled = (CURRENT_STATE = FileState.UnsavedChanges)
+
+        btnCopy.Enabled = (CURRENT_STATE <> FileState.None)
+        btnDelete.Enabled = (CURRENT_STATE <> FileState.None)
+        btnMoveUp.Enabled = (CURRENT_STATE <> FileState.None)
+        btnMoveDown.Enabled = (CURRENT_STATE <> FileState.None)
+        btnOpenMsbFolder.Enabled = (CURRENT_STATE <> FileState.None)
+        btnRestoreBak.Enabled = (CURRENT_STATE <> FileState.None)
+
+        Dim newText = ""
+
+        If CURRENT_STATE <> FileState.None Then
+            newText = $"{New FileInfo(txtMSBfile.Text).Name}"
+            If CURRENT_STATE = FileState.UnsavedChanges Then
+                newText &= "*"
+            End If
+            newText &= " - "
+        End If
+
+        newText &= $"Wulf's Bootleg MapStudio ({VERSION})"
+
+        Text = newText
+
+    End Sub
 
     Public models As msbdata
     Public events0 As msbdata
@@ -231,8 +282,12 @@ Public Class frmMSBEdit
             dgv.Columns(i).DefaultCellStyle.ForeColor = layout.retrieveForeColor(i)
             dgv.Columns(i).SortMode = DataGridViewColumnSortMode.NotSortable
 
-            If layout.isKnown(i) = False Then
+            If layout.isUnknown(i) Then
                 dgv.Columns(i).Visible = chkShowUnknowns.Checked
+            End If
+
+            If layout.isAdvanced(i) Then
+                dgv.Columns(i).Visible = chkShowAdvanced.Checked
             End If
         Next
     End Sub
@@ -251,7 +306,7 @@ Public Class frmMSBEdit
         partRow(layout.getNameIndex) = RawStrToStr(partName)
         Padding = partName.Length + 1
 
-        hasSib = layout.retrieveName(layout.getNameIndex + 1) = "Sibpath"
+        hasSib = layout.retrieveName(layout.getNameIndex + 1) = "Placeholder Model"
         If hasSib Then
             Dim siboffset = SIntFromFour(ptr + &H10)
             sibpath = RawStrFromBytes(ptr + siboffset)
@@ -299,8 +354,267 @@ Public Class frmMSBEdit
         Next
         dgv.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
     End Sub
-    Private Sub btnOpen_Click(sender As Object, e As EventArgs) Handles btnOpen.Click
-        bytes = File.ReadAllBytes(txtMSBfile.Text)
+
+    Public Function CHECK_FILE(file_name As String) As Boolean
+
+        If Not File.Exists(file_name) Then
+            MessageBox.Show($"File ""{file_name}"" not found.", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return False
+        Else
+            Return True
+        End If
+
+    End Function
+
+    Public Function TRY_SAVE_FILE(file_name As String) As Boolean
+
+        File.Copy(file_name, file_name & ".tempsavbak", True)
+        Try
+            SAVE_FILE(file_name)
+            CURRENT_STATE = FileState.Loaded
+        Catch ex As Exception
+            ACTION_ERROR(ex, "saving file")
+            If File.Exists(file_name & ".tempsavbak") Then
+                File.Copy(file_name & ".tempsavbak", file_name, True)
+            Else
+                MessageBox.Show("Temporary save file backup got deleted by another app. 
+Save file is likely corrupted on-disk because of this.")
+            End If
+            Return False
+        Finally
+            If File.Exists(file_name & ".tempsavbak") Then
+                File.Delete(file_name & ".tempsavbak")
+            End If
+        End Try
+
+        Return True
+    End Function
+
+    Public Function TRY_OPEN_FILE(file_name As String) As Boolean
+
+        Try
+            OPEN_FILE(file_name)
+            CURRENT_STATE = FileState.Loaded
+        Catch ex As Exception
+            ACTION_ERROR(ex, "opening file")
+            Return False
+        End Try
+
+        Return True
+
+    End Function
+
+    Public Sub SAVE_FILE(file_name As String)
+        bytes = File.ReadAllBytes(file_name)
+
+        Dim msbIndex As Byte() = {}
+        Dim msbData As Byte() = {}
+
+        Dim modelPtr As UInteger
+        Dim modelCnt As UInteger
+
+        Dim eventPtr As UInteger
+        Dim eventCnt As UInteger
+
+        Dim pointPtr As UInteger
+        Dim pointCnt As UInteger
+
+        Dim partsPtr As UInteger
+        Dim partsCnt As UInteger
+
+        'Used in Demon's, not Dark
+        Dim mapstudioPtr As UInteger
+        Dim mapstudioCnt As UInteger
+
+        bigEndian = True
+        If UIntFromFour(&H8) > &H10000 Then
+            bigEndian = False
+        End If
+
+
+        modelPtr = UIntFromFour(&H4)
+        modelCnt = UIntFromFour(&H8)
+
+
+        eventPtr = UIntFromFour((modelCnt * &H4) + &H8)
+        eventCnt = UIntFromFour(eventPtr + &H8)
+
+        pointPtr = UIntFromFour((eventCnt * &H4) + &H8 + eventPtr)
+        pointCnt = UIntFromFour(pointPtr + &H8)
+
+        partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
+        partsCnt = UIntFromFour(partsPtr + &H8)
+
+
+        Dim curroffset As UInteger
+        Dim nameoffset As UInteger
+
+        Dim name As Byte()
+        Dim sibpath As Byte()
+
+        Dim padding As UInteger
+
+        If Not File.Exists(file_name & ".bak") Then
+            File.WriteAllBytes(file_name & ".bak", bytes)
+        End If
+
+        If File.Exists(file_name) Then File.Delete(file_name)
+
+        Using MSBStream As New IO.FileStream(file_name, IO.FileMode.CreateNew)
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+
+
+            modelPtr = 0
+            modelCnt = dgvModels.Rows.Count + 1
+            curroffset = modelPtr + &HC + (modelCnt) * &H4
+
+            MSBStream.Position = &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(modelCnt))
+
+            MSBStream.Position = curroffset
+            WriteBytes(MSBStream, Str2Bytes("MODEL_PARAM_ST"))
+            MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+            'Models
+            For i As UInteger = 0 To modelCnt - 2
+                curroffset = MSBStream.Position
+                MSBStream.Position = modelPtr + &HC + i * &H4
+                WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+                MSBStream.Position = curroffset
+
+                nameoffset = dgvModels.Rows(i).Cells(0).Value
+                name = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex).Value)
+                sibpath = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value)
+
+                padding = ((sibpath.Length + name.Length + 5) And -&H4)
+                If padding <= &H10 Then
+                    padding = &H10
+                    If Not bigEndian Then padding += &H4
+                End If
+
+                For j = 0 To models.fieldCount - 1
+                    If j = models.getNameIndex Then MSBStream.Position = curroffset + nameoffset
+
+                    Select Case models.retrieveType(j)
+                        Case "i32"
+                            WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(j).Value))
+                        Case "string"
+                            WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value))
+                            WriteBytes(MSBStream, Int8ToOneByte(0))
+                    End Select
+                Next
+                MSBStream.Position = curroffset + nameoffset + padding
+            Next
+
+
+            eventPtr = (MSBStream.Length And -&H4) + &H4
+            MSBStream.Position = modelPtr + &HC + (modelCnt - 1) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
+            MSBStream.Position = eventPtr
+
+            eventCnt = 1
+            For Each dgv In eventsdgvs
+                eventCnt += dgv.Rows.Count
+            Next
+            curroffset = eventPtr + &HC + eventCnt * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(eventCnt))
+
+            MSBStream.Position = curroffset
+            WriteBytes(MSBStream, Str2Bytes("EVENT_PARAM_ST"))
+            MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+            ' I haven't tested if the game wants events to be in order (like points) but it probably does.
+            Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+            Dim keys = New List(Of Integer)
+            For i = 0 To eventsdgvs.Length - 1
+                For j = 0 To eventsdgvs(i).Rows.Count - 1
+                    Dim row = eventsdgvs(i).Rows(j)
+                    rows.Add(Tuple.Create(row, events(i)))
+                    Dim idx = CInt(row.Cells(3).Value)
+                    keys.Add(idx)
+                Next
+            Next
+            Dim sortedRows As Array = rows.ToArray
+            Array.Sort(keys.ToArray, rows.ToArray)
+
+            Dim eventsidx = 0
+            For i = 0 To sortedRows.Length - 1
+                Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+                saveRow(MSBStream, t.Item1, t.Item2, eventPtr, eventsidx)
+            Next
+
+
+            pointPtr = MSBStream.Length
+            MSBStream.Position = eventPtr + &HC + (eventCnt - 1) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(pointPtr))
+            MSBStream.Position = pointPtr
+
+            pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count + 1
+            curroffset = pointPtr + &HC + pointCnt * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(pointCnt))
+
+            MSBStream.Position = curroffset
+            WriteBytes(MSBStream, Str2Bytes("POINT_PARAM_ST"))
+            MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+            ' The game needs each point to be in order, so aggregate each point type, sorted by index
+            rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
+            keys = New List(Of Integer)
+            For i = 0 To pointsdgvs.Length - 1
+                For j = 0 To pointsdgvs(i).Rows.Count - 1
+                    Dim row = pointsdgvs(i).Rows(j)
+                    rows.Add(Tuple.Create(row, points(i)))
+                    Dim idx = CInt(row.Cells(2).Value)
+                    keys.Add(idx)
+                Next
+            Next
+            sortedRows = rows.ToArray
+            Array.Sort(keys.ToArray, sortedRows)
+
+            Dim partsidx = 0
+            For i = 0 To sortedRows.Length - 1
+                Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
+                saveRow(MSBStream, t.Item1, t.Item2, pointPtr, partsidx)
+            Next
+
+
+            partsPtr = MSBStream.Length
+            MSBStream.Position = pointPtr + &HC + (pointCnt - 1) * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(partsPtr))
+            MSBStream.Position = partsPtr
+
+            partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count + 1
+            curroffset = partsPtr + &HC + partsCnt * &H4
+            WriteBytes(MSBStream, UInt32ToFourByte(0))
+            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
+            WriteBytes(MSBStream, UInt32ToFourByte(partsCnt))
+
+            MSBStream.Position = curroffset
+            WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
+            MSBStream.Position = (MSBStream.Length And -&H4) + &H4
+
+            partsidx = 0
+
+            For i = 0 To partsdgvs.Length - 1
+                For j = 0 To partsdgvs(i).Rows.Count - 1
+                    saveRow(MSBStream, partsdgvs(i).Rows(j), parts(i), partsPtr, partsidx)
+                Next
+            Next
+        End Using
+    End Sub
+
+    Public Sub OPEN_FILE(file_name As String)
+
+        If Not (CHECK_FILE(file_name)) Then
+            Return
+        End If
+
+        bytes = File.ReadAllBytes(file_name)
 
 
         Dim ptr As UInteger
@@ -395,7 +709,7 @@ Public Class frmMSBEdit
             ptr = UIntFromFour(eventPtr + &HC + i * &H4)
 
             idx = Array.IndexOf(eventtype, SIntFromFour(ptr + &H8))
-            readRow(eventsdgvs(idx), Events(idx), ptr)
+            readRow(eventsdgvs(idx), events(idx), ptr)
         Next
 
 
@@ -438,6 +752,36 @@ Public Class frmMSBEdit
         labelRows(dgvCollision11)
 
         updateStatusBar()
+
+        'For Each dgv In dgvs
+        '    dgv.AutoResizeColumns()
+        'Next
+
+    End Sub
+
+    Private Sub ACTION_ERROR(ex As Exception, action As String)
+        MessageBox.Show($"Error while {action}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+    End Sub
+
+    Private Sub btnOpen_Click(sender As Object, e As EventArgs) Handles btnOpen.Click
+
+        If CURRENT_STATE = FileState.UnsavedChanges Then
+            Dim dlgResult = MessageBox.Show("Would you like to SAVE all unsaved changes before loading the MSB file?",
+                                            "Save Changes?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+
+            If dlgResult = DialogResult.Cancel Then
+                Return
+            ElseIf dlgResult = DialogResult.Yes Then
+                If Not TRY_SAVE_FILE(txtMSBfile.Text) Then
+                    MessageBox.Show("Because an error occurred while saving, the MSB load operation was cancelled so that your changes would remain in the editor.",
+                                        "Load Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    Return
+                End If
+            End If
+        End If
+
+        TRY_OPEN_FILE(txtMSBfile.Text)
+
     End Sub
 
     Private Sub saveRow(ByRef MSBStream As FileStream, ByRef row As DataGridViewRow, ByRef data As msbdata, ByRef ptr As Integer, ByRef partsidx As Integer)
@@ -488,209 +832,9 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
-        bytes = File.ReadAllBytes(txtMSBfile.Text)
 
-        Dim msbIndex As Byte() = {}
-        Dim msbData As Byte() = {}
+        TRY_SAVE_FILE(txtMSBfile.Text)
 
-        Dim modelPtr As UInteger
-        Dim modelCnt As UInteger
-
-        Dim eventPtr As UInteger
-        Dim eventCnt As UInteger
-
-        Dim pointPtr As UInteger
-        Dim pointCnt As UInteger
-
-        Dim partsPtr As UInteger
-        Dim partsCnt As UInteger
-
-        'Used in Demon's, not Dark
-        Dim mapstudioPtr As UInteger
-        Dim mapstudioCnt As UInteger
-
-        bigEndian = True
-        If UIntFromFour(&H8) > &H10000 Then
-            bigEndian = False
-        End If
-
-
-        modelPtr = UIntFromFour(&H4)
-        modelCnt = UIntFromFour(&H8)
-
-
-        eventPtr = UIntFromFour((modelCnt * &H4) + &H8)
-        eventCnt = UIntFromFour(eventPtr + &H8)
-
-        pointPtr = UIntFromFour((eventCnt * &H4) + &H8 + eventPtr)
-        pointCnt = UIntFromFour(pointPtr + &H8)
-
-        partsPtr = UIntFromFour((pointCnt * &H4) + &H8 + pointPtr)
-        partsCnt = UIntFromFour(partsPtr + &H8)
-
-
-        Dim curroffset As UInteger
-        Dim nameoffset As UInteger
-
-        Dim name As Byte()
-        Dim sibpath As Byte()
-
-        Dim padding As UInteger
-
-        If Not File.Exists(txtMSBfile.Text & ".bak") Then
-            File.WriteAllBytes(txtMSBfile.Text & ".bak", bytes)
-        End If
-
-        If File.Exists(txtMSBfile.Text) Then File.Delete(txtMSBfile.Text)
-        Dim MSBStream As New IO.FileStream(txtMSBfile.Text, IO.FileMode.CreateNew)
-
-        WriteBytes(MSBStream, UInt32ToFourByte(0))
-
-
-        modelPtr = 0
-        modelCnt = dgvModels.Rows.Count + 1
-        curroffset = modelPtr + &HC + (modelCnt) * &H4
-
-        MSBStream.Position = &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(modelCnt))
-
-        MSBStream.Position = curroffset
-        WriteBytes(MSBStream, Str2Bytes("MODEL_PARAM_ST"))
-        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
-
-        'Models
-        For i As UInteger = 0 To modelCnt - 2
-            curroffset = MSBStream.Position
-            MSBStream.Position = modelPtr + &HC + i * &H4
-            WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-            MSBStream.Position = curroffset
-
-            nameoffset = dgvModels.Rows(i).Cells(0).Value
-            name = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex).Value)
-            sibpath = Str2Bytes(dgvModels.Rows(i).Cells(models.getNameIndex + 1).Value)
-
-            padding = ((sibpath.Length + name.Length + 5) And -&H4)
-            If padding <= &H10 Then
-                padding = &H10
-                If Not bigEndian Then padding += &H4
-            End If
-
-            For j = 0 To models.fieldCount - 1
-                If j = models.getNameIndex Then MSBStream.Position = curroffset + nameoffset
-
-                Select Case models.retrieveType(j)
-                    Case "i32"
-                        WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(j).Value))
-                    Case "string"
-                        WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value))
-                        WriteBytes(MSBStream, Int8ToOneByte(0))
-                End Select
-            Next
-            MSBStream.Position = curroffset + nameoffset + padding
-        Next
-
-
-        eventPtr = (MSBStream.Length And -&H4) + &H4
-        MSBStream.Position = modelPtr + &HC + (modelCnt - 1) * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(eventPtr))
-        MSBStream.Position = eventPtr
-
-        eventCnt = 1
-        For Each dgv In eventsdgvs
-            eventCnt += dgv.Rows.Count
-        Next
-        curroffset = eventPtr + &HC + eventCnt * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(eventCnt))
-
-        MSBStream.Position = curroffset
-        WriteBytes(MSBStream, Str2Bytes("EVENT_PARAM_ST"))
-        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
-
-        ' I haven't tested if the game wants events to be in order (like points) but it probably does.
-        Dim rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
-        Dim keys = New List(Of Integer)
-        For i = 0 To eventsdgvs.Length - 1
-            For j = 0 To eventsdgvs(i).Rows.Count - 1
-                Dim row = eventsdgvs(i).Rows(j)
-                rows.Add(Tuple.Create(row, events(i)))
-                Dim idx = CInt(row.Cells(3).Value)
-                keys.Add(idx)
-            Next
-        Next
-        Dim sortedRows As Array = rows.ToArray
-        Array.Sort(keys.ToArray, rows.ToArray)
-
-        Dim eventsidx = 0
-        For i = 0 To sortedRows.Length - 1
-            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
-            saveRow(MSBStream, t.Item1, t.Item2, eventPtr, eventsidx)
-        Next
-
-
-        pointPtr = MSBStream.Length
-        MSBStream.Position = eventPtr + &HC + (eventCnt - 1) * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(pointPtr))
-        MSBStream.Position = pointPtr
-
-        pointCnt = dgvPoints0.Rows.Count + dgvPoints2.Rows.Count + dgvPoints3.Rows.Count + dgvPoints5.Rows.Count + 1
-        curroffset = pointPtr + &HC + pointCnt * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(pointCnt))
-
-        MSBStream.Position = curroffset
-        WriteBytes(MSBStream, Str2Bytes("POINT_PARAM_ST"))
-        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
-
-        ' The game needs each point to be in order, so aggregate each point type, sorted by index
-        rows = New List(Of Tuple(Of DataGridViewRow, msbdata))
-        keys = New List(Of Integer)
-        For i = 0 To pointsdgvs.Length - 1
-            For j = 0 To pointsdgvs(i).Rows.Count - 1
-                Dim row = pointsdgvs(i).Rows(j)
-                rows.Add(Tuple.Create(row, points(i)))
-                Dim idx = CInt(row.Cells(2).Value)
-                keys.Add(idx)
-            Next
-        Next
-        sortedRows = rows.ToArray
-        Array.Sort(keys.ToArray, sortedRows)
-
-        Dim partsidx = 0
-        For i = 0 To sortedRows.Length - 1
-            Dim t = CType(sortedRows(i), Tuple(Of DataGridViewRow, msbdata))
-            saveRow(MSBStream, t.Item1, t.Item2, pointPtr, partsidx)
-        Next
-
-
-        partsPtr = MSBStream.Length
-        MSBStream.Position = pointPtr + &HC + (pointCnt - 1) * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(partsPtr))
-        MSBStream.Position = partsPtr
-
-        partsCnt = dgvMapPieces0.Rows.Count + dgvObjects1.Rows.Count + dgvCreatures2.Rows.Count + dgvCreatures4.Rows.Count + dgvCollision5.Rows.Count + dgvNavimesh8.Rows.Count + dgvObjects9.Rows.Count + dgvCreatures10.Rows.Count + dgvCollision11.Rows.Count + 1
-        curroffset = partsPtr + &HC + partsCnt * &H4
-        WriteBytes(MSBStream, UInt32ToFourByte(0))
-        WriteBytes(MSBStream, UInt32ToFourByte(curroffset))
-        WriteBytes(MSBStream, UInt32ToFourByte(partsCnt))
-
-        MSBStream.Position = curroffset
-        WriteBytes(MSBStream, Str2Bytes("PARTS_PARAM_ST"))
-        MSBStream.Position = (MSBStream.Length And -&H4) + &H4
-
-        partsidx = 0
-
-        For i = 0 To partsdgvs.Length - 1
-            For j = 0 To partsdgvs(i).Rows.Count - 1
-                saveRow(MSBStream, partsdgvs(i).Rows(j), parts(i), partsPtr, partsidx)
-            Next
-        Next
-
-        MSBStream.Close()
-        MsgBox("Save Complete.")
     End Sub
 
 
@@ -738,12 +882,172 @@ Public Class frmMSBEdit
         For Each dgv In dgvs
             AddHandler dgv.SelectionChanged, AddressOf Me.onDgvSelectionChanged
             AddHandler dgv.KeyDown, AddressOf Me.onDgvKeyDown
+
+            'dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
+            'dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None
+
+            AddHandler dgv.CellValueChanged, AddressOf Me.onAnyDgvCellValueChanged
         Next
 
         AddHandler tabControlRoot.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
         AddHandler tabControlEvents.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
         AddHandler tabControlPoints.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
         AddHandler tabControlParts.SelectedIndexChanged, AddressOf Me.onTabControlSelectedIndexChanged
+
+        AddHandler dgvPoints0.CellEndEdit, AddressOf Me.onPoints0Update
+        AddHandler dgvPoints2.CellEndEdit, AddressOf Me.onPoints2Update
+        AddHandler dgvPoints3.CellEndEdit, AddressOf Me.onPoints3Update
+        AddHandler dgvPoints5.CellEndEdit, AddressOf Me.onPoints5Update
+
+        CURRENT_STATE_CHANGED()
+
+        If Not String.IsNullOrWhiteSpace(AutoOpenMsbFile) Then
+            txtMSBfile.Text = AutoOpenMsbFile
+            TRY_OPEN_FILE(txtMSBfile.Text)
+        End If
+    End Sub
+
+    Private Sub onAnyDgvCellValueChanged(sender As Object, e As DataGridViewCellEventArgs)
+        CURRENT_STATE = FileState.UnsavedChanges
+    End Sub
+
+
+
+    Private Sub FixPoints0Row(rowIndex As Integer)
+        If dgvPoints0.Rows.Item(rowIndex) Is Nothing Then
+            Return
+        End If
+        Dim nameCellValue = dgvPoints0.CurrentRow.Cells.Item(14).Value
+        Dim newNameValue As String = ""
+        If nameCellValue IsNot Nothing Then
+            newNameValue = nameCellValue.ToString()
+        End If
+
+        Dim baseOffsetValue = Encoding.GetEncoding("shift_jis").GetBytes(newNameValue).Length + 62
+        Dim row = dgvPoints0.Rows.Item(rowIndex)
+        'x28 field
+        row.Cells.Item(10).Value = baseOffsetValue
+        dgvPoints0.UpdateCellValue(10, rowIndex)
+
+        'x2C field
+        row.Cells.Item(11).Value = baseOffsetValue + 4
+        dgvPoints0.UpdateCellValue(11, rowIndex)
+
+        ' 0x30 not updated on this one, it remains 0 always?
+
+        'x34 field
+        row.Cells.Item(13).Value = baseOffsetValue + 8
+        dgvPoints0.UpdateCellValue(13, rowIndex)
+    End Sub
+
+    Private Sub FixPoints2Row(rowIndex As Integer)
+        If dgvPoints2.Rows.Item(rowIndex) Is Nothing Then
+            Return
+        End If
+        Dim nameCellValue = dgvPoints2.CurrentRow.Cells.Item(14).Value
+        Dim newNameValue As String = ""
+        If nameCellValue IsNot Nothing Then
+            newNameValue = nameCellValue.ToString()
+        End If
+        Dim baseOffsetValue = Encoding.GetEncoding("shift_jis").GetBytes(newNameValue).Length + 68
+        Dim row = dgvPoints2.Rows.Item(rowIndex)
+        'x28 field
+        row.Cells.Item(10).Value = baseOffsetValue
+        dgvPoints2.UpdateCellValue(10, rowIndex)
+
+        'x2C field
+        row.Cells.Item(11).Value = baseOffsetValue + 4
+        dgvPoints2.UpdateCellValue(11, rowIndex)
+        'x30 field
+        row.Cells.Item(12).Value = baseOffsetValue + 8
+        dgvPoints2.UpdateCellValue(12, rowIndex)
+        'x34 field
+        row.Cells.Item(13).Value = baseOffsetValue + 12
+        dgvPoints2.UpdateCellValue(13, rowIndex)
+    End Sub
+
+    Private Sub FixPoints3Row(rowIndex As Integer)
+        If dgvPoints3.Rows.Item(rowIndex) Is Nothing Then
+            Return
+        End If
+        Dim nameCellValue = dgvPoints3.CurrentRow.Cells.Item(14).Value
+        Dim newNameValue As String = ""
+        If nameCellValue IsNot Nothing Then
+            newNameValue = nameCellValue.ToString()
+        End If
+        Dim baseOffsetValue = Encoding.GetEncoding("shift_jis").GetBytes(newNameValue).Length + 62
+        Dim row = dgvPoints3.Rows.Item(rowIndex)
+        'x28 field
+        row.Cells.Item(10).Value = baseOffsetValue
+        dgvPoints3.UpdateCellValue(10, rowIndex)
+
+        'x2C field
+        row.Cells.Item(11).Value = baseOffsetValue + 4
+        dgvPoints3.UpdateCellValue(11, rowIndex)
+        'x30 field
+        row.Cells.Item(12).Value = baseOffsetValue + 8
+        dgvPoints3.UpdateCellValue(12, rowIndex)
+        'x34 field
+        row.Cells.Item(13).Value = baseOffsetValue + 16
+        dgvPoints3.UpdateCellValue(13, rowIndex)
+    End Sub
+
+    Private Sub FixPoints5Row(rowIndex As Integer)
+        If dgvPoints5.Rows.Item(rowIndex) Is Nothing Then
+            Return
+        End If
+        Dim nameCellValue = dgvPoints5.CurrentRow.Cells.Item(14).Value
+        Dim newNameValue As String = ""
+        If nameCellValue IsNot Nothing Then
+            newNameValue = nameCellValue.ToString()
+        End If
+        Dim baseOffsetValue = Encoding.GetEncoding("shift_jis").GetBytes(newNameValue).Length + 67
+        Dim row = dgvPoints5.Rows.Item(rowIndex)
+        'x28 field
+        row.Cells.Item(10).Value = baseOffsetValue
+        dgvPoints5.UpdateCellValue(10, rowIndex)
+
+        'x2C field
+        row.Cells.Item(11).Value = baseOffsetValue + 4
+        dgvPoints5.UpdateCellValue(11, rowIndex)
+        'x30 field
+        row.Cells.Item(12).Value = baseOffsetValue + 8
+        dgvPoints5.UpdateCellValue(12, rowIndex)
+        'x34 field
+        row.Cells.Item(13).Value = baseOffsetValue + 20
+        dgvPoints5.UpdateCellValue(13, rowIndex)
+    End Sub
+
+    Private Sub onPoints0Update(sender As Object, e As DataGridViewCellEventArgs)
+        If ChkUpdatePointerIndices.Checked Then
+            If e.ColumnIndex = 14 Then 'Edited Name column
+                FixPoints0Row(e.RowIndex)
+            End If
+        End If
+    End Sub
+
+    Private Sub onPoints2Update(sender As Object, e As DataGridViewCellEventArgs)
+        If ChkUpdatePointerIndices.Checked Then
+            If e.ColumnIndex = 14 Then 'Edited Name column
+                FixPoints2Row(e.RowIndex)
+            End If
+        End If
+    End Sub
+
+    Private Sub onPoints3Update(sender As Object, e As DataGridViewCellEventArgs)
+        If ChkUpdatePointerIndices.Checked Then
+            If e.ColumnIndex = 14 Then 'Edited Name column
+                FixPoints3Row(e.RowIndex)
+            End If
+        End If
+    End Sub
+
+    Private Sub onPoints5Update(sender As Object, e As DataGridViewCellEventArgs)
+        If ChkUpdatePointerIndices.Checked Then
+            If e.ColumnIndex = 14 Then 'Edited Name column
+                FixPoints5Row(e.RowIndex)
+            End If
+        End If
     End Sub
 
     Private Function getCurrentRootTab()
@@ -808,13 +1112,21 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
-        Dim dgv = getCurrentDgv()
 
-        If dgv.Rows.Count = 0 Then
-            Return
-        End If
+        Try
+            Dim dgv = getCurrentDgv()
 
-        copyEntry(dgv, dgv.SelectedCells(0).RowIndex)
+            If dgv.Rows.Count = 0 Then
+                Return
+            End If
+
+            copyEntry(dgv, dgv.SelectedCells(0).RowIndex)
+
+            CURRENT_STATE = FileState.UnsavedChanges
+        Catch ex As Exception
+            ACTION_ERROR(ex, "copying entry")
+        End Try
+
     End Sub
 
     Sub copyEntry(ByRef dgv As DataGridView, rowidx As Integer)
@@ -835,21 +1147,30 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
-        Dim dgv = getCurrentDgv()
 
-        If dgv.Rows.Count = 0 Then
-            Return
-        End If
+        Try
+            Dim dgv = getCurrentDgv()
 
-        If dgv.SelectedRows.Count > 0 Then
-            For each cell In dgv.SelectedRows
-                deleteEntry(dgv, dgv.SelectedRows(0).Index)
-            Next
-        Else
-            deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
-        End If
+            If dgv.Rows.Count = 0 Then
+                Return
+            End If
 
-        
+            If dgv.SelectedRows.Count > 0 Then
+                For Each cell In dgv.SelectedRows
+                    deleteEntry(dgv, dgv.SelectedRows(0).Index)
+                Next
+            Else
+                deleteEntry(dgv, dgv.SelectedCells(0).RowIndex)
+            End If
+
+            CURRENT_STATE = FileState.UnsavedChanges
+        Catch ex As Exception
+            ACTION_ERROR(ex, "deleting entry")
+        End Try
+
+
+
+
     End Sub
 
     Sub deleteEntry(ByRef dgv As DataGridView, rowidx As Integer)
@@ -861,53 +1182,71 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub btnMoveUp_Click(sender As Object, e As EventArgs) Handles btnMoveUp.Click
-        Dim dgv = getCurrentDgv()
 
-        If dgv.Rows.Count < 2 Then
-            Return
-        End If
+        Try
+            Dim dgv = getCurrentDgv()
 
-        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+            If dgv.Rows.Count < 2 Then
+                Return
+            End If
 
-        If rowIndex = 0 Then
-            Return
-        End If
+            Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
-        If ChkUpdatePointerIndices.Checked Then
-            UpdatePointerIndices(dgv, rowIndex, -1, True)
-        End If
+            If rowIndex = 0 Then
+                Return
+            End If
 
-        Dim rowAbove As DataGridViewRow = dgv.Rows(rowIndex - 1)
+            If ChkUpdatePointerIndices.Checked Then
+                UpdatePointerIndices(dgv, rowIndex, -1, True)
+            End If
 
-        dgv.Rows.RemoveAt(rowIndex - 1)
-        dgv.Rows.Insert(rowIndex, rowAbove)
+            Dim rowAbove As DataGridViewRow = dgv.Rows(rowIndex - 1)
 
-        updateStatusBar()
+            dgv.Rows.RemoveAt(rowIndex - 1)
+            dgv.Rows.Insert(rowIndex, rowAbove)
+
+            updateStatusBar()
+
+            CURRENT_STATE = FileState.UnsavedChanges
+        Catch ex As Exception
+            ACTION_ERROR(ex, "moving row upward")
+        End Try
+
+
     End Sub
 
     Private Sub btnMoveDown_Click(sender As Object, e As EventArgs) Handles btnMoveDown.Click
-        Dim dgv = getCurrentDgv()
 
-        If dgv.Rows.Count < 2 Then
-            Return
-        End If
+        Try
+            Dim dgv = getCurrentDgv()
 
-        Dim rowIndex = dgv.SelectedCells(0).RowIndex
+            If dgv.Rows.Count < 2 Then
+                Return
+            End If
 
-        If rowIndex = dgv.Rows.Count - 1 Then
-            Return
-        End If
+            Dim rowIndex = dgv.SelectedCells(0).RowIndex
 
-        If ChkUpdatePointerIndices.Checked Then
-            UpdatePointerIndices(dgv, rowIndex, 1, True)
-        End If
+            If rowIndex = dgv.Rows.Count - 1 Then
+                Return
+            End If
 
-        Dim rowBelow As DataGridViewRow = dgv.Rows(rowIndex + 1)
+            If ChkUpdatePointerIndices.Checked Then
+                UpdatePointerIndices(dgv, rowIndex, 1, True)
+            End If
 
-        dgv.Rows.RemoveAt(rowIndex + 1)
-        dgv.Rows.Insert(rowIndex, rowBelow)
+            Dim rowBelow As DataGridViewRow = dgv.Rows(rowIndex + 1)
 
-        updateStatusBar()
+            dgv.Rows.RemoveAt(rowIndex + 1)
+            dgv.Rows.Insert(rowIndex, rowBelow)
+
+            updateStatusBar()
+
+            CURRENT_STATE = FileState.UnsavedChanges
+        Catch ex As Exception
+            ACTION_ERROR(ex, "moving row downward")
+        End Try
+
+
     End Sub
 
     ' When a row is added/deleted/moved in the points or parts section, update anything in the entire file that points to
@@ -999,15 +1338,20 @@ Public Class frmMSBEdit
 
         If openDlg.ShowDialog() = Windows.Forms.DialogResult.OK Then
             txtMSBfile.Text = openDlg.FileName
+            TRY_OPEN_FILE(txtMSBfile.Text)
         End If
     End Sub
 
     Private Sub chkShowUnknownsChanged(sender As Object, e As EventArgs) Handles chkShowUnknowns.CheckedChanged
+        If CURRENT_STATE = FileState.None Then
+            Return
+        End If
+
         For i = 0 To dgvs.Count - 1
             Dim dgv = dgvs(i)
             Dim layout = layouts(i)
             For j = 0 To layout.fieldCount - 1
-                If layout.isKnown(j) = False Then
+                If layout.isUnknown(j) Then
                     dgv.Columns(j).Visible = chkShowUnknowns.Checked
                 End If
             Next
@@ -1023,56 +1367,160 @@ Public Class frmMSBEdit
     End Sub
 
     Private Sub onDgvKeyDown(sender As Object, e As KeyEventArgs)
-        If (e.Modifiers = Keys.Control AndAlso e.KeyCode = Keys.V) = False Then
-            Return
-        End If
+        If (e.Modifiers = Keys.Control) Then
 
-        Dim o = CType(Clipboard.GetDataObject(), DataObject)
-        If o.GetDataPresent(DataFormats.Text) = False Then
-            Return
-        End If
-        Dim text = o.GetData(DataFormats.Text).ToString
-        text = text.Replace(vbCr, "").TrimEnd(vbLf)
-        Dim lines As String() = text.Split(vbLf)
-
-        Dim sourceRows = New List(Of String())(lines.Length)
-        Dim sourceMaxColumnCount = 0
-        Dim sourceRowCount = lines.Length
-        For i = 0 To lines.Length - 1
-            Dim words = lines(i).Split(vbTab)
-            sourceRows.Add(words)
-
-            If words.Count > sourceMaxColumnCount Then
-                sourceMaxColumnCount = words.Count
-            End If
-        Next
-
-        Dim dgv = CType(sender, DataGridView)
-
-        Dim cell As DataGridViewCell = dgv.SelectedCells(dgv.SelectedCells.Count - 1)
-        Dim startColumn = cell.ColumnIndex
-        Dim endColumn = startColumn + sourceMaxColumnCount - 1
-        Dim startRow = cell.RowIndex
-        Dim endRow = startRow + sourceRowCount - 1
-
-        If endRow > dgv.RowCount - 1 Then
-            endRow = dgv.RowCount - 1
-        End If
-        If endColumn > dgv.ColumnCount - 1 Then
-            endColumn = dgv.ColumnCount - 1
-        End If
-
-        Dim destColumnCount = endColumn - startColumn + 1
-        Dim destRowCount = endRow - startRow + 1
-
-        For x = 0 To destColumnCount - 1
-            For y = 0 To destRowCount - 1
-                Dim newValue As String = ""
-                If x < sourceRows(y).Count Then
-                    newValue = sourceRows(y)(x)
+            If e.KeyCode = Keys.S Then
+                If CURRENT_STATE = FileState.UnsavedChanges Then
+                    TRY_SAVE_FILE(txtMSBfile.Text)
                 End If
-                dgv.Rows(startRow + y).Cells(startColumn + x).Value = newValue
+            ElseIf e.KeyCode = Keys.V Then
+                Dim o = CType(Clipboard.GetDataObject(), DataObject)
+                If o.GetDataPresent(DataFormats.UnicodeText) = False Then
+                    Return
+                End If
+                Dim text = o.GetData(DataFormats.UnicodeText).ToString
+                text = text.Replace(vbCr, "").TrimEnd(vbLf)
+                Dim lines As String() = text.Split(vbLf)
+
+                Dim sourceRows = New List(Of String())(lines.Length)
+                Dim sourceMaxColumnCount = 0
+                Dim sourceRowCount = lines.Length
+                For i = 0 To lines.Length - 1
+                    Dim words = lines(i).Split(vbTab)
+                    sourceRows.Add(words)
+
+                    If words.Count > sourceMaxColumnCount Then
+                        sourceMaxColumnCount = words.Count
+                    End If
+                Next
+
+                Dim dgv = CType(sender, DataGridView)
+
+                Dim cell As DataGridViewCell = dgv.SelectedCells(dgv.SelectedCells.Count - 1)
+                Dim startColumn = cell.ColumnIndex
+                Dim endColumn = startColumn + sourceMaxColumnCount - 1
+                Dim startRow = cell.RowIndex
+                Dim endRow = startRow + sourceRowCount - 1
+
+                If endRow > dgv.RowCount - 1 Then
+                    endRow = dgv.RowCount - 1
+                End If
+                If endColumn > dgv.ColumnCount - 1 Then
+                    endColumn = dgv.ColumnCount - 1
+                End If
+
+                Dim destColumnCount = endColumn - startColumn + 1
+                Dim destRowCount = endRow - startRow + 1
+
+                For x = 0 To destColumnCount - 1
+                    For y = 0 To destRowCount - 1
+                        Dim newValue As String = ""
+                        If x < sourceRows(y).Count Then
+                            newValue = sourceRows(y)(x)
+                        End If
+                        dgv.Rows(startRow + y).Cells(startColumn + x).Value = newValue
+                    Next
+                Next
+
+                If ChkUpdatePointerIndices.Checked Then
+                    For y = 0 To destRowCount - 1
+                        If sender Is dgvPoints0 Then
+                            FixPoints0Row(startRow + y)
+                        ElseIf sender Is dgvPoints2 Then
+                            FixPoints2Row(startRow + y)
+                        ElseIf sender Is dgvPoints3 Then
+                            FixPoints3Row(startRow + y)
+                        ElseIf sender Is dgvPoints5 Then
+                            FixPoints5Row(startRow + y)
+                        End If
+                    Next
+                End If
+            End If
+
+
+
+        End If
+
+
+
+    End Sub
+
+    Private Sub chkShowAdvanced_CheckedChanged(sender As Object, e As EventArgs) Handles chkShowAdvanced.CheckedChanged
+        If CURRENT_STATE = FileState.None Then
+            Return
+        End If
+
+        If Not ChkUpdatePointerIndices.Checked And Not chkShowAdvanced.Checked Then
+            If MessageBox.Show("You have automatic pointer updating DISABLED currently. 
+Are you sure you want to HIDE advanced columns, preventing you from seeing the pointers you need to update manually?",
+                               "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.No Then
+                ' IF USER SAYS NO THEY ARENT SURE
+                chkShowAdvanced.Checked = True
+                Return
+            End If
+        End If
+
+        For i = 0 To dgvs.Count - 1
+            Dim dgv = dgvs(i)
+            Dim layout = layouts(i)
+            For j = 0 To layout.fieldCount - 1
+                If layout.isAdvanced(j) Then
+                    dgv.Columns(j).Visible = chkShowAdvanced.Checked
+                End If
             Next
         Next
+    End Sub
+
+    Private Sub txtMSBfile_TextChanged(sender As Object, e As EventArgs) Handles txtMSBfile.TextChanged
+        btnOpen.Enabled = txtMSBfile.TextLength > 0
+    End Sub
+
+    'Private Sub frmMSBEdit_ResizeBegin(sender As Object, e As EventArgs) Handles MyBase.ResizeBegin
+    '    For Each dgv In dgvs
+    '        dgv.SuspendLayout()
+    '    Next
+    'End Sub
+
+    'Private Sub frmMSBEdit_ResizeEnd(sender As Object, e As EventArgs) Handles MyBase.ResizeEnd
+    '    For Each dgv In dgvs
+    '        dgv.ResumeLayout()
+    '        dgv.Refresh()
+    '    Next
+    'End Sub
+
+    Private Sub ChkUpdatePointerIndices_CheckedChanged(sender As Object, e As EventArgs) Handles ChkUpdatePointerIndices.CheckedChanged
+        If CURRENT_STATE = FileState.None Then
+            Return
+        End If
+
+        If Not ChkUpdatePointerIndices.Checked And Not chkShowAdvanced.Checked Then
+            If MessageBox.Show("You have just DISABLED automatic pointer updating but you have advanced columns HIDDEN as well. 
+This means you will be UNABLE TO SEE the pointer values which you need to update manually (because automatic pointer updating is disabled)!
+
+Would you like to SHOW the advanced columns now so you can see the pointers you need to update?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.Yes Then
+                chkShowAdvanced.Checked = True
+            End If
+        End If
+    End Sub
+
+    Private Sub btnOpenMsbFolder_Click(sender As Object, e As EventArgs) Handles btnOpenMsbFolder.Click
+        If CHECK_FILE(txtMSBfile.Text) Then
+            Process.Start(New FileInfo(txtMSBfile.Text).DirectoryName)
+        End If
+    End Sub
+
+    Private Sub btnRestoreBak_Click(sender As Object, e As EventArgs) Handles btnRestoreBak.Click
+        If Not File.Exists(txtMSBfile.Text & ".bak") Then
+            MessageBox.Show("No .bak file exists for this MSB. These files are autogenerated the FIRST time you save in this app.",
+                            "No .bak File", MessageBoxButtons.OK, MessageBoxIcon.Hand)
+        Else
+
+            If MessageBox.Show("Are you sure you want to lose the current file forever and revert back to the .bak file?",
+                                           "Restore .bak?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+                File.Copy(txtMSBfile.Text & ".bak", txtMSBfile.Text, True)
+                TRY_OPEN_FILE(txtMSBfile.Text)
+            End If
+
+        End If
     End Sub
 End Class
