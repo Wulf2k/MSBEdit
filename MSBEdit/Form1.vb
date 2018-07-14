@@ -205,7 +205,9 @@ Public Class frmMSBEdit
             bytes(loc + i) = byt(i)
         Next
     End Sub
-
+    Private Function UIntFromOne(ByVal loc As UInteger) As SByte
+        Return bytes(loc)
+    End Function
     Private Function SIntFromOne(ByVal loc As UInteger) As SByte
         Return CSByte(bytes(loc))
     End Function
@@ -339,6 +341,15 @@ Public Class frmMSBEdit
                 Case "i32"
                     partRow(j) = SIntFromFour(ptr + textboost + currOffset)
                     currOffset += 4
+                Case "h8"
+                    partRow(j) = UIntFromOne(ptr + textboost + currOffset).ToString("X2")
+                    currOffset += 1
+                Case "h16"
+                    partRow(j) = UIntFromTwo(ptr + textboost + currOffset).ToString("X4")
+                    currOffset += 2
+                Case "h32"
+                    partRow(j) = UIntFromFour(ptr + textboost + currOffset).ToString("X8")
+                    currOffset += 4
                 Case "f32"
                     partRow(j) = SingleFromFour(ptr + textboost + currOffset)
                     currOffset += 4
@@ -368,6 +379,8 @@ Public Class frmMSBEdit
 
     Public Function TRY_SAVE_FILE(file_name As String) As Boolean
 
+        SuspendLayout()
+
         File.Copy(file_name, file_name & ".tempsavbak", True)
         Try
             SAVE_FILE(file_name)
@@ -385,6 +398,8 @@ Save file is likely corrupted on-disk because of this.")
             If File.Exists(file_name & ".tempsavbak") Then
                 File.Delete(file_name & ".tempsavbak")
             End If
+
+            ResumeLayout()
         End Try
 
         Return True
@@ -392,12 +407,16 @@ Save file is likely corrupted on-disk because of this.")
 
     Public Function TRY_OPEN_FILE(file_name As String) As Boolean
 
+        SuspendLayout()
+
         Try
             OPEN_FILE(file_name)
             CURRENT_STATE = FileState.Loaded
         Catch ex As Exception
             ACTION_ERROR(ex, "opening file")
             Return False
+        Finally
+            ResumeLayout()
         End Try
 
         Return True
@@ -499,6 +518,8 @@ Save file is likely corrupted on-disk because of this.")
                     Select Case models.retrieveType(j)
                         Case "i32"
                             WriteBytes(MSBStream, UInt32ToFourByte(dgvModels.Rows(i).Cells(j).Value))
+                        Case "h32"
+                            WriteBytes(MSBStream, UInt32ToFourByte(Convert.ToInt32(dgvModels.Rows(i).Cells(j).Value.ToString(), 16)))
                         Case "string"
                             WriteBytes(MSBStream, Str2Bytes(dgvModels.Rows(i).Cells(j).Value))
                             WriteBytes(MSBStream, Int8ToOneByte(0))
@@ -693,6 +714,9 @@ Save file is likely corrupted on-disk because of this.")
                     Case "i32"
                         mdlRow(j) = SIntFromFour(ptr + currOffset)
                         currOffset += 4
+                    Case "h32"
+                        mdlRow(j) = UIntFromFour(ptr + currOffset).ToString("X8")
+                        currOffset += 4
                 End Select
             Next
 
@@ -795,7 +819,7 @@ Save file is likely corrupted on-disk because of this.")
 
         Dim Padding = Name.Length + 1
 
-        Dim hasSib As Boolean = data.retrieveName(data.getNameIndex + 1) = "Sibpath"
+        Dim hasSib As Boolean = data.retrieveName(data.getNameIndex + 1) = "Placeholder Model"
         If hasSib Then
             Dim sibpath As Byte() = Str2Bytes(row.Cells(data.getNameIndex + 1).Value)
             Padding += sibpath.Length + 1
@@ -821,6 +845,12 @@ Save file is likely corrupted on-disk because of this.")
                     WriteBytes(MSBStream, Int16ToTwoByte(row.Cells(j).Value))
                 Case "i32"
                     WriteBytes(MSBStream, Int32ToFourByte(row.Cells(j).Value))
+                Case "h8"
+                    WriteBytes(MSBStream, UInt8ToOneByte(Convert.ToByte(row.Cells(j).Value.ToString(), 16)))
+                Case "h16"
+                    WriteBytes(MSBStream, UInt16TotwoByte(Convert.ToUInt16(row.Cells(j).Value.ToString(), 16)))
+                Case "h32"
+                    WriteBytes(MSBStream, UInt32ToFourByte(Convert.ToUInt32(row.Cells(j).Value.ToString(), 16)))
                 Case "f32"
                     WriteBytes(MSBStream, SingleToFourByte(row.Cells(j).Value))
                 Case "string"
@@ -1347,6 +1377,8 @@ Save file is likely corrupted on-disk because of this.")
             Return
         End If
 
+        SuspendLayout()
+
         For i = 0 To dgvs.Count - 1
             Dim dgv = dgvs(i)
             Dim layout = layouts(i)
@@ -1356,6 +1388,8 @@ Save file is likely corrupted on-disk because of this.")
                 End If
             Next
         Next
+
+        ResumeLayout()
     End Sub
 
     Private Sub onDgvSelectionChanged(sender As Object, e As EventArgs)
@@ -1460,6 +1494,8 @@ Are you sure you want to HIDE advanced columns, preventing you from seeing the p
             End If
         End If
 
+        SuspendLayout()
+
         For i = 0 To dgvs.Count - 1
             Dim dgv = dgvs(i)
             Dim layout = layouts(i)
@@ -1469,6 +1505,8 @@ Are you sure you want to HIDE advanced columns, preventing you from seeing the p
                 End If
             Next
         Next
+
+        ResumeLayout()
     End Sub
 
     Private Sub txtMSBfile_TextChanged(sender As Object, e As EventArgs) Handles txtMSBfile.TextChanged
