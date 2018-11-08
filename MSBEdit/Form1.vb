@@ -52,7 +52,7 @@ Public Class frmMSBEdit
             newText &= " - "
         End If
 
-        newText &= $"Wulf's Bootleg MapStudio ({VERSION})"
+        newText &= $"Wulf's MSB Editor ({VERSION})"
 
         Text = newText
 
