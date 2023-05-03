@@ -317,7 +317,7 @@ Partial Class frmMSBEdit
         Me.tabEvents.Margin = New System.Windows.Forms.Padding(0)
         Me.tabEvents.Name = "tabEvents"
         Me.tabEvents.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabEvents.Size = New System.Drawing.Size(1016, 642)
+        Me.tabEvents.Size = New System.Drawing.Size(1053, 642)
         Me.tabEvents.TabIndex = 5
         Me.tabEvents.Text = "Events"
         Me.tabEvents.UseVisualStyleBackColor = True
@@ -706,7 +706,7 @@ Partial Class frmMSBEdit
         Me.tabPoints.Margin = New System.Windows.Forms.Padding(0)
         Me.tabPoints.Name = "tabPoints"
         Me.tabPoints.Padding = New System.Windows.Forms.Padding(3, 3, 3, 16)
-        Me.tabPoints.Size = New System.Drawing.Size(1016, 642)
+        Me.tabPoints.Size = New System.Drawing.Size(1053, 642)
         Me.tabPoints.TabIndex = 3
         Me.tabPoints.Text = "Regions"
         Me.tabPoints.UseVisualStyleBackColor = True
@@ -843,7 +843,7 @@ Partial Class frmMSBEdit
         Me.tabParts.Margin = New System.Windows.Forms.Padding(0)
         Me.tabParts.Name = "tabParts"
         Me.tabParts.Padding = New System.Windows.Forms.Padding(3, 3, 3, 13)
-        Me.tabParts.Size = New System.Drawing.Size(1016, 642)
+        Me.tabParts.Size = New System.Drawing.Size(1053, 642)
         Me.tabParts.TabIndex = 4
         Me.tabParts.Text = "Parts"
         Me.tabParts.UseVisualStyleBackColor = True
@@ -1126,7 +1126,7 @@ Partial Class frmMSBEdit
         'labelSectionIndex
         '
         Me.labelSectionIndex.Name = "labelSectionIndex"
-        Me.labelSectionIndex.Size = New System.Drawing.Size(83, 17)
+        Me.labelSectionIndex.Size = New System.Drawing.Size(84, 17)
         Me.labelSectionIndex.Text = "Section index: "
         '
         'StatusStrip1
@@ -1199,7 +1199,7 @@ Partial Class frmMSBEdit
         Me.Controls.Add(Me.lblGAFile)
         Me.MinimumSize = New System.Drawing.Size(1100, 300)
         Me.Name = "frmMSBEdit"
-        Me.Text = "Wulf's MSB Editor 2018-06-13"
+        Me.Text = "Wulf's MSB Editor"
         Me.tabControlRoot.ResumeLayout(false)
         Me.tabModels.ResumeLayout(false)
         CType(Me.dgvModels,System.ComponentModel.ISupportInitialize).EndInit
